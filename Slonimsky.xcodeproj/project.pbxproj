@@ -1,0 +1,586 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */; };
+		98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2E2E2FBE0200223430 /* ContentView.swift */; };
+		98692B312E2FBE0E00223430 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98692B302E2FBE0E00223430 /* Assets.xcassets */; };
+		98692B342E2FBE0E00223430 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98692B332E2FBE0E00223430 /* Preview Assets.xcassets */; };
+		98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */; };
+		98692B492E2FBE0F00223430 /* SlonimskyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */; };
+		98692B4B2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		98692B3B2E2FBE0F00223430 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98692B212E2FBE0200223430 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98692B282E2FBE0200223430;
+			remoteInfo = Slonimsky;
+		};
+		98692B452E2FBE0F00223430 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 98692B212E2FBE0200223430 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 98692B282E2FBE0200223430;
+			remoteInfo = Slonimsky;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		98692B292E2FBE0200223430 /* Slonimsky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slonimsky.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyApp.swift; sourceTree = "<group>"; };
+		98692B2E2E2FBE0200223430 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		98692B302E2FBE0E00223430 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		98692B332E2FBE0E00223430 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		98692B352E2FBE0E00223430 /* Slonimsky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Slonimsky.entitlements; sourceTree = "<group>"; };
+		98692B3A2E2FBE0F00223430 /* SlonimskyTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlonimskyTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyTests.swift; sourceTree = "<group>"; };
+		98692B442E2FBE0F00223430 /* SlonimskyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlonimskyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITests.swift; sourceTree = "<group>"; };
+		98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITestsLaunchTests.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		98692B262E2FBE0200223430 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B372E2FBE0F00223430 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B412E2FBE0F00223430 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		98692B202E2FBE0200223430 = {
+			isa = PBXGroup;
+			children = (
+				98692B2B2E2FBE0200223430 /* Slonimsky */,
+				98692B3D2E2FBE0F00223430 /* SlonimskyTests */,
+				98692B472E2FBE0F00223430 /* SlonimskyUITests */,
+				98692B2A2E2FBE0200223430 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		98692B2A2E2FBE0200223430 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				98692B292E2FBE0200223430 /* Slonimsky.app */,
+				98692B3A2E2FBE0F00223430 /* SlonimskyTests.xctest */,
+				98692B442E2FBE0F00223430 /* SlonimskyUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		98692B2B2E2FBE0200223430 /* Slonimsky */ = {
+			isa = PBXGroup;
+			children = (
+				98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */,
+				98692B2E2E2FBE0200223430 /* ContentView.swift */,
+				98692B302E2FBE0E00223430 /* Assets.xcassets */,
+				98692B352E2FBE0E00223430 /* Slonimsky.entitlements */,
+				98692B322E2FBE0E00223430 /* Preview Content */,
+			);
+			path = Slonimsky;
+			sourceTree = "<group>";
+		};
+		98692B322E2FBE0E00223430 /* Preview Content */ = {
+			isa = PBXGroup;
+			children = (
+				98692B332E2FBE0E00223430 /* Preview Assets.xcassets */,
+			);
+			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		98692B3D2E2FBE0F00223430 /* SlonimskyTests */ = {
+			isa = PBXGroup;
+			children = (
+				98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */,
+			);
+			path = SlonimskyTests;
+			sourceTree = "<group>";
+		};
+		98692B472E2FBE0F00223430 /* SlonimskyUITests */ = {
+			isa = PBXGroup;
+			children = (
+				98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */,
+				98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */,
+			);
+			path = SlonimskyUITests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		98692B282E2FBE0200223430 /* Slonimsky */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98692B4E2E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "Slonimsky" */;
+			buildPhases = (
+				98692B252E2FBE0200223430 /* Sources */,
+				98692B262E2FBE0200223430 /* Frameworks */,
+				98692B272E2FBE0200223430 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Slonimsky;
+			productName = Slonimsky;
+			productReference = 98692B292E2FBE0200223430 /* Slonimsky.app */;
+			productType = "com.apple.product-type.application";
+		};
+		98692B392E2FBE0F00223430 /* SlonimskyTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98692B512E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "SlonimskyTests" */;
+			buildPhases = (
+				98692B362E2FBE0F00223430 /* Sources */,
+				98692B372E2FBE0F00223430 /* Frameworks */,
+				98692B382E2FBE0F00223430 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				98692B3C2E2FBE0F00223430 /* PBXTargetDependency */,
+			);
+			name = SlonimskyTests;
+			productName = SlonimskyTests;
+			productReference = 98692B3A2E2FBE0F00223430 /* SlonimskyTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		98692B432E2FBE0F00223430 /* SlonimskyUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 98692B542E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "SlonimskyUITests" */;
+			buildPhases = (
+				98692B402E2FBE0F00223430 /* Sources */,
+				98692B412E2FBE0F00223430 /* Frameworks */,
+				98692B422E2FBE0F00223430 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				98692B462E2FBE0F00223430 /* PBXTargetDependency */,
+			);
+			name = SlonimskyUITests;
+			productName = SlonimskyUITests;
+			productReference = 98692B442E2FBE0F00223430 /* SlonimskyUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		98692B212E2FBE0200223430 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					98692B282E2FBE0200223430 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+					98692B392E2FBE0F00223430 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = 98692B282E2FBE0200223430;
+					};
+					98692B432E2FBE0F00223430 = {
+						CreatedOnToolsVersion = 15.2;
+						TestTargetID = 98692B282E2FBE0200223430;
+					};
+				};
+			};
+			buildConfigurationList = 98692B242E2FBE0200223430 /* Build configuration list for PBXProject "Slonimsky" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 98692B202E2FBE0200223430;
+			productRefGroup = 98692B2A2E2FBE0200223430 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				98692B282E2FBE0200223430 /* Slonimsky */,
+				98692B392E2FBE0F00223430 /* SlonimskyTests */,
+				98692B432E2FBE0F00223430 /* SlonimskyUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		98692B272E2FBE0200223430 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				98692B342E2FBE0E00223430 /* Preview Assets.xcassets in Resources */,
+				98692B312E2FBE0E00223430 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B382E2FBE0F00223430 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B422E2FBE0F00223430 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		98692B252E2FBE0200223430 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */,
+				98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B362E2FBE0F00223430 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		98692B402E2FBE0F00223430 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				98692B4B2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift in Sources */,
+				98692B492E2FBE0F00223430 /* SlonimskyUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		98692B3C2E2FBE0F00223430 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 98692B282E2FBE0200223430 /* Slonimsky */;
+			targetProxy = 98692B3B2E2FBE0F00223430 /* PBXContainerItemProxy */;
+		};
+		98692B462E2FBE0F00223430 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 98692B282E2FBE0200223430 /* Slonimsky */;
+			targetProxy = 98692B452E2FBE0F00223430 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		98692B4C2E2FBE0F00223430 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		98692B4D2E2FBE0F00223430 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+			};
+			name = Release;
+		};
+		98692B4F2E2FBE0F00223430 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Slonimsky/Slonimsky.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Slonimsky/Preview Content\"";
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.Slonimsky;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		98692B502E2FBE0F00223430 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = Slonimsky/Slonimsky.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_ASSET_PATHS = "\"Slonimsky/Preview Content\"";
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				ENABLE_HARDENED_RUNTIME = YES;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.Slonimsky;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		98692B522E2FBE0F00223430 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.SlonimskyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Slonimsky.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Slonimsky";
+			};
+			name = Debug;
+		};
+		98692B532E2FBE0F00223430 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 13.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.SlonimskyTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Slonimsky.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Slonimsky";
+			};
+			name = Release;
+		};
+		98692B552E2FBE0F00223430 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.SlonimskyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Slonimsky;
+			};
+			name = Debug;
+		};
+		98692B562E2FBE0F00223430 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = NNM3WB8BE4;
+				GENERATE_INFOPLIST_FILE = YES;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.PM.SlonimskyUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TEST_TARGET_NAME = Slonimsky;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		98692B242E2FBE0200223430 /* Build configuration list for PBXProject "Slonimsky" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98692B4C2E2FBE0F00223430 /* Debug */,
+				98692B4D2E2FBE0F00223430 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98692B4E2E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "Slonimsky" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98692B4F2E2FBE0F00223430 /* Debug */,
+				98692B502E2FBE0F00223430 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98692B512E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "SlonimskyTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98692B522E2FBE0F00223430 /* Debug */,
+				98692B532E2FBE0F00223430 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		98692B542E2FBE0F00223430 /* Build configuration list for PBXNativeTarget "SlonimskyUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				98692B552E2FBE0F00223430 /* Debug */,
+				98692B562E2FBE0F00223430 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 98692B212E2FBE0200223430 /* Project object */;
+}
