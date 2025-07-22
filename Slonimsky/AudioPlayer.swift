@@ -8,7 +8,22 @@ class AudioPlayer {
     init() {
         audioEngine.attach(sampler)
         audioEngine.connect(sampler, to: audioEngine.mainMixerNode, format: nil)
-        try? audioEngine.start()
+
+        // Load gs_instruments.dls
+        let soundBankURL = URL(fileURLWithPath: "/System/Library/Components/CoreAudio.component/Contents/Resources/gs_instruments.dls")
+        do {
+            try sampler.loadInstrument(at: soundBankURL)
+            print("gs_instruments.dls loaded successfully.")
+        } catch {
+            print("Error loading sound bank: \(error.localizedDescription)")
+        }
+
+        do {
+            try audioEngine.start()
+            print("AudioEngine started successfully.")
+        } catch {
+            print("Error starting audio engine: \(error.localizedDescription)")
+        }
     }
 
     func play(notes: [Int]) {

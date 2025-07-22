@@ -1,4 +1,3 @@
-
 import Foundation
 
 /// Defines the foundational Slonimsky-style patterns based on octave divisions.
@@ -72,5 +71,18 @@ struct NoteSequenceGenerator {
         }
 
         return sequence
+    }
+
+    static func applyModulation(to sequence: [Int], modulation: SlonimskyModulation) -> [Int] {
+        switch modulation {
+        case .none:
+            return sequence
+        case .interpolation:
+            return sequence.flatMap { [$0, $0 + 1] }
+        case .infrapolation:
+            return sequence.flatMap { [$0 - 1, $0] }
+        case .ultrapolation:
+            return sequence.flatMap { [$0, $0 + 1] }
+        }
     }
 }

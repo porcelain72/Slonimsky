@@ -6,12 +6,14 @@
 //
 
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State private var rootNote = 60
     @State private var scalePattern: ScalePattern = .tritone
     @State private var numberOfNotes = 12
     @State private var direction: PatternDirection = .ascending
+    @State private var modulation: SlonimskyModulation = .none
     @State private var sequence: [Int] = []
 
     private let audioPlayer = AudioPlayer()
@@ -32,16 +34,23 @@ struct ContentView: View {
                         Text("Descending").tag(PatternDirection.descending)
                     }
                     .pickerStyle(SegmentedPickerStyle())
+                    Picker("Modulation", selection: $modulation) {
+                        Text("None").tag(SlonimskyModulation.none)
+                        Text("Interpolation").tag(SlonimskyModulation.interpolation)
+                        Text("Infrapolation").tag(SlonimskyModulation.infrapolation)
+                        Text("Ultrapolation").tag(SlonimskyModulation.ultrapolation)
+                    }
                 }
             }
 
             Button("Generate and Play") {
-                sequence = NoteSequenceGenerator.generate(
+                let generatedSequence = NoteSequenceGenerator.generate(
                     rootNote: rootNote,
                     scalePattern: scalePattern,
                     numberOfNotes: numberOfNotes,
                     direction: direction
                 )
+                sequence = NoteSequenceGenerator.applyModulation(to: generatedSequence, modulation: modulation)
                 audioPlayer.play(notes: sequence)
             }
             .padding()
@@ -53,11 +62,12 @@ struct ContentView: View {
                     numberOfNotes: numberOfNotes,
                     direction: direction
                 )
+                let modulatedSequence = NoteSequenceGenerator.applyModulation(to: generatedSequence, modulation: modulation)
 
                 do {
-                    let url = try MIDIFileGenerator.generate(tracks: [MIDITrack(notes: generatedSequence)])
+                    let url = try MIDIFileGenerator.generate(tracks: [MIDITrack(notes: modulatedSequence)])
                     let savePanel = NSSavePanel()
-                    savePanel.allowedFileTypes = ["mid"]
+                    savePanel.allowedContentTypes = [.midi]
                     savePanel.begin { result in
                         if result == .OK,
                            let saveURL = savePanel.url {
