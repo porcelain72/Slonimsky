@@ -1,88 +1,110 @@
 import Foundation
 
-/// Defines the foundational Slonimsky-style patterns based on octave divisions.
-enum ScalePattern {
-    case tritone       // Divides the octave into 2 equal intervals (6 semitones)
-    case augmented     // Divides the octave into 3 equal intervals (4 semitones)
-    case diminished7   // Divides the octave into 4 equal intervals (3 semitones)
-
-    /// The intervals in semitones for each pattern.
-    var intervals: [Int] {
-        switch self {
-        case .tritone:
-            return [6]
-        case .augmented:
-            return [4, 4, 4]
-        case .diminished7:
-            return [3, 3, 3, 3]
-        }
-    }
-}
-
-/// Specifies the direction of the melodic sequence.
 enum PatternDirection {
     case ascending
     case descending
 }
 
-/// A helper struct to generate numerical sequences of notes.
 struct NoteSequenceGenerator {
 
-    /// Generates a sequence of MIDI note numbers based on the provided parameters.
-    ///
-    /// - Parameters:
-    ///   - rootNote: The starting MIDI note number (0-127).
-    ///   - scalePattern: The core pattern to use for generation.
-    ///   - numberOfNotes: The total number of notes to generate in the sequence.
-    ///   - direction: The melodic direction (ascending or descending).
-    /// - Returns: An array of integers representing the MIDI note numbers.
-    static func generate(
-        rootNote: Int,
-        scalePattern: ScalePattern,
-        numberOfNotes: Int,
-        direction: PatternDirection
-    ) -> [Int] {
-        guard numberOfNotes > 0 else {
-            return []
-        }
+    static func calculateVelocity(index n: Int, note: Int, model: VelocityModel) -> UInt8 {
+        let sinComponent = sin(Double(n) * model.phase) * model.waveDepth
+        let randComponent = Double.random(in: -1...1) * model.randomness
 
-        var sequence: [Int] = []
-        var currentNote = rootNote
-        let intervals = scalePattern.intervals
-        var intervalIndex = 0
+        let isEmphasized = (model.emphasisBeat > 0) && (n % model.emphasisBeat == 0)
+        let emphasisBoost = isEmphasized ? model.emphasisAmount : 0.0
 
-        for _ in 0..<numberOfNotes {
-            // Clamp the note to the valid MIDI range
-            let clampedNote = max(0, min(127, currentNote))
-            sequence.append(clampedNote)
+        let combined = sinComponent + randComponent + emphasisBoost
+        let offset = Double(model.range) * combined
+        let velocity = Double(model.baseVelocity) + offset
 
-            // Determine the next interval
-            let interval = intervals[intervalIndex % intervals.count]
-
-            // Calculate the next note based on direction
-            switch direction {
-            case .ascending:
-                currentNote += interval
-            case .descending:
-                currentNote -= interval
-            }
-            
-            intervalIndex += 1
-        }
-
-        return sequence
+        return UInt8(clamping: Int(round(velocity)))
     }
 
-    static func applyModulation(to sequence: [Int], modulation: SlonimskyModulation) -> [Int] {
-        switch modulation {
-        case .none:
-            return sequence
-        case .interpolation:
-            return sequence.flatMap { [$0, $0 + 1] }
-        case .infrapolation:
-            return sequence.flatMap { [$0 - 1, $0] }
-        case .ultrapolation:
-            return sequence.flatMap { [$0, $0 + 1] }
+    static func buildAllSubsequences(
+        startNote: Int,
+        interval: Int,
+        count: Int = 8,
+        maxInterpolate: Int = 0,
+        maxInfrapolate: Int = 0,
+        maxUltrapolate: Int = 0,
+        model: VelocityModel
+    ) -> [[MIDIInfo]] {
+
+        var subsequences: [[MIDIInfo]] = []
+
+        func baseNotes() -> [Int] {
+            return (0..<count).map { i in startNote + i * interval }
         }
+
+        func buildVariant(
+            from notes: [Int],
+            interpolate: Int,
+            infrapolate: Int,
+            ultrapolate: Int,
+            counter: Double
+        ) -> [MIDIInfo] {
+            var result: [MIDIInfo] = []
+            let increment = 1
+
+            for i in 0..<notes.count {
+                let note = notes[i]
+                result.append(MIDIInfo(
+                    note: note,
+                    velocity: calculateVelocity(index: i, note: note, model: model)
+                ))
+
+                // Interpolation
+                if interpolate > 0, i < notes.count - 1 {
+                    for p in 1...interpolate {
+                        let new = note + p * increment
+                        result.append(MIDIInfo(
+                            note: new,
+                            velocity: calculateVelocity(index: i, note: new, model: model)
+                        ))
+                    }
+                }
+
+                // Infrapolation
+                if infrapolate > 0, i < notes.count - 1 {
+                    for p in 1...infrapolate {
+                        let new = note - p * increment
+                        result.append(MIDIInfo(
+                            note: new,
+                            velocity: calculateVelocity(index: i, note: new, model: model)
+                        ))
+                    }
+                }
+
+                // Ultrapolation
+                if ultrapolate > 0, i < notes.count - 1 {
+                    for p in 1...ultrapolate {
+                        let new = notes[i + 1] - p * increment
+                        result.append(MIDIInfo(
+                            note: new,
+                            velocity: calculateVelocity(index: i, note: new, model: model)
+                        ))
+                    }
+                }
+            }
+
+            return result
+        }
+
+
+        let principal = baseNotes()
+
+        for i in 0...maxUltrapolate {
+            for f in 0...maxInfrapolate {
+                for u in 0...maxInterpolate {
+                    let forward = buildVariant(from: principal, interpolate: u, infrapolate: f, ultrapolate: i, counter: Double(i * maxUltrapolate + f * maxInfrapolate + u))
+                    let mirrored = Array(forward.dropLast().reversed())
+                    let full = forward + mirrored
+                    subsequences.append(full)
+                }
+            }
+        }
+
+        return subsequences
     }
 }

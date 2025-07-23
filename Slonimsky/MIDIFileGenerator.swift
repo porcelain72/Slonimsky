@@ -5,8 +5,13 @@ import Foundation
 /// A structure to represent a single musical track, containing a sequence of notes.
 struct MIDITrack {
     /// An array of MIDI note numbers (0-127).
-    let notes: [Int]
+    let notes: [MIDIInfo]
     // In the future, we can add other properties like MIDI channel or instrument type here.
+}
+
+struct MIDIInfo {
+    let note : Int
+    let velocity : UInt8
 }
 
 /// A helper for generating Standard MIDI Files (.mid) using AudioToolbox.
@@ -17,8 +22,8 @@ struct MIDIFileGenerator {
     /// - Parameter tracks: An array of `MIDITrack` objects to include in the file.
     /// - Returns: A URL pointing to the newly created temporary MIDI file.
     /// - Throws: An error if the MIDI file cannot be created or written to disk.
-    static func generate(tracks: [MIDITrack]) throws -> URL {
-        var sequence: MusicSequence?
+    static func generate(tracks: [MIDITrack], noteDuration: Double) throws -> URL {
+
         var newSequence: MusicSequence?
         guard NewMusicSequence(&newSequence) == noErr, let sequence = newSequence else {
             throw MIDIError.sequenceCreationFailed
@@ -35,10 +40,10 @@ struct MIDIFileGenerator {
             for noteNumber in trackData.notes {
                 var noteMessage = MIDINoteMessage(
                     channel: UInt8(index % 16), // Assign a different channel per track
-                    note: UInt8(clamping: noteNumber),
-                    velocity: 100, // Default velocity
+                    note: UInt8(clamping: noteNumber.note),
+                    velocity: noteNumber.velocity, // Default velocity
                     releaseVelocity: 0,
-                    duration: 1.0 // Each note is one beat long
+                    duration: Float32(MusicTimeStamp(noteDuration)) // Use the provided noteDuration
                 )
 
                 guard MusicTrackNewMIDINoteEvent(musicTrack, currentTime, &noteMessage) == noErr else {
@@ -77,3 +82,13 @@ extension UInt8 {
         self = UInt8(Swift.max(0, Swift.min(255, value)))
     }
 }
+
+enum NoteLength: Float64 {
+    case whole = 4.0
+    case half = 2.0
+    case quarter = 1.0
+    case eighth = 0.5
+    case sixteenth = 0.25
+}
+
+
