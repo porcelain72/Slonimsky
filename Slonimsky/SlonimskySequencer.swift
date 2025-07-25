@@ -1,14 +1,16 @@
 import Foundation
 
 class SlonimskySequencer: ObservableObject {
+    @Published var useMIDIOutput: Bool = false
+
     @Published var isPlaying: Bool = false
     @Published var melodySubsequences: [[MIDIInfo]] = []
     @Published var chords: [ChordEvent] = []
     @Published var toneIncrement: Int = 0       // number of semitones to shift rootNote each time
     @Published var maxToneShift: Int = 0      // max total shift in semitones
 
-    private let audioPlayer = MusicSequencePlayer()
-    private let chordPlayer = AudioPlayer()
+    private let musicPlayer = MusicSequencePlayer()
+        private let midiOutputPlayer = MIDISequenceOutputPlayer()
 
 
     // Config
@@ -74,28 +76,37 @@ class SlonimskySequencer: ObservableObject {
 
 
     func play() {
-        stop() // Cancel old tasks
         generate()
         isPlaying = true
 
-        let beatDuration = 60.0 / bpm
-        let noteTime = noteDuration * beatDuration
+        let shouldUseMIDI = useMIDIOutput || midiOutputPlayer.hasAvailableDestination
 
-        var startTime: TimeInterval = 0
-        let player = audioPlayer
-
-       // player.load(sequences: melodySubsequences, noteDuration: noteTime)
-        player.load(melodySequences: melodySubsequences, chords: chords, noteDuration: noteTime)
-        player.play()
-        
+        if shouldUseMIDI {
+            midiOutputPlayer.play(
+                melody: melodySubsequences,
+                chords: chords,
+                noteDuration: noteDuration,
+                bpm: bpm
+            )
+        } else {
+            musicPlayer.load(
+                melodySequences: melodySubsequences,
+                chords: chords,
+                noteDuration: noteDuration,
+                bpm: bpm
+            )
+            musicPlayer.play()
+        }
     }
 
-    func stop() {
-    
-        audioPlayer.stop()
-      //  chordPlayer.stop()
-        isPlaying = false
+    var flattenedMelody: [MIDIInfo] {
+        melodySubsequences.flatMap { $0 }
     }
+      func stop() {
+          isPlaying = false
+          midiOutputPlayer.stop()
+          musicPlayer.stop()
+      }
 
     func calculateVelocity(index n: Int, note: Int, model: VelocityModel) -> UInt8 {
         let sinComponent = sin(Double(n) * model.phase) * model.waveDepth

@@ -9,7 +9,7 @@ struct MIDITrack {
     // In the future, we can add other properties like MIDI channel or instrument type here.
 }
 
-struct MIDIInfo {
+struct MIDIInfo: Equatable {
     let note : Int
     let velocity : UInt8
 }
