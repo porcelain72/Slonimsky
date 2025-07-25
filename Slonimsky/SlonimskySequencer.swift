@@ -3,12 +3,13 @@ import Foundation
 class SlonimskySequencer: ObservableObject {
     @Published var isPlaying: Bool = false
     @Published var melodySubsequences: [[MIDIInfo]] = []
-    @Published var chords: [Chord] = []
+    @Published var chords: [ChordEvent] = []
+    @Published var toneIncrement: Int = 0       // number of semitones to shift rootNote each time
+    @Published var maxToneShift: Int = 0      // max total shift in semitones
 
-    private let audioPlayer = AudioPlayer()
+    private let audioPlayer = MusicSequencePlayer()
     private let chordPlayer = AudioPlayer()
 
-    private var playbackTasks: [DispatchWorkItem] = []
 
     // Config
     @Published var rootNote: Int = 60
@@ -19,8 +20,12 @@ class SlonimskySequencer: ObservableObject {
     @Published var model: VelocityModel = .default
     @Published var modulations: [SlonimskyModulation] = []
     @Published var chordParams: ChordExtractionParams = .init()
-
+    
+    
     func generate() {
+        melodySubsequences = []
+        chords = []
+
         let interval = 12 / divisionsOfOctave
         let count = (12 / interval) * numberOfOctaves
 
@@ -28,25 +33,45 @@ class SlonimskySequencer: ObservableObject {
         let infra  = modulations.first { $0.type == .infrapolation }
         let ultra  = modulations.first { $0.type == .ultrapolation }
 
-        // Build structured melody
-        melodySubsequences = NoteSequenceGenerator.buildAllSubsequences(
-            startNote: rootNote,
-            interval: interval,
-            count: count,
-            maxInterpolate: interp?.numberOfNewNotes ?? 0,
-            maxInfrapolate: infra?.numberOfNewNotes ?? 0,
-            maxUltrapolate: ultra?.numberOfNewNotes ?? 0,
-            model: model
-        )
+        var toneShift = 0
+        var startBeatOffset: Double = 0
+        let effectiveToneIncrement = toneIncrement > 0 ? toneIncrement : maxToneShift + 1
 
-        // Generate one chord per subsequence
-        chords = melodySubsequences.enumerated().map { (i, _) in
-            let root = rootNote + (i * interval)
-            let chordNotes = (0..<chordParams.chordSize).map { j in root + j * interval }
-            let velocity = calculateVelocity(index: i, note: root, model: model)
-            return Chord(notes: chordNotes, velocity: velocity, channel: 1)
+        while toneShift <= maxToneShift {
+            let shiftedRoot = rootNote + toneShift
+            let subsequences = NoteSequenceGenerator.buildAllSubsequences(
+                startNote: shiftedRoot,
+                interval: interval,
+                count: count,
+                interpolate: interp,
+                infrapolate: infra,
+                ultrapolate: ultra,
+                model: model
+            )
+
+            melodySubsequences.append(contentsOf: subsequences)
+
+            // Count total number of notes in all these subsequences
+            let notesInThisRound = subsequences.flatMap { $0 }.count
+            let durationBeats = Double(notesInThisRound) * noteDuration
+
+            let newChords = extractChords(
+                from: subsequences,
+                chordSize: chordParams.chordSize,
+                spreadOctaves: chordParams.spreadOctaves,
+                preferCloseVoicing: chordParams.preferCloseVoicing,
+                beatLengthPerNote: noteDuration,
+                channel: 1,
+                velocityScale: chordParams.velocityScale,
+                startBeatOffset: startBeatOffset
+            )
+
+            chords.append(contentsOf: newChords)
+            startBeatOffset += durationBeats
+            toneShift += effectiveToneIncrement
         }
     }
+
 
     func play() {
         stop() // Cancel old tasks
@@ -57,50 +82,18 @@ class SlonimskySequencer: ObservableObject {
         let noteTime = noteDuration * beatDuration
 
         var startTime: TimeInterval = 0
+        let player = audioPlayer
 
-        for (i, subsequence) in melodySubsequences.enumerated() {
-            let chord = chords[i]
-            let duration = Double(subsequence.count) * noteTime
-
-            let task = DispatchWorkItem { [weak self] in
-                guard let self = self else { return }
-
-                // Play chord
-                for note in chord.notes {
-                    self.chordPlayer.startNote(UInt8(clamping: note), velocity: chord.velocity, channel: chord.channel)
-                }
-
-                // Play melody notes
-                for (j, note) in subsequence.enumerated() {
-                    self.audioPlayer.startNote(UInt8(clamping: note.note), velocity: note.velocity, channel: 0)
-                    Thread.sleep(forTimeInterval: noteTime)
-                    self.audioPlayer.stopNote(UInt8(clamping: note.note), channel: 0)
-                }
-
-                // Stop chord after melody segment
-                for note in chord.notes {
-                    self.chordPlayer.stopNote(UInt8(clamping: note), channel: chord.channel)
-                }
-
-                if i == self.melodySubsequences.count - 1 {
-                    DispatchQueue.main.async {
-                        self.isPlaying = false
-                    }
-                }
-            }
-
-            playbackTasks.append(task)
-            DispatchQueue.global(qos: .userInitiated).asyncAfter(deadline: .now() + startTime, execute: task)
-
-            startTime += duration
-        }
+       // player.load(sequences: melodySubsequences, noteDuration: noteTime)
+        player.load(melodySequences: melodySubsequences, chords: chords, noteDuration: noteTime)
+        player.play()
+        
     }
 
     func stop() {
-        playbackTasks.forEach { $0.cancel() }
-        playbackTasks.removeAll()
+    
         audioPlayer.stop()
-        chordPlayer.stop()
+      //  chordPlayer.stop()
         isPlaying = false
     }
 
@@ -114,4 +107,161 @@ class SlonimskySequencer: ObservableObject {
         let velocity = Double(model.baseVelocity) + offset
         return UInt8(clamping: Int(round(velocity)))
     }
+    
+    func extractChords(
+        from melodyGroups: [[MIDIInfo]],
+        chordSize: Int = 3,
+        spreadOctaves: Int = 1,
+        preferCloseVoicing: Bool = true,
+        beatLengthPerNote: Double,
+        channel: UInt8 = 1,
+        velocityScale: Double = 0.8,
+        startBeatOffset: Double = 0
+    ) -> [ChordEvent] {
+        var events: [ChordEvent] = []
+        var currentBeat: Double = startBeatOffset
+
+        for group in melodyGroups {
+            guard !group.isEmpty else { continue }
+
+            let avgVelocity = group.map(\.velocity).average
+            let chordVelocity = UInt8(clamping: Int(avgVelocity * velocityScale))
+
+            let notes = group.map(\.note)
+            let pcs = notes.map { (($0 % 12) + 12) % 12 }
+            let pcCounts = Dictionary(pcs.map { ($0, 1) }, uniquingKeysWith: +)
+            let rankedPCs = pcCounts.sorted { $0.value > $1.value }.map(\.key)
+
+            let rootPC = rankedPCs.first ?? 0
+            let chordPCs = buildChordFromPitchClasses(ranked: rankedPCs, rootHint: rootPC, size: chordSize)
+
+            let register = notes.sorted()[notes.count / 2]
+            let chordNotes = voiceChord(pcs: chordPCs, around: register, spreadOctaves: spreadOctaves, preferClose: preferCloseVoicing)
+                .map { min(max($0, 0), 127) }
+
+            let durationBeats = Double(group.count) * beatLengthPerNote
+            let event = ChordEvent(
+                startBeat: currentBeat,
+                durationBeats: durationBeats,
+                notes: chordNotes,
+                velocity: chordVelocity,
+                channel: channel
+            )
+
+            events.append(event)
+            currentBeat += durationBeats
+        }
+
+        return events
+    }
+
+    func buildChordFromPitchClasses(ranked: [Int], rootHint: Int?, size: Int) -> [Int] {
+        let root = rootHint ?? ranked.first ?? 0
+
+        var out: [Int] = [root]
+        if ranked.contains((root + 4) % 12) {
+            out.append((root + 4) % 12) // major
+        } else if ranked.contains((root + 3) % 12) {
+            out.append((root + 3) % 12) // minor
+        }
+
+        if ranked.contains((root + 7) % 12) {
+            out.append((root + 7) % 12) // fifth
+        }
+
+        if size >= 4, let next = ranked.first(where: { !out.contains($0) }) {
+            out.append(next)
+        }
+
+        return Array(out.prefix(size))
+    }
+
+    func voiceChord(pcs: [Int], around note: Int, spreadOctaves: Int, preferClose: Bool) -> [Int] {
+        let baseOct = note / 12
+        var result: [Int] = []
+
+        if preferClose {
+            var current = baseOct * 12
+            for pc in pcs {
+                var candidate = current - (current % 12) + pc
+                if let last = result.last, candidate <= last { candidate += 12 }
+                result.append(candidate)
+                current = candidate
+            }
+        } else {
+            for (i, pc) in pcs.enumerated() {
+                let offset = (i * spreadOctaves) / max(pcs.count - 1, 1)
+                result.append((baseOct + offset) * 12 + pc)
+            }
+        }
+
+        return result
+    }
+
+    func estimatedMelodyNoteCount() -> Int {
+        let interval = 12 / divisionsOfOctave
+        let count = (12 / interval) * numberOfOctaves
+
+        let interp = modulations.first { $0.type == .interpolation }?.numberOfNewNotes ?? 0
+        let infra  = modulations.first { $0.type == .infrapolation }?.numberOfNewNotes ?? 0
+        let ultra  = modulations.first { $0.type == .ultrapolation }?.numberOfNewNotes ?? 0
+
+        // Estimate per shifted root
+        var notesPerShift = 0
+        for i in 0...ultra {
+            for j in 0...infra {
+                for k in 0...interp {
+                    // This matches your logic: sequence + reversed (minus one) = (2 * n - 1)
+                    let base = count
+                    let variant = NoteSequenceGenerator.estimateVariantLength(baseCount: base, interpolate: k, infrapolate: j, ultrapolate: i)
+                    notesPerShift += variant
+                }
+            }
+        }
+
+        let totalShifts = ((maxToneShift / toneIncrement) + 1)
+        return totalShifts * notesPerShift
+    }
+    
+    var estimatedDuration: TimeInterval {
+        let interval = 12 / divisionsOfOctave
+        let count = (12 / interval) * numberOfOctaves
+
+        let interp = modulations.first { $0.type == .interpolation }?.numberOfNewNotes ?? 0
+        let infra  = modulations.first { $0.type == .infrapolation }?.numberOfNewNotes ?? 0
+        let ultra  = modulations.first { $0.type == .ultrapolation }?.numberOfNewNotes ?? 0
+
+        var notesPerShift = 0
+        for i in 0...ultra {
+            for j in 0...infra {
+                for k in 0...interp {
+                    let variant = NoteSequenceGenerator.estimateVariantLength(
+                        baseCount: count,
+                        interpolate: k,
+                        infrapolate: j,
+                        ultrapolate: i
+                    )
+                    notesPerShift += variant
+                }
+            }
+        }
+
+        let shifts = maxToneShift > 0 && toneIncrement > 0
+            ? (maxToneShift / toneIncrement) + 1
+            : 1
+
+        let totalNotes = shifts * notesPerShift
+        return Double(totalNotes) * noteDuration
+    }
+
 }
+
+extension Array where Element: BinaryInteger {
+    var average: Double {
+        guard !isEmpty else { return 0.0 }
+        let sum = self.reduce(0) { $0 + Int($1) }  // Convert to Int during summing
+        return Double(sum) / Double(self.count)
+    }
+}
+
+

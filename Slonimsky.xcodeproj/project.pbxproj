@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		983C796E2E32762200A8E669 /* ChordTytpeAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */; };
+		983C79702E32785500A8E669 /* MusicSequencePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */; };
+		983C79722E327EC800A8E669 /* MidiExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79712E327EC800A8E669 /* MidiExporter.swift */; };
 		98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */; };
 		98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2E2E2FBE0200223430 /* ContentView.swift */; };
 		98692B312E2FBE0E00223430 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98692B302E2FBE0E00223430 /* Assets.xcassets */; };
@@ -42,6 +45,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordTytpeAnalyzer.swift; sourceTree = "<group>"; };
+		983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicSequencePlayer.swift; sourceTree = "<group>"; };
+		983C79712E327EC800A8E669 /* MidiExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MidiExporter.swift; sourceTree = "<group>"; };
 		98692B292E2FBE0200223430 /* Slonimsky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slonimsky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyApp.swift; sourceTree = "<group>"; };
 		98692B2E2E2FBE0200223430 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -118,9 +124,12 @@
 				98692B622E3104EB00223430 /* Chord.swift */,
 				98692B5E2E2FC07000223432 /* SlonimskyModulation.swift */,
 				98692B5C2E2FC07000223431 /* AudioPlayer.swift */,
+				983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */,
+				983C79712E327EC800A8E669 /* MidiExporter.swift */,
 				98692B582E2FC07000223430 /* MIDIFileGenerator.swift */,
 				98692B5E2E30F4E200223430 /* VelocityVisualizer.swift */,
 				98692B592E2FC07000223430 /* NoteSequenceGenerator.swift */,
+				983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */,
 				98692B302E2FBE0E00223430 /* Assets.xcassets */,
 				98692B352E2FBE0E00223430 /* Slonimsky.entitlements */,
 				98692B322E2FBE0E00223430 /* Preview Content */,
@@ -288,11 +297,14 @@
 				98692B5F2E2FC07000223432 /* SlonimskyModulation.swift in Sources */,
 				98692B5D2E2FC07000223431 /* AudioPlayer.swift in Sources */,
 				98692B5B2E2FC07000223430 /* NoteSequenceGenerator.swift in Sources */,
+				983C79702E32785500A8E669 /* MusicSequencePlayer.swift in Sources */,
 				98692B5F2E30F4E200223430 /* VelocityVisualizer.swift in Sources */,
+				983C796E2E32762200A8E669 /* ChordTytpeAnalyzer.swift in Sources */,
 				98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */,
 				98692B652E3106CD00223430 /* SlonimskySequencer.swift in Sources */,
 				98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */,
 				98692B632E3104EB00223430 /* Chord.swift in Sources */,
+				983C79722E327EC800A8E669 /* MidiExporter.swift in Sources */,
 				98692B612E3102E100223430 /* VelocityModel.swift in Sources */,
 				98692B5A2E2FC07000223430 /* MIDIFileGenerator.swift in Sources */,
 			);

@@ -66,6 +66,19 @@ struct ContentView: View {
                     Slider(value:  $sequencer.model.emphasisAmount, in: 0...1, label:{Text("Emphasis Amount")})
                        
                 }
+                Section(header: Text("Tone Shifting")) {
+                    Stepper("Tone Increment: \(sequencer.toneIncrement)", value: $sequencer.toneIncrement, in: 0...24)
+                    Stepper("Max Tone Shift: \(sequencer.maxToneShift)", value: $sequencer.maxToneShift, in: 0...96, step: 1)
+                }
+
+                Section(header: Text("Playback Info")) {
+                    HStack {
+                        Text("Estimated Time")
+                        Spacer()
+                        Text(formatTime(sequencer.estimatedDuration))
+                            .foregroundColor(.secondary)
+                    }
+                }
             }
 
             Button(action: {
@@ -81,40 +94,8 @@ struct ContentView: View {
             .padding()
 
             Button("Save MIDI") {
-                /*
-                let interp = modulations.first { mod in
-                    mod.type == .interpolation
-                }
-                let infra =  modulations.first { mod in
-                    mod.type == .infrapolation
-                }
-                
-                let ultra =  modulations.first { mod in
-                    mod.type == .ultrapolation
-                }
-                
-                let interval = 12/divisionsOfOctave
-                let count = (12/interval) * numberOfOctaves
-                sequence = NoteSequenceGenerator.buildAllCombinations(startNote: rootNote, interval: interval, count: count, maxInterpolate: interp?.numberOfNewNotes ?? 0, maxInfrapolate: infra?.numberOfNewNotes ?? 0, maxUltrapolate:ultra?.numberOfNewNotes ?? 0, model:  sequencer.model)
-                
-                
-               // let midiSequence = sequence.map{max(0, min(127, $0)) }
-
-                do {
-                    let url = try MIDIFileGenerator.generate(tracks: [MIDITrack(notes: sequence)], noteDuration: Double(noteDuration))
-                    let savePanel = NSSavePanel()
-                    savePanel.allowedContentTypes = [.midi]
-                    savePanel.begin { result in
-                        if result == .OK,
-                           let saveURL = savePanel.url {
-                            try? FileManager.default.moveItem(at: url, to: saveURL)
-                        }
-                    }
-                } catch {
-                    // Handle error
-                    print(error)
-                }
-                 */}
+              export()
+            }
             .padding()
 /*
             if !sequence.isEmpty {
@@ -127,6 +108,45 @@ struct ContentView: View {
             VelocityVisualizer(sequence: sequence, currentNoteIndex: audioPlayer.currentNoteIndex)
         }
         .padding()
+    }
+    
+    func formatTime(_ seconds: TimeInterval) -> String {
+        let minutes = Int(seconds) / 60
+        let sec = Int(seconds) % 60
+        return String(format: "%02d:%02d", minutes, sec)
+    }
+
+    
+    func export(){
+        sequencer.generate()
+        
+        let savePanel = NSSavePanel()
+        savePanel.nameFieldStringValue = "Export.mid"
+        savePanel.allowedContentTypes = [.midi]
+
+        savePanel.begin { result in
+            if result == .OK, let finalURL = savePanel.url {
+                var fixedURL = finalURL
+                if fixedURL.pathExtension.lowercased() != "mid" {
+                    fixedURL.deletePathExtension()
+                    fixedURL.appendPathExtension("mid")
+                }
+
+                do {
+                    try MIDIExporter.exportMIDI(
+                        melodyTracks: sequencer.melodySubsequences,
+                        chordEvents: sequencer.chords,
+                        noteDuration: sequencer.noteDuration,
+                        bpm: sequencer.bpm,
+                        fileURL: fixedURL
+                    )
+                    print("✅ MIDI written to \(fixedURL)")
+                } catch {
+                    print("❌ Export error: \(error)")
+                }
+            }
+        }
+
     }
 }
 

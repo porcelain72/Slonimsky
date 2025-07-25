@@ -16,6 +16,6 @@ struct SlonimskyModulation: Identifiable {
     var intervalBetweenNewNotes: Int // The step size for new notes
 
     static var defaultModulation: SlonimskyModulation {
-        SlonimskyModulation(type: .none, numberOfNewNotes: 1, intervalBetweenNewNotes: 1)
+        SlonimskyModulation(type: .interpolation, numberOfNewNotes: 3, intervalBetweenNewNotes: 1)
     }
 }

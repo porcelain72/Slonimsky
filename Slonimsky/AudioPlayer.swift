@@ -76,7 +76,12 @@ class AudioPlayer : ObservableObject {
     }
 
     func play(notes: [MIDIInfo], duration: TimeInterval, completion: (() -> Void)?) {
-        // stop()  // Optional: cancel existing playback
+        stop() // Stop any existing playback
+
+        guard !notes.isEmpty else {
+            completion?()
+            return
+        }
 
         if !engine.isRunning {
             do {
@@ -87,47 +92,49 @@ class AudioPlayer : ObservableObject {
             }
         }
 
-        var task: DispatchWorkItem!  // must be var to allow reference inside itself
+        let startTime = DispatchTime.now()
+        let beatInterval = duration
 
-        task = DispatchWorkItem { [weak self] in
-            guard let self = self else { return }
+        var tasks: [DispatchWorkItem] = []
 
-            for (index, note) in notes.enumerated() {
-                if task.isCancelled {
-                    DispatchQueue.main.async { self.currentNoteIndex = nil }
-                    completion?()
-                    break
-                }
+        for (index, note) in notes.enumerated() {
+            let scheduledTime = startTime + beatInterval * Double(index)
 
+            // Note-on task
+            let onTask = DispatchWorkItem { [weak self] in
+                guard let self = self else { return }
+                let noteValue = UInt8(clamping: note.note)
+                self.sampler.startNote(noteValue, withVelocity: note.velocity, onChannel: 0)
                 DispatchQueue.main.async {
                     self.currentNoteIndex = index
                 }
+            }
 
-                let noteValue = UInt8(note.note)
-                self.sampler.startNote(noteValue, withVelocity: note.velocity, onChannel: 0)
-
-                let noteEndTime = Date().addingTimeInterval(duration)
-                while Date() < noteEndTime {
-                    if task.isCancelled {
-                        self.sampler.stopNote(noteValue, onChannel: 0)
-                        DispatchQueue.main.async { self.currentNoteIndex = nil }
-                        completion?()
-                        return
-                    }
-                    Thread.sleep(forTimeInterval: 0.05)
-                }
-
+            // Note-off task
+            let offTask = DispatchWorkItem { [weak self] in
+                guard let self = self else { return }
+                let noteValue = UInt8(clamping: note.note)
                 self.sampler.stopNote(noteValue, onChannel: 0)
+                if index == notes.count - 1 {
+                    DispatchQueue.main.async {
+                        self.currentNoteIndex = nil
+                        completion?()
+                    }
+                }
             }
 
-            DispatchQueue.main.async {
-                self.currentNoteIndex = nil
-                completion?()
-            }
+            // Schedule both tasks
+            queue.asyncAfter(deadline: scheduledTime, execute: onTask)
+            queue.asyncAfter(deadline: scheduledTime + beatInterval, execute: offTask)
+
+            tasks.append(onTask)
+            tasks.append(offTask)
         }
 
-        playbackTask = task
-        queue.async(execute: task)  // ✅ THIS LINE RUNS THE TASK!
+        // Save references if you want to cancel later
+        self.playbackTask = DispatchWorkItem {
+            tasks.forEach { $0.cancel() }
+        }
     }
 
 
