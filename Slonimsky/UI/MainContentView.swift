@@ -13,7 +13,6 @@ struct MainContentView: View {
     // MARK: - State Objects
     @StateObject private var midiService = MIDIIntegrationService()
     @StateObject private var parameterManager = ParameterManager()
-    @StateObject private var sheetMusicVM = SheetMusicViewModel()
     
     // MARK: - State Properties
     @State private var selectedGenerator: String = "Scale Pattern Generator"
@@ -53,7 +52,6 @@ struct MainContentView: View {
                 // Right Panel: Sheet Music
                 if showSheetMusic {
                     SheetMusicPanelView(
-                        sheetMusicVM: sheetMusicVM,
                         midiService: midiService
                     )
                     .frame(minWidth: 400, maxWidth: .infinity)

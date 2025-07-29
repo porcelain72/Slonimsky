@@ -7,31 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		983C796E2E32762200A8E669 /* ChordTytpeAnalyzer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */; };
-		983C79702E32785500A8E669 /* MusicSequencePlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */; };
-		983C79722E327EC800A8E669 /* MidiExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79712E327EC800A8E669 /* MidiExporter.swift */; };
-		983C79742E33872400A8E669 /* MidiOutputPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79732E33872400A8E669 /* MidiOutputPlayer.swift */; };
-		983C79762E338F2900A8E669 /* MidiSequenceOutputPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79752E338F2900A8E669 /* MidiSequenceOutputPlayer.swift */; };
-		983C79782E33A6A100A8E669 /* SheetMusicGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79772E33A6A100A8E669 /* SheetMusicGenerator.swift */; };
-		983C797A2E33A89E00A8E669 /* SheetMusicViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C79792E33A89E00A8E669 /* SheetMusicViewModel.swift */; };
-		983C797C2E33A8D200A8E669 /* SheetMusicView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C797B2E33A8D200A8E669 /* SheetMusicView.swift */; };
-		983C797E2E33A9CD00A8E669 /* ParameterControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C797D2E33A9CD00A8E669 /* ParameterControlsView.swift */; };
-		983C79802E33B71300A8E669 /* SheetMusicRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 983C797F2E33B71300A8E669 /* SheetMusicRenderer.swift */; };
 		98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */; };
-		98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B2E2E2FBE0200223430 /* ContentView.swift */; };
 		98692B312E2FBE0E00223430 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98692B302E2FBE0E00223430 /* Assets.xcassets */; };
 		98692B342E2FBE0E00223430 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 98692B332E2FBE0E00223430 /* Preview Assets.xcassets */; };
 		98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */; };
 		98692B492E2FBE0F00223430 /* SlonimskyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */; };
 		98692B4B2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */; };
-		98692B5A2E2FC07000223430 /* MIDIFileGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B582E2FC07000223430 /* MIDIFileGenerator.swift */; };
-		98692B5B2E2FC07000223430 /* NoteSequenceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B592E2FC07000223430 /* NoteSequenceGenerator.swift */; };
-		98692B5D2E2FC07000223431 /* AudioPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B5C2E2FC07000223431 /* AudioPlayer.swift */; };
-		98692B5F2E2FC07000223432 /* SlonimskyModulation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B5E2E2FC07000223432 /* SlonimskyModulation.swift */; };
-		98692B5F2E30F4E200223430 /* VelocityVisualizer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B5E2E30F4E200223430 /* VelocityVisualizer.swift */; };
-		98692B612E3102E100223430 /* VelocityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B602E3102E100223430 /* VelocityModel.swift */; };
-		98692B632E3104EB00223430 /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B622E3104EB00223430 /* Chord.swift */; };
-		98692B652E3106CD00223430 /* SlonimskySequencer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B642E3106CD00223430 /* SlonimskySequencer.swift */; };
 		98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
 		98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309502E3932FE000D9EC7 /* ModulationSettings.swift */; };
@@ -79,19 +60,8 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
-		983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChordTytpeAnalyzer.swift; sourceTree = "<group>"; };
-		983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MusicSequencePlayer.swift; sourceTree = "<group>"; };
-		983C79712E327EC800A8E669 /* MidiExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MidiExporter.swift; sourceTree = "<group>"; };
-		983C79732E33872400A8E669 /* MidiOutputPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MidiOutputPlayer.swift; sourceTree = "<group>"; };
-		983C79752E338F2900A8E669 /* MidiSequenceOutputPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MidiSequenceOutputPlayer.swift; sourceTree = "<group>"; };
-		983C79772E33A6A100A8E669 /* SheetMusicGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetMusicGenerator.swift; sourceTree = "<group>"; };
-		983C79792E33A89E00A8E669 /* SheetMusicViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetMusicViewModel.swift; sourceTree = "<group>"; };
-		983C797B2E33A8D200A8E669 /* SheetMusicView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetMusicView.swift; sourceTree = "<group>"; };
-		983C797D2E33A9CD00A8E669 /* ParameterControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParameterControlsView.swift; sourceTree = "<group>"; };
-		983C797F2E33B71300A8E669 /* SheetMusicRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SheetMusicRenderer.swift; sourceTree = "<group>"; };
 		98692B292E2FBE0200223430 /* Slonimsky.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Slonimsky.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyApp.swift; sourceTree = "<group>"; };
-		98692B2E2E2FBE0200223430 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		98692B302E2FBE0E00223430 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		98692B332E2FBE0E00223430 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		98692B352E2FBE0E00223430 /* Slonimsky.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Slonimsky.entitlements; sourceTree = "<group>"; };
@@ -100,14 +70,6 @@
 		98692B442E2FBE0F00223430 /* SlonimskyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlonimskyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITests.swift; sourceTree = "<group>"; };
 		98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITestsLaunchTests.swift; sourceTree = "<group>"; };
-		98692B582E2FC07000223430 /* MIDIFileGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIFileGenerator.swift; sourceTree = "<group>"; };
-		98692B592E2FC07000223430 /* NoteSequenceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteSequenceGenerator.swift; sourceTree = "<group>"; };
-		98692B5C2E2FC07000223431 /* AudioPlayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioPlayer.swift; sourceTree = "<group>"; };
-		98692B5E2E2FC07000223432 /* SlonimskyModulation.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyModulation.swift; sourceTree = "<group>"; };
-		98692B5E2E30F4E200223430 /* VelocityVisualizer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityVisualizer.swift; sourceTree = "<group>"; };
-		98692B602E3102E100223430 /* VelocityModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityModel.swift; sourceTree = "<group>"; };
-		98692B622E3104EB00223430 /* Chord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chord.swift; sourceTree = "<group>"; };
-		98692B642E3106CD00223430 /* SlonimskySequencer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskySequencer.swift; sourceTree = "<group>"; };
 		98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternParameters.swift; sourceTree = "<group>"; };
 		98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VelocitySettings.swift; sourceTree = "<group>"; };
 		98C309502E3932FE000D9EC7 /* ModulationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModulationSettings.swift; sourceTree = "<group>"; };
@@ -187,31 +149,12 @@
 			isa = PBXGroup;
 			children = (
 				98692B2C2E2FBE0200223430 /* SlonimskyApp.swift */,
-				98692B2E2E2FBE0200223430 /* ContentView.swift */,
-				983C797D2E33A9CD00A8E669 /* ParameterControlsView.swift */,
-				98692B642E3106CD00223430 /* SlonimskySequencer.swift */,
-				98692B602E3102E100223430 /* VelocityModel.swift */,
-				98692B622E3104EB00223430 /* Chord.swift */,
-				98692B5E2E2FC07000223432 /* SlonimskyModulation.swift */,
-				98692B5C2E2FC07000223431 /* AudioPlayer.swift */,
-				983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */,
-				983C79712E327EC800A8E669 /* MidiExporter.swift */,
-				98692B582E2FC07000223430 /* MIDIFileGenerator.swift */,
 				98C3097D2E393378000D9EC7 /* SlonimskyTests */,
 				98C3097B2E39334F000D9EC7 /* MidiInfo.swift */,
 				98C3096E2E39333C000D9EC7 /* UI */,
 				98C309672E39332A000D9EC7 /* MIDI */,
 				98C309542E393311000D9EC7 /* PatternGenerators */,
 				98C3094D2E3932FE000D9EC7 /* Models */,
-				983C79732E33872400A8E669 /* MidiOutputPlayer.swift */,
-				983C79752E338F2900A8E669 /* MidiSequenceOutputPlayer.swift */,
-				98692B5E2E30F4E200223430 /* VelocityVisualizer.swift */,
-				98692B592E2FC07000223430 /* NoteSequenceGenerator.swift */,
-				983C796D2E32762200A8E669 /* ChordTytpeAnalyzer.swift */,
-				983C79772E33A6A100A8E669 /* SheetMusicGenerator.swift */,
-				983C79792E33A89E00A8E669 /* SheetMusicViewModel.swift */,
-				983C797B2E33A8D200A8E669 /* SheetMusicView.swift */,
-				983C797F2E33B71300A8E669 /* SheetMusicRenderer.swift */,
 				98692B302E2FBE0E00223430 /* Assets.xcassets */,
 				98692B352E2FBE0E00223430 /* Slonimsky.entitlements */,
 				98692B322E2FBE0E00223430 /* Preview Content */,
@@ -441,47 +384,28 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				98692B5F2E2FC07000223432 /* SlonimskyModulation.swift in Sources */,
 				98C309792E39333C000D9EC7 /* SheetMusicPanelView.swift in Sources */,
-				983C797E2E33A9CD00A8E669 /* ParameterControlsView.swift in Sources */,
-				98692B5D2E2FC07000223431 /* AudioPlayer.swift in Sources */,
 				98C309662E393312000D9EC7 /* IntervalPatternGenerator.swift in Sources */,
-				98692B5B2E2FC07000223430 /* NoteSequenceGenerator.swift in Sources */,
-				983C79802E33B71300A8E669 /* SheetMusicRenderer.swift in Sources */,
-				983C79702E32785500A8E669 /* MusicSequencePlayer.swift in Sources */,
 				98C3096D2E39332A000D9EC7 /* MIDIIntegrationService.swift in Sources */,
-				98692B5F2E30F4E200223430 /* VelocityVisualizer.swift in Sources */,
 				98C309752E39333C000D9EC7 /* ParameterManager.swift in Sources */,
 				98C309772E39333C000D9EC7 /* PianoRollPanelView.swift in Sources */,
 				98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */,
 				98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */,
-				983C79782E33A6A100A8E669 /* SheetMusicGenerator.swift in Sources */,
-				983C796E2E32762200A8E669 /* ChordTytpeAnalyzer.swift in Sources */,
-				98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */,
 				98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */,
 				98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */,
-				983C797A2E33A89E00A8E669 /* SheetMusicViewModel.swift in Sources */,
-				98692B652E3106CD00223430 /* SlonimskySequencer.swift in Sources */,
 				98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */,
 				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
 				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
 				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
 				98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */,
-				983C797C2E33A8D200A8E669 /* SheetMusicView.swift in Sources */,
 				98C309642E393312000D9EC7 /* ModulationPatternGenerator.swift in Sources */,
 				98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */,
-				98692B632E3104EB00223430 /* Chord.swift in Sources */,
 				98C309632E393312000D9EC7 /* PatternGeneratorRegistry.swift in Sources */,
 				98C309782E39333C000D9EC7 /* ParameterPanelView.swift in Sources */,
 				98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */,
-				983C79742E33872400A8E669 /* MidiOutputPlayer.swift in Sources */,
 				98C3095F2E393311000D9EC7 /* RhythmicPatternGenerator.swift in Sources */,
-				983C79722E327EC800A8E669 /* MidiExporter.swift in Sources */,
 				98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */,
-				98692B612E3102E100223430 /* VelocityModel.swift in Sources */,
-				983C79762E338F2900A8E669 /* MidiSequenceOutputPlayer.swift in Sources */,
 				98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */,
-				98692B5A2E2FC07000223430 /* MIDIFileGenerator.swift in Sources */,
 				98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

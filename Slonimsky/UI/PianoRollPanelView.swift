@@ -372,7 +372,7 @@ struct NoteView: View {
     var body: some View {
         let x = CGFloat(index) * timeDivision * zoomLevel
         let notePosition = 108 - note.note
-        let y = CGFloat(notePosition as Double) * 20 * zoomLevel
+        let y = CGFloat(20.0 * Double(notePosition) * zoomLevel)
         let width = CGFloat(note.beatLength) * timeDivision * zoomLevel
         let height = 18 * zoomLevel
         
