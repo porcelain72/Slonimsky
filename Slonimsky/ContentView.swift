@@ -25,10 +25,16 @@ struct ContentView: View {
     var body: some View {
             HStack(alignment: .top) {
                 // Controls on the left
-                ParameterControlsView(sequencer: sequencer)
-                    .frame(minWidth: 300)
-                    .padding()
+                VStack{
+                    ParameterControlsView(sequencer: sequencer)
+                        .frame(minWidth: 300)
+                        .padding()
+                    
+                    Button("Save MIDI") {
+                      export()
+                    }
 
+                }
                 // Sheet music view on the right
                 SheetMusicView(viewModel: sheetMusicVM)
                     .frame(minWidth: 400, maxWidth: .infinity, maxHeight: .infinity)

@@ -74,6 +74,7 @@ struct ParameterControlsView: View {
             }) {
                 Text(sequencer.isPlaying ? "Stop Playing" : "Generate and Play")
             }
+            .padding()
         }
     }
 

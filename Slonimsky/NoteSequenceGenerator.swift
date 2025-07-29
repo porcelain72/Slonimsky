@@ -6,6 +6,7 @@ enum PatternDirection {
 }
 
 struct NoteSequenceGenerator {
+    typealias ModulationData = (count:Int, interval:Int)
     
     static func calculateVelocity(index n: Int, note: Int, model: VelocityModel) -> UInt8 {
         let sinComponent = sin(Double(n) * model.phase) * model.waveDepth
@@ -28,85 +29,93 @@ struct NoteSequenceGenerator {
         interpolate: SlonimskyModulation?,
         infrapolate: SlonimskyModulation?,
         ultrapolate: SlonimskyModulation?,
-        model: VelocityModel
+        model: VelocityModel,
+        noteDuration: NoteDuration = .eighth,
+        timeSignature: MIDITimeSignature = .defaultSignature
     ) -> [[MIDIInfo]] {
-        
-        var subsequences: [[MIDIInfo]] = []
+        let beatLength = noteDuration.beatValue(in: timeSignature)
         
         func baseNotes() -> [Int] {
             return (0..<count).map { i in startNote + i * interval }
         }
-        
+
         func buildVariant(
             from notes: [Int],
-            interpolate: SlonimskyModulation?,
-            infrapolate: SlonimskyModulation?,
-            ultrapolate: SlonimskyModulation?,
+            interpolate: ModulationData,
+            infrapolate: ModulationData,
+            ultrapolate: ModulationData,
             counter: Double
         ) -> [MIDIInfo] {
             var result: [MIDIInfo] = []
-            let increment = 1
-            
+
             for i in 0..<notes.count {
                 let note = notes[i]
                 result.append(MIDIInfo(
                     note: note,
-                    velocity: calculateVelocity(index: i, note: note, model: model)
+                    velocity: calculateVelocity(index: i, note: note, model: model),
+                    beatLength: beatLength
                 ))
-                
-                // Interpolation
-                if (interpolate?.numberOfNewNotes ?? 0) > 0, i < notes.count - 1 {
-                    for p in 1...(interpolate?.numberOfNewNotes ?? 1) {
-                        let new = note + p * (interpolate?.intervalBetweenNewNotes ?? 1)
+
+                if interpolate.count  > 0, i < notes.count - 1 {
+                    for p in 1...interpolate.count {
+                        let new = note + p * (interpolate.interval)
                         result.append(MIDIInfo(
                             note: new,
-                            velocity: calculateVelocity(index: i, note: new, model: model)
+                            velocity: calculateVelocity(index: i, note: new, model: model),
+                            beatLength: beatLength
                         ))
                     }
                 }
-                
-                // Infrapolation
-                if (infrapolate?.numberOfNewNotes ?? 0) > 0, i < notes.count - 1 {
-                    for p in 1...(infrapolate?.numberOfNewNotes ?? 1) {
-                        let new = note - p * (infrapolate?.intervalBetweenNewNotes ?? 1)
+
+                if infrapolate.count > 0, i < notes.count - 1 {
+                    for p in 1...infrapolate.count {
+                        let new = note - p * infrapolate.interval
                         result.append(MIDIInfo(
                             note: new,
-                            velocity: calculateVelocity(index: i, note: new, model: model)
+                            velocity: calculateVelocity(index: i, note: new, model: model),
+                            beatLength: beatLength
                         ))
                     }
                 }
-                
-                // Ultrapolation
-                if (ultrapolate?.numberOfNewNotes ?? 0) > 0, i < notes.count - 1 {
-                    for p in 1...(ultrapolate?.numberOfNewNotes ?? 1) {
-                        let new = notes[i + 1] - p * (ultrapolate?.intervalBetweenNewNotes ?? 1)
+
+                if ultrapolate.count > 0, i < notes.count - 1 {
+                    for p in 1...ultrapolate.count {
+                        let new = notes[i + 1] - p * ultrapolate.interval
                         result.append(MIDIInfo(
                             note: new,
-                            velocity: calculateVelocity(index: i, note: new, model: model)
+                            velocity: calculateVelocity(index: i, note: new, model: model),
+                            beatLength: beatLength
                         ))
                     }
                 }
             }
-            
+
             return result
         }
-        
-        
+
         let principal = baseNotes()
-        
+        var subsequences: [[MIDIInfo]] = []
+
         for i in 0...(ultrapolate?.numberOfNewNotes ?? 0) {
             for f in 0...(infrapolate?.numberOfNewNotes ?? 0) {
                 for u in 0...(interpolate?.numberOfNewNotes ?? 0) {
-                    let forward = buildVariant(from: principal, interpolate: interpolate, infrapolate: infrapolate, ultrapolate: ultrapolate, counter: Double(i * (ultrapolate?.numberOfNewNotes ?? 0) + f * (infrapolate?.numberOfNewNotes ?? 0) + u))
+                    let forward = buildVariant(from: principal,
+                                               interpolate: (count: u, interval: interpolate?.intervalBetweenNewNotes ?? 1),
+                                               infrapolate: (count: f, interval: infrapolate?.intervalBetweenNewNotes ?? 1),
+                                               ultrapolate: (count: i, interval: ultrapolate?.intervalBetweenNewNotes ?? 1),
+                                               counter: Double(i * (ultrapolate?.numberOfNewNotes ?? 0) +
+                                                               f * (infrapolate?.numberOfNewNotes ?? 0) +
+                                                               u))
                     let mirrored = Array(forward.dropLast().reversed())
                     let full = forward + mirrored
                     subsequences.append(full.dropLast())
                 }
             }
         }
-        
+
         return subsequences
     }
+
     
     static func estimateVariantLength(baseCount: Int, interpolate: Int, infrapolate: Int, ultrapolate: Int) -> Int {
         var total = 0

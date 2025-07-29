@@ -8,7 +8,7 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "E989772E-186E-4E97-A994-DB109FEA3CED"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Slonimsky/MusicSequencePlayer.swift"
@@ -40,14 +40,14 @@
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
             uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F"
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "Slonimsky/SheetMusicViewModel.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "39"
-            endingLineNumber = "39"
+            startingLineNumber = "45"
+            endingLineNumber = "45"
             landmarkName = "generateSheet(from:chords:noteDuration:bpm:)"
             landmarkType = "7">
             <Locations>
@@ -96,7 +96,246 @@
                   endingLineNumber = "39"
                   offsetFromSymbolStart = "100">
                </Location>
+               <Location
+                  uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F - 2bd557f4c68333e0"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
+                  moduleName = "Slonimsky"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "45"
+                  endingLineNumber = "45"
+                  offsetFromSymbolStart = "342">
+               </Location>
             </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "E53D29D0-DAA7-41F8-B972-85C8FA6979F1"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "51"
+            endingLineNumber = "51"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "C7E4146A-A0CF-45DB-979F-CDB6535C886D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SheetMusicViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "52"
+            endingLineNumber = "52"
+            landmarkName = "generateSheet(from:chords:noteDuration:bpm:)"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "566394D2-3009-46E1-AE76-854FA561BCC8"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SheetMusicViewModel.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "53"
+            endingLineNumber = "53"
+            landmarkName = "generateSheet(from:chords:noteDuration:bpm:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "566394D2-3009-46E1-AE76-854FA561BCC8 - 2bd557f4c68332e8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
+                  moduleName = "Slonimsky"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "939">
+               </Location>
+               <Location
+                  uuid = "566394D2-3009-46E1-AE76-854FA561BCC8 - 2bd557f4c68332e8"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
+                  moduleName = "Slonimsky"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "53"
+                  endingLineNumber = "53"
+                  offsetFromSymbolStart = "1110">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "3041CC56-1ED5-43B4-9DB0-0989D3C6286C"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/ParameterControlsView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "72"
+            endingLineNumber = "72"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "2011814D-CAE5-4743-9EAA-9B9971CE9B2E"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SlonimskySequencer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "85"
+            endingLineNumber = "85"
+            landmarkName = "play()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "EDEFF144-D4C8-4B33-A057-F362684F495D"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/MidiSequenceOutputPlayer.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "99"
+            endingLineNumber = "99"
+            landmarkName = "play(melody:chords:noteDuration:bpm:)"
+            landmarkType = "7">
+            <Locations>
+               <Location
+                  uuid = "EDEFF144-D4C8-4B33-A057-F362684F495D - 9538b13a43764d3f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Slonimsky.MIDISequenceOutputPlayer.play(melody: Swift.Array&lt;Swift.Array&lt;Slonimsky.MIDIInfo&gt;&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) -&gt; ()"
+                  moduleName = "Slonimsky"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/MidiSequenceOutputPlayer.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "100"
+                  endingLineNumber = "100"
+                  offsetFromSymbolStart = "2861">
+               </Location>
+               <Location
+                  uuid = "EDEFF144-D4C8-4B33-A057-F362684F495D - 9538b13a43764d3f"
+                  shouldBeEnabled = "Yes"
+                  ignoreCount = "0"
+                  continueAfterRunningActions = "No"
+                  symbolName = "Slonimsky.MIDISequenceOutputPlayer.play(melody: Swift.Array&lt;Swift.Array&lt;Slonimsky.MIDIInfo&gt;&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) -&gt; ()"
+                  moduleName = "Slonimsky"
+                  usesParentBreakpointCondition = "Yes"
+                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/MidiSequenceOutputPlayer.swift"
+                  startingColumnNumber = "9223372036854775807"
+                  endingColumnNumber = "9223372036854775807"
+                  startingLineNumber = "100"
+                  endingLineNumber = "100"
+                  offsetFromSymbolStart = "3195">
+               </Location>
+            </Locations>
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "4169CA99-1087-4443-BD8A-A176A2CDA78F"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/ContentView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "46"
+            endingLineNumber = "46"
+            landmarkName = "body"
+            landmarkType = "24">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "FFFD0E2B-42EC-49A6-A823-A197586A9502"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SheetMusicView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "81"
+            endingLineNumber = "81"
+            landmarkName = "ShareView"
+            landmarkType = "14">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "DA1D0CD4-0818-4B61-ADAD-54AC3EB0A17C"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SheetMusicView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "48"
+            endingLineNumber = "48"
+            landmarkName = "share()"
+            landmarkType = "7">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "74E4FCB8-B797-4F80-AF4F-C0E509D6955E"
+            shouldBeEnabled = "Yes"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "Slonimsky/SheetMusicView.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "83"
+            endingLineNumber = "83"
+            landmarkName = "makeNSViewController(context:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
    </Breakpoints>

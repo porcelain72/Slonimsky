@@ -32,6 +32,33 @@
 		98692B612E3102E100223430 /* VelocityModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B602E3102E100223430 /* VelocityModel.swift */; };
 		98692B632E3104EB00223430 /* Chord.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B622E3104EB00223430 /* Chord.swift */; };
 		98692B652E3106CD00223430 /* SlonimskySequencer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B642E3106CD00223430 /* SlonimskySequencer.swift */; };
+		98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
+		98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
+		98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309502E3932FE000D9EC7 /* ModulationSettings.swift */; };
+		98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */; };
+		98C3095F2E393311000D9EC7 /* RhythmicPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */; };
+		98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */; };
+		98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */; };
+		98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */; };
+		98C309632E393312000D9EC7 /* PatternGeneratorRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095A2E393311000D9EC7 /* PatternGeneratorRegistry.swift */; };
+		98C309642E393312000D9EC7 /* ModulationPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */; };
+		98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095C2E393311000D9EC7 /* PatternGenerator.swift */; };
+		98C309662E393312000D9EC7 /* IntervalPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095D2E393311000D9EC7 /* IntervalPatternGenerator.swift */; };
+		98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309682E39332A000D9EC7 /* MIDIPlaybackControllerView.swift */; };
+		98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309692E39332A000D9EC7 /* MIDIEngine.swift */; };
+		98C3096D2E39332A000D9EC7 /* MIDIIntegrationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3096A2E39332A000D9EC7 /* MIDIIntegrationService.swift */; };
+		98C309752E39333C000D9EC7 /* ParameterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3096F2E39333C000D9EC7 /* ParameterManager.swift */; };
+		98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309702E39333C000D9EC7 /* PresetPickerView.swift */; };
+		98C309772E39333C000D9EC7 /* PianoRollPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */; };
+		98C309782E39333C000D9EC7 /* ParameterPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309722E39333C000D9EC7 /* ParameterPanelView.swift */; };
+		98C309792E39333C000D9EC7 /* SheetMusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */; };
+		98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309742E39333C000D9EC7 /* MainContentView.swift */; };
+		98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097B2E39334F000D9EC7 /* MidiInfo.swift */; };
+		98C309882E3933F0000D9EC7 /* PatternGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */; };
+		98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */; };
+		98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */; };
+		98C3098B2E3933F0000D9EC7 /* NoteSequenceGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */; };
+		98C3098E2E393BDF000D9EC7 /* Salieri in Frameworks */ = {isa = PBXBuildFile; productRef = 98C3098D2E393BDF000D9EC7 /* Salieri */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -81,6 +108,33 @@
 		98692B602E3102E100223430 /* VelocityModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VelocityModel.swift; sourceTree = "<group>"; };
 		98692B622E3104EB00223430 /* Chord.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Chord.swift; sourceTree = "<group>"; };
 		98692B642E3106CD00223430 /* SlonimskySequencer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskySequencer.swift; sourceTree = "<group>"; };
+		98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternParameters.swift; sourceTree = "<group>"; };
+		98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VelocitySettings.swift; sourceTree = "<group>"; };
+		98C309502E3932FE000D9EC7 /* ModulationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModulationSettings.swift; sourceTree = "<group>"; };
+		98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HarmonicPatternGenerator.swift; sourceTree = "<group>"; };
+		98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmicPatternGenerator.swift; sourceTree = "<group>"; };
+		98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScalePatternGenerator.swift; sourceTree = "<group>"; };
+		98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SymmetricalPatternGenerator.swift; sourceTree = "<group>"; };
+		98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContourPatternGenerator.swift; sourceTree = "<group>"; };
+		98C3095A2E393311000D9EC7 /* PatternGeneratorRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternGeneratorRegistry.swift; sourceTree = "<group>"; };
+		98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModulationPatternGenerator.swift; sourceTree = "<group>"; };
+		98C3095C2E393311000D9EC7 /* PatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternGenerator.swift; sourceTree = "<group>"; };
+		98C3095D2E393311000D9EC7 /* IntervalPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IntervalPatternGenerator.swift; sourceTree = "<group>"; };
+		98C309682E39332A000D9EC7 /* MIDIPlaybackControllerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIPlaybackControllerView.swift; sourceTree = "<group>"; };
+		98C309692E39332A000D9EC7 /* MIDIEngine.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIEngine.swift; sourceTree = "<group>"; };
+		98C3096A2E39332A000D9EC7 /* MIDIIntegrationService.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIIntegrationService.swift; sourceTree = "<group>"; };
+		98C3096F2E39333C000D9EC7 /* ParameterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterManager.swift; sourceTree = "<group>"; };
+		98C309702E39333C000D9EC7 /* PresetPickerView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresetPickerView.swift; sourceTree = "<group>"; };
+		98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PianoRollPanelView.swift; sourceTree = "<group>"; };
+		98C309722E39333C000D9EC7 /* ParameterPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterPanelView.swift; sourceTree = "<group>"; };
+		98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPanelView.swift; sourceTree = "<group>"; };
+		98C309742E39333C000D9EC7 /* MainContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
+		98C3097B2E39334F000D9EC7 /* MidiInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MidiInfo.swift; sourceTree = "<group>"; };
+		98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NoteSequenceGeneratorTests.swift; sourceTree = "<group>"; };
+		98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternGeneratorTests.swift; sourceTree = "<group>"; };
+		98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIFileGeneratorTests.swift; sourceTree = "<group>"; };
+		98C309812E393378000D9EC7 /* SlonimskyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests.swift; sourceTree = "<group>"; };
+		98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIIntegrationTests.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +142,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				98C3098E2E393BDF000D9EC7 /* Salieri in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -142,6 +197,12 @@
 				983C796F2E32785500A8E669 /* MusicSequencePlayer.swift */,
 				983C79712E327EC800A8E669 /* MidiExporter.swift */,
 				98692B582E2FC07000223430 /* MIDIFileGenerator.swift */,
+				98C3097D2E393378000D9EC7 /* SlonimskyTests */,
+				98C3097B2E39334F000D9EC7 /* MidiInfo.swift */,
+				98C3096E2E39333C000D9EC7 /* UI */,
+				98C309672E39332A000D9EC7 /* MIDI */,
+				98C309542E393311000D9EC7 /* PatternGenerators */,
+				98C3094D2E3932FE000D9EC7 /* Models */,
 				983C79732E33872400A8E669 /* MidiOutputPlayer.swift */,
 				983C79752E338F2900A8E669 /* MidiSequenceOutputPlayer.swift */,
 				98692B5E2E30F4E200223430 /* VelocityVisualizer.swift */,
@@ -183,6 +244,67 @@
 			path = SlonimskyUITests;
 			sourceTree = "<group>";
 		};
+		98C3094D2E3932FE000D9EC7 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */,
+				98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */,
+				98C309502E3932FE000D9EC7 /* ModulationSettings.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		98C309542E393311000D9EC7 /* PatternGenerators */ = {
+			isa = PBXGroup;
+			children = (
+				98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */,
+				98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */,
+				98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */,
+				98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */,
+				98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */,
+				98C3095A2E393311000D9EC7 /* PatternGeneratorRegistry.swift */,
+				98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */,
+				98C3095C2E393311000D9EC7 /* PatternGenerator.swift */,
+				98C3095D2E393311000D9EC7 /* IntervalPatternGenerator.swift */,
+			);
+			path = PatternGenerators;
+			sourceTree = "<group>";
+		};
+		98C309672E39332A000D9EC7 /* MIDI */ = {
+			isa = PBXGroup;
+			children = (
+				98C309682E39332A000D9EC7 /* MIDIPlaybackControllerView.swift */,
+				98C309692E39332A000D9EC7 /* MIDIEngine.swift */,
+				98C3096A2E39332A000D9EC7 /* MIDIIntegrationService.swift */,
+			);
+			path = MIDI;
+			sourceTree = "<group>";
+		};
+		98C3096E2E39333C000D9EC7 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				98C3096F2E39333C000D9EC7 /* ParameterManager.swift */,
+				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
+				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
+				98C309722E39333C000D9EC7 /* ParameterPanelView.swift */,
+				98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */,
+				98C309742E39333C000D9EC7 /* MainContentView.swift */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		98C3097D2E393378000D9EC7 /* SlonimskyTests */ = {
+			isa = PBXGroup;
+			children = (
+				98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */,
+				98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */,
+				98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */,
+				98C309812E393378000D9EC7 /* SlonimskyTests.swift */,
+				98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */,
+			);
+			path = SlonimskyTests;
+			sourceTree = SOURCE_ROOT;
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -199,6 +321,9 @@
 			dependencies = (
 			);
 			name = Slonimsky;
+			packageProductDependencies = (
+				98C3098D2E393BDF000D9EC7 /* Salieri */,
+			);
 			productName = Slonimsky;
 			productReference = 98692B292E2FBE0200223430 /* Slonimsky.app */;
 			productType = "com.apple.product-type.application";
@@ -272,6 +397,7 @@
 			);
 			mainGroup = 98692B202E2FBE0200223430;
 			packageReferences = (
+				98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */,
 			);
 			productRefGroup = 98692B2A2E2FBE0200223430 /* Products */;
 			projectDirPath = "";
@@ -316,25 +442,47 @@
 			buildActionMask = 2147483647;
 			files = (
 				98692B5F2E2FC07000223432 /* SlonimskyModulation.swift in Sources */,
+				98C309792E39333C000D9EC7 /* SheetMusicPanelView.swift in Sources */,
 				983C797E2E33A9CD00A8E669 /* ParameterControlsView.swift in Sources */,
 				98692B5D2E2FC07000223431 /* AudioPlayer.swift in Sources */,
+				98C309662E393312000D9EC7 /* IntervalPatternGenerator.swift in Sources */,
 				98692B5B2E2FC07000223430 /* NoteSequenceGenerator.swift in Sources */,
 				983C79802E33B71300A8E669 /* SheetMusicRenderer.swift in Sources */,
 				983C79702E32785500A8E669 /* MusicSequencePlayer.swift in Sources */,
+				98C3096D2E39332A000D9EC7 /* MIDIIntegrationService.swift in Sources */,
 				98692B5F2E30F4E200223430 /* VelocityVisualizer.swift in Sources */,
+				98C309752E39333C000D9EC7 /* ParameterManager.swift in Sources */,
+				98C309772E39333C000D9EC7 /* PianoRollPanelView.swift in Sources */,
+				98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */,
+				98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */,
 				983C79782E33A6A100A8E669 /* SheetMusicGenerator.swift in Sources */,
 				983C796E2E32762200A8E669 /* ChordTytpeAnalyzer.swift in Sources */,
 				98692B2F2E2FBE0200223430 /* ContentView.swift in Sources */,
+				98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */,
+				98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */,
 				983C797A2E33A89E00A8E669 /* SheetMusicViewModel.swift in Sources */,
 				98692B652E3106CD00223430 /* SlonimskySequencer.swift in Sources */,
+				98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */,
+				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
+				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
+				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
+				98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */,
 				983C797C2E33A8D200A8E669 /* SheetMusicView.swift in Sources */,
+				98C309642E393312000D9EC7 /* ModulationPatternGenerator.swift in Sources */,
 				98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */,
 				98692B632E3104EB00223430 /* Chord.swift in Sources */,
+				98C309632E393312000D9EC7 /* PatternGeneratorRegistry.swift in Sources */,
+				98C309782E39333C000D9EC7 /* ParameterPanelView.swift in Sources */,
+				98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */,
 				983C79742E33872400A8E669 /* MidiOutputPlayer.swift in Sources */,
+				98C3095F2E393311000D9EC7 /* RhythmicPatternGenerator.swift in Sources */,
 				983C79722E327EC800A8E669 /* MidiExporter.swift in Sources */,
+				98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */,
 				98692B612E3102E100223430 /* VelocityModel.swift in Sources */,
 				983C79762E338F2900A8E669 /* MidiSequenceOutputPlayer.swift in Sources */,
+				98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */,
 				98692B5A2E2FC07000223430 /* MIDIFileGenerator.swift in Sources */,
+				98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -342,7 +490,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				98C3098B2E3933F0000D9EC7 /* NoteSequenceGeneratorTests.swift in Sources */,
+				98C309882E3933F0000D9EC7 /* PatternGeneratorTests.swift in Sources */,
+				98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */,
 				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
+				98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -655,6 +807,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/porcelain72/Salieri";
+			requirement = {
+				branch = main25;
+				kind = branch;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		98C3098D2E393BDF000D9EC7 /* Salieri */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */;
+			productName = Salieri;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 98692B212E2FBE0200223430 /* Project object */;
 }

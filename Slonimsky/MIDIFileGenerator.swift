@@ -2,17 +2,6 @@
 import AudioToolbox
 import Foundation
 
-/// A structure to represent a single musical track, containing a sequence of notes.
-struct MIDITrack {
-    /// An array of MIDI note numbers (0-127).
-    let notes: [MIDIInfo]
-    // In the future, we can add other properties like MIDI channel or instrument type here.
-}
-
-struct MIDIInfo: Equatable {
-    let note : Int
-    let velocity : UInt8
-}
 
 /// A helper for generating Standard MIDI Files (.mid) using AudioToolbox.
 struct MIDIFileGenerator {

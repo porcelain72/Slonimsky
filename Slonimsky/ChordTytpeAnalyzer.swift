@@ -7,7 +7,7 @@
 
 import Foundation
 
-enum ChordType: String {
+enum AnalyzerChordType: String {
     case major, minor, diminished, augmented
     case major7, minor7, dominant7
     case sus2, sus4
@@ -48,7 +48,7 @@ struct ChordTypeAnalyzer {
     }
 
     /// Classifies the chord type based on intervals from the root
-    private static func detectChordType(from intervals: [Int]) -> ChordType {
+    private static func detectChordType(from intervals: [Int]) -> AnalyzerChordType {
         let intervalSet = Set(intervals)
 
         switch intervalSet {
@@ -66,7 +66,7 @@ struct ChordTypeAnalyzer {
     }
 
     /// Returns a voiced chord (as MIDI note numbers) based on type
-    private static func voiceChord(root: Int, type: ChordType) -> [Int] {
+    private static func voiceChord(root: Int, type: AnalyzerChordType) -> [Int] {
         switch type {
         case .major:      return [root, root + 4, root + 7]
         case .minor:      return [root, root + 3, root + 7]

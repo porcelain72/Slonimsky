@@ -8,14 +8,20 @@
 import Foundation
 import PDFKit
 import SwiftUI
+import Salieri
 
 @MainActor
 class SheetMusicViewModel: ObservableObject {
     @Published var pdfDocument: PDFDocument? = nil
-    private let generator = SheetMusicGenerator()
+    
+
+    private let generator = Salieri(configuration: SalieriConfiguration(
+        pageSize: CGSize(width: 612, height: 792), // US Letter
+        margins: EdgeInsets(top: 72, left: 72, bottom: 72, right: 72),
+        staffSize: 4.0 ))
 
     var midiURL: URL?
-    var pdfURL: URL?
+    var pdfData: Data?
     var lyURL: URL?
 
     /// Regenerates sheet music from sequencer state
@@ -38,21 +44,15 @@ class SheetMusicViewModel: ObservableObject {
         do {
             let base = FileManager.default.temporaryDirectory.appendingPathComponent("SheetMusic")
             midiURL = base.appendingPathExtension("midi")
-            pdfURL = base.appendingPathExtension("pdf")
-            lyURL = base.appendingPathExtension("ly")
+         //   pdfURL = base.appendingPathExtension("pdf")
 
-            try await Task.detached(priority: .userInitiated) {
-                try self.generator.generateSheetMusic(
-                    melody: melody,
-                    chords: chords,
-                    noteDuration: noteDuration,
-                    bpm: bpm,
-                    outputURL: base
-                )
-            }.value
-
-            if let pdfURL, let doc = PDFDocument(url: pdfURL) {
+           
+            
+           
+            if   let sequence =  try MIDIExporter.getSequence(melodyTracks: [melody], chordEvents: chords, noteDuration: noteDuration, bpm: bpm),
+                 let doc = generator.renderPDF(from: sequence) {
                 self.pdfDocument = doc
+                pdfData = self.pdfDocument?.dataRepresentation()
             }
 
         } catch {
@@ -60,9 +60,9 @@ class SheetMusicViewModel: ObservableObject {
         }
     }
 
-    func shareItems() -> [URL] {
-        return [pdfURL, midiURL, lyURL]
+    func shareItems() -> [Data] {
+        return [pdfData]
             .compactMap { $0 }
-            .filter { FileManager.default.fileExists(atPath: $0.path) }
+           // .filter { FileManager.default.fileExists(atPath: $0.path) }
     }
 }

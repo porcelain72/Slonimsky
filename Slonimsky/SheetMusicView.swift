@@ -11,11 +11,16 @@ import PDFKit
 struct SheetMusicView: View {
     @ObservedObject var viewModel: SheetMusicViewModel
     @State private var showShareSheet = false
-
+    @State private var shareURL : URL? = nil
+    
     var body: some View {
         VStack {
             if let doc = viewModel.pdfDocument {
-                PDFKitView(document: doc)
+                PDFKitView(document: Binding(get: {
+                    doc
+                }, set: { _ in
+                    
+                }))
                     .frame(minHeight: 400)
             } else {
                 Text("Generating sheet music…")
@@ -25,7 +30,7 @@ struct SheetMusicView: View {
         .toolbar {
             ToolbarItem(placement: .automatic) {
                 Button {
-                    showShareSheet = true
+                    share()
                 } label: {
                     Label("Share", systemImage: "square.and.arrow.up")
                 }
@@ -33,7 +38,22 @@ struct SheetMusicView: View {
             }
         }
         .sheet(isPresented: $showShareSheet) {
-            ShareView(urls: viewModel.shareItems())
+            if let url = self.shareURL{
+                ShareView(url: url)
+            }
+        }
+    }
+    
+    private func share(){
+        let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("\(UUID().uuidString).pdf")
+        if let data = viewModel.shareItems().first{
+            do{
+                try data.write(to: tempURL)
+                shareURL = tempURL
+                showShareSheet = true
+            } catch {
+                
+            }
         }
     }
 }
@@ -41,7 +61,7 @@ struct SheetMusicView: View {
 
 
 struct PDFKitView: NSViewRepresentable {
-    let document: PDFDocument
+    @Binding var document: PDFDocument
 
     func makeNSView(context: Context) -> PDFView {
         let view = PDFView()
@@ -57,11 +77,11 @@ struct PDFKitView: NSViewRepresentable {
 
 
 struct ShareView: NSViewControllerRepresentable {
-    let urls: [URL]
-
+    let url: URL
+    //let data: Data
     func makeNSViewController(context: Context) -> NSViewController {
         let vc = NSViewController()
-        let picker = NSSharingServicePicker(items: urls)
+        let picker = NSSharingServicePicker(items: [url])
         picker.show(relativeTo: .zero, of: vc.view, preferredEdge: .minY)
         return vc
     }

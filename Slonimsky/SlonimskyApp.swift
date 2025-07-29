@@ -11,7 +11,10 @@ import SwiftUI
 struct SlonimskyApp: App {
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            MainContentView()
         }
+        .windowStyle(.hiddenTitleBar)
+        .windowResizability(.contentSize)
+        .defaultSize(width: 1400, height: 900)
     }
 }

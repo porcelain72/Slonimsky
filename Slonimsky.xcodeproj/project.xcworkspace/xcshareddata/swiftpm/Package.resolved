@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "salieri",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/porcelain72/Salieri",
+      "state" : {
+        "branch" : "main25",
+        "revision" : "c5a970e244874ba23d4e0553377a795280c3c8a6"
+      }
+    }
+  ],
+  "version" : 2
+}
