@@ -23,31 +23,16 @@ class ScalePatternGenerator: BasePatternGenerator {
         // Generate base scale notes
         let baseNotes = generateBaseScale(parameters: parameters)
         
-        // Apply directional patterns
-        let directionalNotes = applyDirectionalPatterns(notes: baseNotes, parameters: parameters)
-        
-        // Apply register shifts
-        let shiftedNotes = applyRegisterShifts(
-            notes: directionalNotes,
-            pattern: parameters.registerShifts,
-            maxShift: parameters.toneShifting.maxToneShift
+        // Use ParameterApplicationManager to apply parameters in correct order
+        let finalNotes = ParameterApplicationManager.applyParameters(
+            baseNotes: baseNotes,
+            parameters: parameters,
+            generatorType: "Scale"
         )
         
-        // Apply contour patterns
-        let contourNotes = applyContourPattern(
-            notes: shiftedNotes,
-            pattern: parameters.contourPattern
-        )
-        
-        // Convert to MIDIInfo with velocity and duration
-        let midiNotes = convertToMIDIInfo(
-            notes: contourNotes,
-            parameters: parameters
-        )
-        
-        // Apply Slonimsky modulations
+        // Apply Slonimsky modulations (final step)
         let modulatedNotes = applySlonimskyModulations(
-            notes: midiNotes,
+            notes: finalNotes,
             parameters: parameters
         )
         
@@ -101,8 +86,18 @@ class ScalePatternGenerator: BasePatternGenerator {
         var notes: [Int] = []
         
         for octave in 0..<parameters.numberOfOctaves {
+            let rootNote = parameters.rootNote + (octave * 12)
+            
             for (index, interval) in scaleIntervals.enumerated() {
-                let note = parameters.rootNote + (octave * 12) + interval
+                let note: Int
+                if index == 0 {
+                    // First note is the root note
+                    note = rootNote
+                } else {
+                    // Calculate accumulated intervals for subsequent notes
+                    let accumulatedInterval = scaleIntervals.prefix(index).reduce(0, +)
+                    note = rootNote + accumulatedInterval
+                }
                 
                 // Ensure note is within valid MIDI range
                 if note >= 0 && note <= 127 {

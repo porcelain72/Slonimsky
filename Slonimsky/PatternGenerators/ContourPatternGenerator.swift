@@ -310,7 +310,7 @@ class ContourPatternGenerator: BasePatternGenerator {
         
         // Calculate contour direction changes
         var directionChanges = 0
-        for i in 1..<notes.count {
+        for i in 1..<(notes.count - 1) {
             let prevDirection = notes[i-1] < notes[i] ? 1 : -1
             let currDirection = notes[i] < notes[i+1] ? 1 : -1
             if prevDirection != currDirection {

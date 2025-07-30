@@ -105,8 +105,9 @@ class BasePatternGenerator: PatternGenerator {
     ) -> [Int] {
         guard notes.count > 1 else { return notes }
         
-        let baseNote = notes[0]
-        let range = notes.max()! - notes.min()!
+        // Calculate the original range and center
+        let originalRange = notes.max()! - notes.min()!
+        let centerNote = notes.min()! + (originalRange / 2)
         
         return notes.enumerated().map { index, note in
             let normalizedIndex = Double(index) / Double(notes.count - 1)
@@ -132,8 +133,12 @@ class BasePatternGenerator: PatternGenerator {
                 contourOffset = 1.0 - abs(2.0 * normalizedIndex - 1.0)
             }
             
-            let shift = Int(Double(range) * contourOffset * intensity)
-            return baseNote + shift
+            // Apply contour as a modification to the existing note, not a complete recalculation
+            let contourShift = Int(Double(originalRange) * (contourOffset - 0.5) * intensity)
+            let modifiedNote = note + contourShift
+            
+            // Ensure the note stays within valid MIDI range
+            return max(0, min(127, modifiedNote))
         }
     }
     

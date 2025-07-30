@@ -38,28 +38,16 @@ class IntervalPatternGenerator: BasePatternGenerator {
             parameters: parameters
         )
         
-        // Apply register shifts
-        let shiftedNotes = applyRegisterShifts(
-            notes: symmetricalNotes,
-            pattern: parameters.registerShifts,
-            maxShift: parameters.toneShifting.maxToneShift
+        // Use ParameterApplicationManager to apply remaining parameters in correct order
+        let finalNotes = ParameterApplicationManager.applyParameters(
+            baseNotes: symmetricalNotes,
+            parameters: parameters,
+            generatorType: "Interval"
         )
         
-        // Apply contour patterns
-        let contourNotes = applyContourPattern(
-            notes: shiftedNotes,
-            pattern: parameters.contourPattern
-        )
-        
-        // Convert to MIDIInfo with velocity and duration
-        let midiNotes = convertToMIDIInfo(
-            notes: contourNotes,
-            parameters: parameters
-        )
-        
-        // Apply Slonimsky modulations
+        // Apply Slonimsky modulations (final step)
         let modulatedNotes = applySlonimskyModulations(
-            notes: midiNotes,
+            notes: finalNotes,
             parameters: parameters
         )
         
@@ -115,13 +103,11 @@ class IntervalPatternGenerator: BasePatternGenerator {
         
         // Generate primary interval sequence
         for i in 0..<parameters.totalNotes {
-            let primaryInterval = parameters.primaryInterval
-            
-            // Add secondary interval variations
-            if i % 2 == 1 && parameters.secondaryInterval != primaryInterval {
+            // Use primary interval for all notes unless secondary interval is different
+            if i % 2 == 1 && parameters.secondaryInterval != parameters.primaryInterval {
                 intervals.append(parameters.secondaryInterval)
             } else {
-                intervals.append(primaryInterval)
+                intervals.append(parameters.primaryInterval)
             }
         }
         

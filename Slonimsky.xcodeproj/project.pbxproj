@@ -38,10 +38,13 @@
 		98C309882E3933F0000D9EC7 /* PatternGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */; };
 		98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */; };
 		98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */; };
+		98C3098B2E3940BA000D9EC7 /* ParameterApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309832E3940BA000D9EC7 /* ParameterApplicationTests.swift */; };
 		98C3098B2E3933F0000D9EC7 /* NoteSequenceGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */; };
 		98C3098E2E393BDF000D9EC7 /* Salieri in Frameworks */ = {isa = PBXBuildFile; productRef = 98C3098D2E393BDF000D9EC7 /* Salieri */; };
 		98C309942E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */; };
 		98C309962E3940B7000D9EC7 /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309922E3940B7000D9EC7 /* String+Localization.swift */; };
+		98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */; };
+		98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */; };
 		98C309972E3940B7000D9EC7 /* ParameterDescriptionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */; };
 		98C309982E3940B7000D9EC7 /* ParameterInfoPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */; };
 		98C309992E3940B7000D9EC7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 98C309952E3940B7000D9EC7 /* Localizable.strings */; };
@@ -101,7 +104,10 @@
 		98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
+		98C309832E3940BA000D9EC7 /* ParameterApplicationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/ParameterApplicationTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309922E3940B7000D9EC7 /* String+Localization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+Localization.swift"; path = "Slonimsky/Extensions/String+Localization.swift"; sourceTree = SOURCE_ROOT; };
+		98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UInt8+Clamping.swift"; path = "Slonimsky/Extensions/UInt8+Clamping.swift"; sourceTree = SOURCE_ROOT; };
+		98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterApplicationManager.swift; sourceTree = "<group>"; };
 		98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterDescriptionHelper.swift; sourceTree = "<group>"; };
 		98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoGenerationSettingsView.swift; sourceTree = "<group>"; };
 		98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterInfoPopupView.swift; sourceTree = "<group>"; };
@@ -223,6 +229,7 @@
 				98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */,
 				98C3095C2E393311000D9EC7 /* PatternGenerator.swift */,
 				98C3095D2E393311000D9EC7 /* IntervalPatternGenerator.swift */,
+				98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */,
 			);
 			path = PatternGenerators;
 			sourceTree = "<group>";
@@ -266,6 +273,7 @@
 			isa = PBXGroup;
 			children = (
 				98C309922E3940B7000D9EC7 /* String+Localization.swift */,
+				98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -431,6 +439,8 @@
 				98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */,
 				98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */,
 				98C309962E3940B7000D9EC7 /* String+Localization.swift in Sources */,
+				98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */,
+				98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */,
 				98C309942E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift in Sources */,
 				98C309972E3940B7000D9EC7 /* ParameterDescriptionHelper.swift in Sources */,
 				98C309982E3940B7000D9EC7 /* ParameterInfoPopupView.swift in Sources */,
@@ -446,6 +456,7 @@
 				98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */,
 				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
 				98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */,
+				98C3098B2E3940BA000D9EC7 /* ParameterApplicationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
