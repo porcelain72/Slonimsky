@@ -116,6 +116,9 @@ struct MainContentView: View {
         } message: {
             Text("Choose which parameters to randomize")
         }
+        .onAppear {
+            setupAutoGeneration()
+        }
     }
     
     // MARK: - Actions
@@ -167,6 +170,12 @@ struct MainContentView: View {
         // Update sheet music view model with new pattern
         // This will be implemented when we integrate with Salieri
         print("📝 Sheet music updated with \(pattern.notes.count) notes")
+    }
+    
+    private func setupAutoGeneration() {
+        // Set up auto-generation with the MIDI service
+        midiService.setupAutoGeneration(with: parameterManager)
+        print("🔄 Auto-generation setup complete")
     }
 }
 

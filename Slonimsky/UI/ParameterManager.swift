@@ -117,9 +117,24 @@ class ParameterManager: ObservableObject {
     // Parameter Selection for Randomization
     @Published var selectedParametersForRandomization: Set<ParameterCategory> = []
     
+    // Auto-generation Settings
+    @Published var autoGenerateEnabled = false {
+        didSet { 
+            if autoGenerateEnabled {
+                setupAutoGeneration()
+            } else {
+                stopAutoGeneration()
+            }
+        }
+    }
+    @Published var autoGenerationDelay: TimeInterval = 1.0 // seconds
+    @Published var selectedGeneratorForAutoGeneration = "Scale Pattern Generator"
+    
     // MARK: - Private Properties
     private var cancellables = Set<AnyCancellable>()
     private let validationSubject = PassthroughSubject<Void, Never>()
+    private let autoGenerationSubject = PassthroughSubject<Void, Never>()
+    private var autoGenerationCancellable: AnyCancellable?
     
     // MARK: - Initialization
     init() {
@@ -226,6 +241,9 @@ class ParameterManager: ObservableObject {
                 randomizeHarmonicParameters()
             case .expression:
                 randomizeExpressionParameters()
+            case .autoGeneration:
+                // Auto-generation doesn't need randomization
+                break
             }
         }
     }
@@ -277,6 +295,11 @@ class ParameterManager: ObservableObject {
         return validationSubject.eraseToAnyPublisher()
     }
     
+    /// Get auto-generation trigger publisher
+    var autoGenerationPublisher: AnyPublisher<Void, Never> {
+        return autoGenerationSubject.eraseToAnyPublisher()
+    }
+    
     // MARK: - Private Methods
     
     private func setupBindings() {
@@ -291,6 +314,26 @@ class ParameterManager: ObservableObject {
     
     private func validateAndNotify() {
         validationSubject.send()
+        
+        // Trigger auto-generation if enabled
+        if autoGenerateEnabled {
+            autoGenerationSubject.send()
+        }
+    }
+    
+    private func setupAutoGeneration() {
+        stopAutoGeneration() // Clean up any existing subscription
+        
+        autoGenerationCancellable = autoGenerationSubject
+            .debounce(for: .seconds(autoGenerationDelay), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.objectWillChange.send()
+            }
+    }
+    
+    private func stopAutoGeneration() {
+        autoGenerationCancellable?.cancel()
+        autoGenerationCancellable = nil
     }
     
     func loadDefaultPreset() {
@@ -404,6 +447,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     case rhythmic = "Rhythmic"
     case harmonic = "Harmonic"
     case expression = "Expression"
+    case autoGeneration = "Auto-generation"
     
     var id: String { rawValue }
     
@@ -423,6 +467,8 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
             return "Harmonic mode, chord generation, rhythm"
         case .expression:
             return "Velocity, tone shifting, expression"
+        case .autoGeneration:
+            return "Auto-generation settings and controls"
         }
     }
 } 

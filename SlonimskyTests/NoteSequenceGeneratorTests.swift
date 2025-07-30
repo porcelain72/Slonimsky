@@ -1,65 +1,102 @@
 import XCTest
-@testable import MidiGen
+@testable import Slonimsky
 
 final class NoteSequenceGeneratorTests: XCTestCase {
-
-    func testGenerateTritoneAscending() {
-        let sequence = NoteSequenceGenerator.generate(
+    
+    func testIntervalPatternGenerator() throws {
+        let generator = IntervalPatternGenerator()
+        let parameters = PatternParameters(
             rootNote: 60,
-            scalePattern: .tritone,
-            numberOfNotes: 4,
-            direction: .ascending
+            numberOfOctaves: 1,
+            primaryInterval: 2,
+            intervalPattern: .ascending
         )
-        XCTAssertEqual(sequence, [60, 66, 72, 78])
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
-
-    func testGenerateAugmentedDescending() {
-        let sequence = NoteSequenceGenerator.generate(
-            rootNote: 72,
-            scalePattern: .augmented,
-            numberOfNotes: 5,
-            direction: .descending
-        )
-        XCTAssertEqual(sequence, [72, 68, 64, 60, 56])
-    }
-
-    func testGenerateDiminished7Ascending() {
-        let sequence = NoteSequenceGenerator.generate(
+    
+    func testScalePatternGenerator() throws {
+        let generator = ScalePatternGenerator()
+        let parameters = PatternParameters(
             rootNote: 60,
-            scalePattern: .diminished7,
-            numberOfNotes: 5,
-            direction: .ascending
+            scaleType: .diatonic,
+            numberOfOctaves: 1
         )
-        XCTAssertEqual(sequence, [60, 63, 66, 69, 72])
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
-
-    func testGenerateEmptySequence() {
-        let sequence = NoteSequenceGenerator.generate(
+    
+    func testHarmonicPatternGenerator() throws {
+        let generator = HarmonicPatternGenerator()
+        let parameters = PatternParameters(
             rootNote: 60,
-            scalePattern: .tritone,
-            numberOfNotes: 0,
-            direction: .ascending
+            numberOfOctaves: 1
         )
-        XCTAssertEqual(sequence, [])
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
-
-    func testClampingAtTop() {
-        let sequence = NoteSequenceGenerator.generate(
-            rootNote: 125,
-            scalePattern: .tritone,
-            numberOfNotes: 3,
-            direction: .ascending
+    
+    func testSymmetricalPatternGenerator() throws {
+        let generator = SymmetricalPatternGenerator()
+        let parameters = PatternParameters(
+            rootNote: 60,
+            numberOfOctaves: 1,
+            symmetricalIntervals: true
         )
-        XCTAssertEqual(sequence, [125, 127, 127])
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
-
-    func testClampingAtBottom() {
-        let sequence = NoteSequenceGenerator.generate(
-            rootNote: 2,
-            scalePattern: .augmented,
-            numberOfNotes: 3,
-            direction: .descending
+    
+    func testContourPatternGenerator() throws {
+        let generator = ContourPatternGenerator()
+        let parameters = PatternParameters(
+            rootNote: 60,
+            numberOfOctaves: 1,
+            contourPattern: .arch
         )
-        XCTAssertEqual(sequence, [2, 0, 0])
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
+    }
+    
+    func testRhythmicPatternGenerator() throws {
+        let generator = RhythmicPatternGenerator()
+        let parameters = PatternParameters(
+            rootNote: 60,
+            numberOfOctaves: 1,
+            noteDurationPattern: .alternating
+        )
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
+    }
+    
+    func testModulationPatternGenerator() throws {
+        let generator = ModulationPatternGenerator()
+        let parameters = PatternParameters(
+            rootNote: 60,
+            numberOfOctaves: 1
+        )
+        
+        let result = generator.generatePattern(parameters: parameters)
+        
+        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
+        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
 }

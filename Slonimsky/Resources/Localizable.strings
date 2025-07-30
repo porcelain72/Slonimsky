@@ -1,0 +1,108 @@
+/* Parameter Section Descriptions */
+
+// Basic Parameters Section
+"basic_parameters_title" = "Basic Parameters";
+"basic_parameters_description" = "Fundamental musical parameters that define the basic structure of your pattern. These parameters establish the tonal foundation, scale, range, and timing of the generated music.";
+"basic_parameters_root_note" = "Root Note: The starting pitch (MIDI note 0-127) for your pattern. Higher values create higher-pitched patterns.";
+"basic_parameters_scale_type" = "Scale Type: The musical scale used for note selection. Chromatic includes all notes, while other scales follow traditional musical theory.";
+"basic_parameters_octaves" = "Octaves: The number of octaves to span in your pattern. More octaves create wider pitch ranges.";
+"basic_parameters_divisions" = "Divisions: How many equal parts to divide each octave into. 12 = traditional semitones, higher values create microtonal patterns.";
+"basic_parameters_tempo" = "Tempo: The speed of the pattern in beats per minute (BPM). Higher values create faster, more energetic patterns.";
+"basic_parameters_time_signature" = "Time Signature: The rhythmic structure of the pattern. Affects how beats are grouped and emphasized.";
+
+// Interval Parameters Section
+"interval_parameters_title" = "Interval Parameters";
+"interval_parameters_description" = "Control how notes relate to each other melodically. These parameters define the musical intervals between consecutive notes, creating the melodic contour of your pattern.";
+"interval_parameters_primary_interval" = "Primary Interval: The main interval size (in semitones) between consecutive notes. Creates the primary melodic movement.";
+"interval_parameters_secondary_interval" = "Secondary Interval: An alternate interval used for variation. Often used in combination with the primary interval.";
+"interval_parameters_pattern" = "Pattern: How intervals are applied. Ascending moves up, descending moves down, alternating switches direction.";
+"interval_parameters_inversion" = "Interval Inversion: When enabled, intervals are inverted (e.g., major 3rd becomes minor 6th). Creates harmonic variety.";
+"interval_parameters_symmetrical" = "Symmetrical Intervals: Creates patterns that mirror around a central point. Produces balanced, mathematical structures.";
+
+// Slonimsky Modulations Section
+"modulation_parameters_title" = "Slonimsky Modulations";
+"modulation_parameters_description" = "Advanced Slonimsky techniques for creating complex melodic transformations. These modulations insert, expand, or contract notes within the pattern to create sophisticated musical structures.";
+"modulation_parameters_interpolation" = "Interpolation: Inserts new notes between existing notes. Creates smoother, more flowing melodic lines.";
+"modulation_parameters_infrapolation" = "Infrapolation: Adds notes below the existing melodic line. Creates bass lines and harmonic depth.";
+"modulation_parameters_ultrapolation" = "Ultrapolation: Adds notes above the existing melodic line. Creates descant lines and harmonic richness.";
+
+// Directional Parameters Section
+"directional_parameters_title" = "Directional Parameters";
+"directional_parameters_description" = "Control the overall direction and shape of your melodic pattern. These parameters create mirroring, retrograde effects, and contour variations that add complexity and interest.";
+"directional_parameters_direction" = "Direction: The primary melodic direction. Ascending moves up, descending moves down, alternating changes direction.";
+"directional_parameters_mirror_points" = "Mirror Points: Number of points where the melody mirrors itself. Creates symmetrical patterns around these points.";
+"directional_parameters_retrograde" = "Retrograde Sections: When enabled, some sections play backwards. Creates palindrome-like effects.";
+"directional_parameters_register_shifts" = "Register Shifts: How the pattern moves between different octave registers. Creates dramatic pitch contrasts.";
+"directional_parameters_contour" = "Contour: The overall shape of the melodic line. Linear moves steadily, arched rises then falls, etc.";
+
+// Rhythmic Parameters Section
+"rhythmic_parameters_title" = "Rhythmic Parameters";
+"rhythmic_parameters_description" = "Control the timing, duration, and rhythmic complexity of your pattern. These parameters affect how notes are spaced in time, creating rhythmic interest and groove.";
+"rhythmic_parameters_duration_pattern" = "Duration Pattern: How note lengths vary throughout the pattern. Uniform keeps all notes the same length.";
+"rhythmic_parameters_base_duration" = "Base Duration: The fundamental note length in seconds. Shorter values create faster, more energetic rhythms.";
+"rhythmic_parameters_density" = "Rhythmic Density: How many notes occur per beat. Higher values create busier, more complex rhythms.";
+"rhythmic_parameters_syncopation" = "Syncopation: Off-beat emphasis and rhythmic displacement. Higher values create more syncopated, groove-oriented patterns.";
+"rhythmic_parameters_metric_modulation" = "Metric Modulation: Changes in tempo or rhythmic subdivision. Creates complex, shifting rhythmic structures.";
+
+// Harmonic Parameters Section
+"harmonic_parameters_title" = "Harmonic Parameters";
+"harmonic_parameters_description" = "Control the harmonic content and chordal structure of your pattern. These parameters add harmonic richness and create more sophisticated musical textures.";
+"harmonic_parameters_harmonic_mode" = "Harmonic Mode: The harmonic approach. Tonal follows traditional harmony, atonal avoids traditional relationships.";
+"harmonic_parameters_chord_generation" = "Chord Generation: When enabled, creates chords instead of single notes. Adds harmonic richness.";
+"harmonic_parameters_harmonic_rhythm" = "Harmonic Rhythm: How frequently chords change and their rhythmic placement. Creates harmonic movement and tension.";
+
+// Expression Parameters Section
+"expression_parameters_title" = "Expression Parameters";
+"expression_parameters_description" = "Control the expressive qualities and performance characteristics of your pattern. These parameters affect velocity, dynamics, and subtle performance nuances.";
+"expression_parameters_velocity" = "Velocity Settings: Control the dynamic intensity of each note. Creates expressive, human-like performances.";
+"expression_parameters_tone_shifting" = "Tone Shifting: Gradual pitch changes over time. Creates evolving, shifting tonal centers.";
+
+/* Parameter Detail Descriptions */
+
+// Basic Parameter Details
+"root_note_detail" = "The fundamental pitch that serves as the tonal center. MIDI note 60 is middle C. Higher values create higher-pitched patterns, lower values create bass patterns.";
+"scale_type_detail" = "Defines the set of notes available for the pattern. Chromatic includes all 12 semitones, while other scales follow traditional musical theory with specific interval relationships.";
+"octaves_detail" = "Determines the vertical range of the pattern. One octave spans 12 semitones. More octaves create wider pitch ranges and more dramatic melodic possibilities.";
+"divisions_detail" = "Splits each octave into equal parts. 12 divisions = traditional semitones. Higher values (like 24) create quarter-tone scales, enabling microtonal music.";
+"tempo_detail" = "Sets the speed of the pattern in beats per minute. 120 BPM is moderate, 60 BPM is slow, 180 BPM is fast. Affects the overall energy and character.";
+"time_signature_detail" = "Defines the rhythmic structure. 4/4 has 4 beats per measure, 3/4 has 3 beats, etc. Affects how rhythms are grouped and emphasized.";
+
+// Interval Parameter Details
+"primary_interval_detail" = "The main interval size between consecutive notes. 1 = semitone, 2 = whole tone, 3 = minor third, 7 = perfect fifth, 12 = octave. Creates the primary melodic character.";
+"secondary_interval_detail" = "An alternate interval used for variation and contrast. Often used in patterns that alternate between two different interval sizes.";
+"interval_pattern_detail" = "How the interval is applied. Ascending moves up by the interval, descending moves down, alternating switches direction, creating varied melodic contours.";
+"interval_inversion_detail" = "Inverts intervals around the octave. A major third (4 semitones) becomes a minor sixth (8 semitones). Creates harmonic variety and complexity.";
+"symmetrical_intervals_detail" = "Creates patterns that mirror around a central point. Produces mathematically balanced structures with inherent symmetry.";
+
+// Modulation Parameter Details
+"interpolation_detail" = "Inserts new notes between existing notes in the pattern. Creates smoother, more flowing melodic lines by filling in gaps.";
+"infrapolation_detail" = "Adds notes below the existing melodic line. Creates bass lines, harmonic depth, and fuller musical textures.";
+"ultrapolation_detail" = "Adds notes above the existing melodic line. Creates descant lines, harmonic richness, and more complex voicings.";
+
+// Directional Parameter Details
+"direction_detail" = "Sets the primary melodic direction. Ascending patterns move upward, descending move downward, alternating change direction for variety.";
+"mirror_points_detail" = "Creates symmetrical patterns by mirroring the melody around specific points. More mirror points create more complex symmetrical structures.";
+"retrograde_detail" = "Plays some sections of the pattern backwards. Creates palindrome-like effects where the melody reverses direction.";
+"register_shifts_detail" = "Moves the pattern between different octave registers. Creates dramatic pitch contrasts and varied tonal colors.";
+"contour_detail" = "Defines the overall shape of the melodic line. Linear moves steadily, arched rises then falls, creating different melodic characters.";
+
+// Rhythmic Parameter Details
+"duration_pattern_detail" = "Controls how note lengths vary. Uniform keeps all notes the same length, while other patterns create rhythmic variety and interest.";
+"base_duration_detail" = "The fundamental note length in seconds. Shorter durations create faster, more energetic rhythms, longer durations create more spacious, meditative patterns.";
+"density_detail" = "Controls how many notes occur per beat. Higher density creates busier, more complex rhythms, lower density creates more spacious, relaxed patterns.";
+"syncopation_detail" = "Creates off-beat emphasis and rhythmic displacement. Higher syncopation creates more groove-oriented, dance-like patterns.";
+"metric_modulation_detail" = "Changes tempo or rhythmic subdivision during the pattern. Creates complex, shifting rhythmic structures with varying speeds.";
+
+// Harmonic Parameter Details
+"harmonic_mode_detail" = "Tonal follows traditional harmonic relationships, atonal avoids traditional consonance, creating more experimental harmonic textures.";
+"chord_generation_detail" = "Creates chords instead of single notes. Adds harmonic richness and creates more sophisticated musical textures.";
+"harmonic_rhythm_detail" = "Controls how frequently chords change and their rhythmic placement. Creates harmonic movement, tension, and release.";
+
+// Expression Parameter Details
+"velocity_detail" = "Controls the dynamic intensity of each note. Creates expressive, human-like performances with varying levels of emphasis.";
+"tone_shifting_detail" = "Gradually changes pitch over time. Creates evolving, shifting tonal centers and continuous harmonic development.";
+
+/* Popup Titles */
+"parameter_info_title" = "Parameter Information";
+"parameter_section_info" = "Section Information";
+"parameter_detail_info" = "Parameter Detail"; 

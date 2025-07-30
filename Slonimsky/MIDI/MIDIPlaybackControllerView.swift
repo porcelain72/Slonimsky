@@ -17,7 +17,9 @@ struct MIDIPlaybackControllerView: View {
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: 16) {
+        VStack(spacing: 20) {
+          //  Spacer()
+            
             // Playback Controls
             HStack(spacing: 20) {
                 // Play/Pause Button
@@ -27,6 +29,7 @@ struct MIDIPlaybackControllerView: View {
                         .foregroundColor(playbackStatus.isPlaying ? .orange : .green)
                 }
                 .disabled(midiService.currentPattern == nil)
+                .buttonStyle(.plain)
                 
                 // Stop Button
                 Button(action: stopPlayback) {
@@ -35,7 +38,18 @@ struct MIDIPlaybackControllerView: View {
                         .foregroundColor(.red)
                 }
                 .disabled(midiService.currentPattern == nil || !playbackStatus.isPlaying)
-                
+                .buttonStyle(.plain)
+
+                // Loop Button
+                Button(action: toggleLooping) {
+                    Image(systemName: midiService.isLooping ? "repeat.circle.fill" : "repeat.circle")
+                        .font(.system(size: 32))
+                        .foregroundColor(midiService.isLooping ? .teal : .gray)
+                }
+                .disabled(midiService.currentPattern == nil)
+                .help("Toggle looping")
+                .buttonStyle(.plain)
+
                 // Export Button
                 Button(action: exportMIDI) {
                     Image(systemName: "square.and.arrow.up.circle.fill")
@@ -43,7 +57,8 @@ struct MIDIPlaybackControllerView: View {
                         .foregroundColor(.blue)
                 }
                 .disabled(midiService.currentPattern == nil)
-                
+                .buttonStyle(.plain)
+
                 // External MIDI Button
                 Button(action: sendToExternalMIDI) {
                     Image(systemName: "music.note.circle.fill")
@@ -51,8 +66,11 @@ struct MIDIPlaybackControllerView: View {
                         .foregroundColor(.purple)
                 }
                 .disabled(midiService.currentPattern == nil || midiService.getAvailableDestinations().isEmpty)
+                .buttonStyle(.plain)
+
             }
-            
+            .padding(.top, 8)
+            Spacer()
             // Progress Bar
             if midiService.currentPattern != nil {
                 VStack(spacing: 8) {
@@ -73,7 +91,7 @@ struct MIDIPlaybackControllerView: View {
                     }
                 }
             }
-            
+           // Spacer()
             // Status Information
             VStack(spacing: 8) {
                 if let pattern = midiService.currentPattern {
@@ -132,8 +150,13 @@ struct MIDIPlaybackControllerView: View {
                     .pickerStyle(MenuPickerStyle())
                 }
             }
+            
+           // Spacer()
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .frame(minHeight: 320.0)
+       
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(12)
         .onAppear {
@@ -156,6 +179,10 @@ struct MIDIPlaybackControllerView: View {
     
     private func stopPlayback() {
         midiService.stopPlayback()
+    }
+    
+    private func toggleLooping() {
+        midiService.toggleLooping()
     }
     
     private func exportMIDI() {

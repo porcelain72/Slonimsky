@@ -231,6 +231,7 @@ struct PianoRollPanelView: View {
             HStack {
                 // MIDI Playback Controls
                 MIDIPlaybackControllerView(midiService: midiService)
+                    .frame(minHeight: 120)
                 
                 Spacer()
                 

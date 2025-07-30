@@ -22,6 +22,8 @@ struct ParameterPanelView: View {
     @State private var expandedSections: Set<ParameterCategory> = [.basic, .intervals]
     @State private var showGeneratorPicker = false
     @State private var showValidationErrors = false
+    @State private var showInfoPopup = false
+    @State private var selectedInfoCategory: ParameterCategory = .basic
     
     // MARK: - Body
     var body: some View {
@@ -97,6 +99,15 @@ struct ParameterPanelView: View {
                     ) {
                         ExpressionParametersView(parameterManager: parameterManager)
                     }
+                    
+                    // Auto-generation Settings
+                    parameterSection(
+                        category: .autoGeneration,
+                        title: "Auto-generation",
+                        icon: "arrow.clockwise"
+                    ) {
+                        AutoGenerationSettingsView(parameterManager: parameterManager)
+                    }
                 }
                 .padding()
             }
@@ -112,6 +123,9 @@ struct ParameterPanelView: View {
             Button("OK") { }
         } message: {
             Text(parameterManager.validateParameters().joined(separator: "\n"))
+        }
+        .sheet(isPresented: $showInfoPopup) {
+            ParameterInfoPopupView(category: selectedInfoCategory)
         }
     }
     
@@ -197,22 +211,37 @@ struct ParameterPanelView: View {
         @ViewBuilder content: @escaping () -> Content
     ) -> some View {
         VStack(spacing: 0) {
-            Button(action: { toggleSection(category) }) {
-                HStack {
-                    Image(systemName: icon)
-                        .foregroundColor(.accentColor)
-                    Text(title)
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    Spacer()
-                    Image(systemName: expandedSections.contains(category) ? "chevron.down" : "chevron.right")
-                        .foregroundColor(.secondary)
-                        .font(.caption)
+            HStack(spacing: 0) {
+                Button(action: { toggleSection(category) }) {
+                    HStack {
+                        Image(systemName: icon)
+                            .foregroundColor(.accentColor)
+                        Text(title)
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                        Spacer()
+                        
+                        // Info Button
+                        Button(action: {
+                            selectedInfoCategory = category
+                            showInfoPopup = true
+                        }) {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(.secondary)
+                                .font(.subheadline)
+                        }
+                        .buttonStyle(.plain)
+                        .help("Show parameter information")
+                        
+                        Image(systemName: expandedSections.contains(category) ? "chevron.down" : "chevron.right")
+                            .foregroundColor(.secondary)
+                            .font(.caption)
+                    }
+                    .padding()
+                    .background(Color(NSColor.windowBackgroundColor))
                 }
-                .padding()
-                .background(Color(NSColor.windowBackgroundColor))
+                .buttonStyle(.plain)
             }
-            .buttonStyle(.plain)
             
             if expandedSections.contains(category) {
                 content()

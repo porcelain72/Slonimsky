@@ -136,6 +136,10 @@ class ContourPatternGenerator: BasePatternGenerator {
         rootNote: Int,
         parameters: PatternParameters
     ) -> Int {
+        // Prevent division by zero
+        guard parameters.totalNotes > 1 else {
+            return rootNote
+        }
         let normalizedIndex = Double(index) / Double(parameters.totalNotes - 1)
         
         switch parameters.contourPattern {

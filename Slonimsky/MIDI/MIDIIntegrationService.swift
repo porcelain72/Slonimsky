@@ -17,11 +17,18 @@ class MIDIIntegrationService: ObservableObject {
     @Published var generationProgress: Double = 0.0
     @Published var lastGenerationTime: TimeInterval = 0.0
     @Published var errorMessage: String?
+    @Published var isLooping = false
+    
+    // MARK: - Computed Properties
+    var isPlaying: Bool {
+        return midiEngine.isPlaying
+    }
     
     // MARK: - Private Properties
     private let midiEngine = MIDIEngine()
     private let patternRegistry = PatternGeneratorRegistry.shared
     private var cancellables = Set<AnyCancellable>()
+    private var parameterManager: ParameterManager?
     
     // MARK: - Initialization
     init() {
@@ -29,6 +36,44 @@ class MIDIIntegrationService: ObservableObject {
     }
     
     // MARK: - Public Methods
+    
+    /// Set up auto-generation with parameter manager
+    /// - Parameter parameterManager: The parameter manager to monitor for changes
+    func setupAutoGeneration(with parameterManager: ParameterManager) {
+        self.parameterManager = parameterManager
+        
+        // Subscribe to auto-generation triggers
+        parameterManager.autoGenerationPublisher
+            .sink { [weak self] in
+                self?.handleAutoGeneration()
+            }
+            .store(in: &cancellables)
+    }
+    
+    /// Handle auto-generation when parameters change
+    private func handleAutoGeneration() {
+        guard let parameterManager = parameterManager else { return }
+        
+        let generatorName = parameterManager.selectedGeneratorForAutoGeneration
+        let parameters = parameterManager.currentParameters
+        
+        // Generate new pattern
+        guard let result = patternRegistry.generatePattern(
+            using: generatorName,
+            parameters: parameters
+        ) else {
+            print("❌ Auto-generation failed: pattern generation failed")
+            return
+        }
+        
+        // Update the MIDI sequence seamlessly
+        if midiEngine.updateSequence(with: result) {
+            self.currentPattern = result
+            print("🔄 Auto-generated new sequence successfully")
+        } else {
+            print("❌ Auto-generation failed: sequence update failed")
+        }
+    }
     
     /// Generate a pattern and create MIDI sequence
     /// - Parameters:
@@ -164,6 +209,12 @@ class MIDIIntegrationService: ObservableObject {
     /// Resume playback
     func resumePlayback() {
         midiEngine.resume()
+    }
+    
+    /// Toggle looping behavior
+    func toggleLooping() {
+        isLooping.toggle()
+        midiEngine.setLooping(isLooping)
     }
     
     /// Export current pattern to MIDI file

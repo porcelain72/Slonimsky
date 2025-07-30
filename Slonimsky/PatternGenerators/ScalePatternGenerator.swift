@@ -109,8 +109,8 @@ class ScalePatternGenerator: BasePatternGenerator {
                     notes.append(note)
                 }
                 
-                // Stop if we've reached the desired number of divisions
-                if notes.count >= parameters.divisionsOfOctave {
+                // Stop if we've reached the desired number of divisions for this octave
+                if (index + 1) >= parameters.divisionsOfOctave {
                     break
                 }
             }

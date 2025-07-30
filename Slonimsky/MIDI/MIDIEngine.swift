@@ -19,6 +19,7 @@ class MIDIEngine: ObservableObject {
     @Published var totalDuration: TimeInterval = 0.0
     @Published var availableDestinations: [MIDIDestination] = []
     @Published var selectedDestination: MIDIDestination?
+    @Published var isLooping = false
     
     // MARK: - Private Properties
     private var musicSequence: MusicSequence?
@@ -58,6 +59,13 @@ class MIDIEngine: ObservableObject {
         let melodyTrack = createMelodyTrack(sequence: sequence, notes: result.notes)
         let harmonyTrack = createHarmonyTrack(sequence: sequence, notes: result.notes)
         let rhythmTrack = createRhythmTrack(sequence: sequence, notes: result.notes)
+        
+        // Calculate total duration from the notes
+        var currentTime: TimeInterval = 0.0
+        for note in result.notes {
+            currentTime += note.beatLength
+        }
+        self.totalDuration = currentTime
         
         // Store the sequence
         self.musicSequence = sequence
@@ -120,6 +128,49 @@ class MIDIEngine: ObservableObject {
         startPlaybackTimer()
         
         print("▶️ Resumed playback")
+    }
+    
+    /// Set looping behavior
+    /// - Parameter looping: Whether to loop the playback
+    func setLooping(_ looping: Bool) {
+        isLooping = looping
+        print("🔄 Looping \(looping ? "enabled" : "disabled")")
+    }
+    
+    /// Update the current sequence with a new one
+    /// - Parameter result: The new pattern generation result
+    /// - Returns: True if successful
+    func updateSequence(with result: PatternGenerationResult) -> Bool {
+        guard let newSequence = generateMusicSequence(from: result) else {
+            print("❌ Failed to generate new sequence")
+            return false
+        }
+        
+        // Store the new sequence
+        self.musicSequence = newSequence
+        
+        // If currently playing, update the player with the new sequence
+        if isPlaying, let player = musicPlayer {
+            // Stop the current playback first
+            MusicPlayerStop(player)
+            
+            // Set the new sequence
+            MusicPlayerSetSequence(player, newSequence)
+            
+            // If looping is enabled, restart playback to ensure the new sequence plays correctly
+            if isLooping {
+                MusicPlayerSetTime(player, 0.0)
+                MusicPlayerStart(player)
+                currentTime = 0.0
+                print("🔄 Updated sequence during looping playback - restarted")
+            } else {
+                // Resume playback with the new sequence
+                MusicPlayerStart(player)
+                print("🔄 Updated sequence during playback")
+            }
+        }
+        
+        return true
     }
     
     /// Export MusicSequence to MIDI file
@@ -426,19 +477,24 @@ class MIDIEngine: ObservableObject {
     }
     
     private func startPlaybackTimer() {
-        playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
+        playbackTimer = Timer.scheduledTimer(withTimeInterval: 0.05, repeats: true) { [weak self] _ in
             guard let self = self, let player = self.musicPlayer else { return }
             
             var currentTime: MusicTimeStamp = 0.0
             MusicPlayerGetTime(player, &currentTime)
             self.currentTime = TimeInterval(currentTime)
             
-            // Check if playback is finished
-            var isPlaying: DarwinBoolean = false
-            MusicPlayerIsPlaying(player, &isPlaying)
-            
-            if !isPlaying.boolValue && self.isPlaying {
-                self.stop()
+            // Check if we've reached the end of the sequence
+            if self.currentTime >= self.totalDuration && self.isPlaying {
+                if self.isLooping {
+                    // Restart playback for looping
+                    MusicPlayerSetTime(player, 0.0)
+                    MusicPlayerStart(player)
+                    self.currentTime = 0.0
+                    print("🔄 Looping playback - restarted at time 0")
+                } else {
+                    self.stop()
+                }
             }
         }
     }
