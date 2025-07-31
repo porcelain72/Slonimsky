@@ -25,9 +25,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let symmetricalIntervals: Bool
     
     // MARK: - Slonimsky Modulations
-    let interpolation: ModulationSettings
-    let infrapolation: ModulationSettings
-    let ultrapolation: ModulationSettings
+    var interpolation: ModulationSettings
+    var infrapolation: ModulationSettings
+    var ultrapolation: ModulationSettings
     
     // MARK: - Directional Patterns
     let primaryDirection: Direction
@@ -49,8 +49,11 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let harmonicRhythm: HarmonicRhythmSettings
     
     // MARK: - Expression
-    let velocitySettings: VelocitySettings
-    let toneShifting: ToneShiftSettings
+    var velocitySettings: VelocitySettings
+    var toneShifting: ToneShiftSettings
+    
+    // MARK: - Cyclical Parameters
+    let cyclicalSettings: CyclicalSettings
     
     // MARK: - Initialization
     init(
@@ -82,7 +85,8 @@ struct PatternParameters: Codable, Equatable, Hashable {
         chordGeneration: ChordSettings = .default,
         harmonicRhythm: HarmonicRhythmSettings = .default,
         velocitySettings: VelocitySettings = .default,
-        toneShifting: ToneShiftSettings = .default
+        toneShifting: ToneShiftSettings = .default,
+        cyclicalSettings: CyclicalSettings = CyclicalSettings()
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
@@ -113,6 +117,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.harmonicRhythm = harmonicRhythm
         self.velocitySettings = velocitySettings
         self.toneShifting = toneShifting
+        self.cyclicalSettings = cyclicalSettings
     }
     
     // MARK: - Validation

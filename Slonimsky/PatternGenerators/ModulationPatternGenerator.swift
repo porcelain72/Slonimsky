@@ -17,47 +17,50 @@ class ModulationPatternGenerator: BasePatternGenerator {
         )
     }
     
-    override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical parameter modifications
+        let cyclicalParameters = applyCyclicalParameters(parameters: parameters, cycleIndex: cycleIndex)
+        
         // Generate base sequence using scale or interval patterns
-        let baseSequence = generateBaseSequence(parameters: parameters)
+        let baseSequence = generateBaseSequence(parameters: cyclicalParameters)
         
         // Apply primary modulation techniques
         let modulatedSequence = applyPrimaryModulations(
             sequence: baseSequence,
-            parameters: parameters
+            parameters: cyclicalParameters
         )
         
         // Apply metric modulation if enabled
         let metricModulatedSequence = applyMetricModulation(
             sequence: modulatedSequence,
-            parameters: parameters
+            parameters: cyclicalParameters
         )
         
         // Apply register shifts
         let shiftedSequence = applyRegisterShifts(
             notes: metricModulatedSequence,
-            pattern: parameters.registerShifts,
-            maxShift: parameters.toneShifting.maxToneShift
+            pattern: cyclicalParameters.registerShifts,
+            maxShift: cyclicalParameters.toneShifting.maxToneShift
         )
         
         // Apply contour patterns
         let contourSequence = applyContourPattern(
             notes: shiftedSequence,
-            pattern: parameters.contourPattern
+            pattern: cyclicalParameters.contourPattern
         )
         
         // Convert to MIDIInfo with velocity and duration
         let midiSequence = convertToMIDIInfo(
             notes: contourSequence,
-            parameters: parameters
+            parameters: cyclicalParameters
         )
         
         // Apply final modulation refinements
         let finalSequence = applyModulationRefinements(
             sequence: midiSequence,
-            parameters: parameters
+            parameters: cyclicalParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -66,7 +69,7 @@ class ModulationPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: finalSequence.count,
-            parameters: parameters
+            parameters: cyclicalParameters
         )
         
         return finalSequence
@@ -593,5 +596,52 @@ class ModulationPatternGenerator: BasePatternGenerator {
         print("  - Ultrapolation: \(parameters.ultrapolation.enabled ? "Enabled (\(parameters.ultrapolation.numberOfNotes) notes)" : "Disabled")")
         print("  - Metric Modulation: \(parameters.metricModulation.enabled ? "Enabled (\(parameters.metricModulation.modulationType.rawValue))" : "Disabled")")
         #endif
+    }
+    
+    // MARK: - Cyclical Parameter Support
+    
+    /// Apply cyclical parameter modifications to the base parameters
+    private func applyCyclicalParameters(parameters: PatternParameters, cycleIndex: Int) -> PatternParameters {
+        var modifiedParameters = parameters
+        
+        // Apply cyclical changes to Slonimsky modulations
+        if let interpolationNotes = getCyclicalValue(for: .interpolationNotes, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.interpolation.numberOfNotes = Int(interpolationNotes)
+            print("🔄 Cycle \(cycleIndex): Interpolation notes = \(Int(interpolationNotes))")
+        }
+        
+        if let infrapolationNotes = getCyclicalValue(for: .infrapolationNotes, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.infrapolation.numberOfNotes = Int(infrapolationNotes)
+            print("🔄 Cycle \(cycleIndex): Infrapolation notes = \(Int(infrapolationNotes))")
+        }
+        
+        if let ultrapolationNotes = getCyclicalValue(for: .ultrapolationNotes, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.ultrapolation.numberOfNotes = Int(ultrapolationNotes)
+            print("🔄 Cycle \(cycleIndex): Ultrapolation notes = \(Int(ultrapolationNotes))")
+        }
+        
+        // Apply cyclical changes to rhythmic parameters
+        if let baseDuration = getCyclicalValue(for: .baseNoteDuration, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.baseNoteDuration = baseDuration
+            print("🔄 Cycle \(cycleIndex): Base note duration = \(baseDuration)")
+        }
+        
+        if let density = getCyclicalValue(for: .rhythmicDensity, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.rhythmicDensity = density
+            print("🔄 Cycle \(cycleIndex): Rhythmic density = \(density)")
+        }
+        
+        // Apply cyclical changes to velocity parameters
+        if let baseVelocity = getCyclicalValue(for: .baseVelocity, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.velocitySettings.baseVelocity = UInt8(clamping: Int(baseVelocity))
+            print("🔄 Cycle \(cycleIndex): Base velocity = \(UInt8(clamping: Int(baseVelocity)))")
+        }
+        
+        if let velocityRange = getCyclicalValue(for: .velocityRange, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
+            modifiedParameters.velocitySettings.range = UInt8(clamping: Int(velocityRange))
+            print("🔄 Cycle \(cycleIndex): Velocity range = \(UInt8(clamping: Int(velocityRange)))")
+        }
+        
+        return modifiedParameters
     }
 } 

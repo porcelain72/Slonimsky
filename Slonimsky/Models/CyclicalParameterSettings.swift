@@ -1,0 +1,287 @@
+import Foundation
+
+/// Types of parameters that can be cycled
+public enum CyclicalParameterType: String, CaseIterable, Codable {
+    case interpolationNotes = "Interpolation Notes"
+    case infrapolationNotes = "Infrapolation Notes"
+    case ultrapolationNotes = "Ultrapolation Notes"
+    case baseNoteDuration = "Base Note Duration"
+    case rhythmicDensity = "Rhythmic Density"
+    case primaryInterval = "Primary Interval"
+    case secondaryInterval = "Secondary Interval"
+    case baseVelocity = "Base Velocity"
+    case velocityRange = "Velocity Range"
+}
+
+/// How cyclical values should be applied to base values
+public enum CyclicalOperationType: String, CaseIterable, Codable {
+    case replace = "Replace"
+    case add = "Add"
+    case multiply = "Multiply"
+    case modulate = "Modulate"
+}
+
+/// Defines how a parameter should change cyclically
+public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
+    /// Whether cyclical changes are enabled for this parameter
+    public var isEnabled: Bool = false
+    
+    /// The minimum value for the parameter
+    public var minValue: Double = 0.0
+    
+    /// The maximum value for the parameter
+    public var maxValue: Double = 10.0
+    
+    /// The step size for each cycle increment
+    public var stepSize: Double = 1.0
+    
+    /// The current cycle value (0-based)
+    public var currentCycle: Int = 0
+    
+    /// The maximum number of cycles before resetting
+    public var maxCycles: Int = 4
+    
+    /// Whether to reset to minValue after reaching maxCycles
+    public var resetAfterMax: Bool = true
+    
+    /// How the cyclical value should be applied to the base value
+    public var operationType: CyclicalOperationType = .replace
+    
+    /// The type of cycling behavior
+    public var cycleType: CycleType = .increment
+    
+    public init(
+        isEnabled: Bool = false,
+        minValue: Double = 0.0,
+        maxValue: Double = 10.0,
+        stepSize: Double = 1.0,
+        currentCycle: Int = 0,
+        maxCycles: Int = 4,
+        resetAfterMax: Bool = true,
+        cycleType: CycleType = .increment
+    ) {
+        self.isEnabled = isEnabled
+        self.minValue = minValue
+        self.maxValue = maxValue
+        self.stepSize = stepSize
+        self.currentCycle = currentCycle
+        self.maxCycles = maxCycles
+        self.resetAfterMax = resetAfterMax
+        self.cycleType = cycleType
+    }
+    
+    /// Calculate the current parameter value based on cycle
+    public func currentValue(baseValue: Double) -> Double {
+        guard isEnabled else { return baseValue }
+        
+        let cycleValue: Double
+        switch cycleType {
+        case .increment:
+            cycleValue = minValue + (Double(currentCycle) * stepSize)
+        case .decrement:
+            cycleValue = maxValue - (Double(currentCycle) * stepSize)
+        case .oscillate:
+            let halfCycles = maxCycles / 2
+            let cycleInHalf = currentCycle % (halfCycles * 2)
+            if cycleInHalf < halfCycles {
+                cycleValue = minValue + (Double(cycleInHalf) * stepSize)
+            } else {
+                cycleValue = maxValue - (Double(cycleInHalf - halfCycles) * stepSize)
+            }
+        case .random:
+            // Use currentCycle as seed for deterministic randomness
+            let random = Double((currentCycle * 12345) % 1000) / 1000.0
+            cycleValue = minValue + (random * (maxValue - minValue))
+        }
+        
+        return max(minValue, min(maxValue, cycleValue))
+    }
+    
+    /// Advance to the next cycle
+    public mutating func advanceCycle() {
+        guard isEnabled else { return }
+        
+        currentCycle += 1
+        
+        if currentCycle >= maxCycles {
+            if resetAfterMax {
+                currentCycle = 0
+            } else {
+                currentCycle = maxCycles - 1
+            }
+        }
+    }
+    
+    /// Reset the cycle counter
+    public mutating func resetCycle() {
+        currentCycle = 0
+    }
+}
+
+/// Types of cycling behavior
+public enum CycleType: String, CaseIterable, Codable {
+    case increment = "Increment"
+    case decrement = "Decrement"
+    case oscillate = "Oscillate"
+    case random = "Random"
+    
+    public var description: String {
+        switch self {
+        case .increment:
+            return "Gradually increase from min to max"
+        case .decrement:
+            return "Gradually decrease from max to min"
+        case .oscillate:
+            return "Oscillate between min and max values"
+        case .random:
+            return "Use random values within range"
+        }
+    }
+}
+
+/// Collection of cyclical settings for different parameter categories
+public struct CyclicalSettings: Codable, Equatable, Hashable {
+    // Slonimsky Modulations
+    public var interpolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.0,
+        maxValue: 5.0,
+        stepSize: 1.0,
+        maxCycles: 6
+    )
+    
+    public var infrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.0,
+        maxValue: 5.0,
+        stepSize: 1.0,
+        maxCycles: 6
+    )
+    
+    public var ultrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.0,
+        maxValue: 5.0,
+        stepSize: 1.0,
+        maxCycles: 6
+    )
+    
+    public var modulationInterval: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 1.0,
+        maxValue: 12.0,
+        stepSize: 1.0,
+        maxCycles: 12
+    )
+    
+    // Rhythmic Parameters
+    public var baseNoteDuration: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.25,
+        maxValue: 2.0,
+        stepSize: 0.25,
+        maxCycles: 8
+    )
+    
+    public var rhythmicDensity: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.5,
+        maxValue: 2.0,
+        stepSize: 0.25,
+        maxCycles: 7
+    )
+    
+    // Interval Parameters
+    public var primaryInterval: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 1.0,
+        maxValue: 12.0,
+        stepSize: 1.0,
+        maxCycles: 12
+    )
+    
+    public var secondaryInterval: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 1.0,
+        maxValue: 12.0,
+        stepSize: 1.0,
+        maxCycles: 12
+    )
+    
+    // Velocity Parameters
+    public var baseVelocity: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 40.0,
+        maxValue: 100.0,
+        stepSize: 10.0,
+        maxCycles: 7
+    )
+    
+    public var velocityRange: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 10.0,
+        maxValue: 50.0,
+        stepSize: 5.0,
+        maxCycles: 9
+    )
+    
+    // Tempo Parameters
+    public var tempo: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 60.0,
+        maxValue: 180.0,
+        stepSize: 20.0,
+        maxCycles: 7
+    )
+    
+    public init() {}
+    
+    /// Get all enabled cyclical parameters
+    public var enabledParameters: [String: CyclicalParameterSettings] {
+        var enabled: [String: CyclicalParameterSettings] = [:]
+        
+        if interpolationNotes.isEnabled { enabled["interpolationNotes"] = interpolationNotes }
+        if infrapolationNotes.isEnabled { enabled["infrapolationNotes"] = infrapolationNotes }
+        if ultrapolationNotes.isEnabled { enabled["ultrapolationNotes"] = ultrapolationNotes }
+        if modulationInterval.isEnabled { enabled["modulationInterval"] = modulationInterval }
+        if baseNoteDuration.isEnabled { enabled["baseNoteDuration"] = baseNoteDuration }
+        if rhythmicDensity.isEnabled { enabled["rhythmicDensity"] = rhythmicDensity }
+        if primaryInterval.isEnabled { enabled["primaryInterval"] = primaryInterval }
+        if secondaryInterval.isEnabled { enabled["secondaryInterval"] = secondaryInterval }
+        if baseVelocity.isEnabled { enabled["baseVelocity"] = baseVelocity }
+        if velocityRange.isEnabled { enabled["velocityRange"] = velocityRange }
+        if tempo.isEnabled { enabled["tempo"] = tempo }
+        
+        return enabled
+    }
+    
+    /// Advance all enabled parameters to the next cycle
+    public mutating func advanceAllCycles() {
+        interpolationNotes.advanceCycle()
+        infrapolationNotes.advanceCycle()
+        ultrapolationNotes.advanceCycle()
+        modulationInterval.advanceCycle()
+        baseNoteDuration.advanceCycle()
+        rhythmicDensity.advanceCycle()
+        primaryInterval.advanceCycle()
+        secondaryInterval.advanceCycle()
+        baseVelocity.advanceCycle()
+        velocityRange.advanceCycle()
+        tempo.advanceCycle()
+    }
+    
+    /// Reset all cycle counters
+    public mutating func resetAllCycles() {
+        interpolationNotes.resetCycle()
+        infrapolationNotes.resetCycle()
+        ultrapolationNotes.resetCycle()
+        modulationInterval.resetCycle()
+        baseNoteDuration.resetCycle()
+        rhythmicDensity.resetCycle()
+        primaryInterval.resetCycle()
+        secondaryInterval.resetCycle()
+        baseVelocity.resetCycle()
+        velocityRange.resetCycle()
+        tempo.resetCycle()
+    }
+} 

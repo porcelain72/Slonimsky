@@ -60,6 +60,20 @@ class PatternGeneratorRegistry: ObservableObject {
         using generatorName: String,
         parameters: PatternParameters
     ) -> PatternGenerationResult? {
+        return generatePattern(using: generatorName, parameters: parameters, cycleIndex: 0)
+    }
+    
+    /// Generate a pattern using a specific generator with cyclical parameters
+    /// - Parameters:
+    ///   - generatorName: The name of the generator to use
+    ///   - parameters: The pattern generation parameters
+    ///   - cycleIndex: The current cycle index for cyclical parameters
+    /// - Returns: Generated pattern result with metadata
+    func generatePattern(
+        using generatorName: String,
+        parameters: PatternParameters,
+        cycleIndex: Int
+    ) -> PatternGenerationResult? {
         guard let generator = getGenerator(name: generatorName) else {
             print("❌ Pattern generator '\(generatorName)' not found")
             return nil
@@ -73,7 +87,7 @@ class PatternGeneratorRegistry: ObservableObject {
         let startTime = CFAbsoluteTimeGetCurrent()
         let startMemory = getMemoryUsage()
         
-        let notes = generator.generatePattern(parameters: parameters)
+        let notes = generator.generatePattern(parameters: parameters, cycleIndex: cycleIndex)
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
         let endMemory = getMemoryUsage()
@@ -85,7 +99,8 @@ class PatternGeneratorRegistry: ObservableObject {
             generationTime: generationTime,
             noteCount: notes.count,
             pitchRange: notes.map(\.note).min()!...notes.map(\.note).max()!,
-            duration: notes.reduce(0) { $0 + $1.beatLength }
+            duration: notes.reduce(0) { $0 + $1.beatLength },
+            cycleIndex: cycleIndex
         )
         
         let performance = PerformanceMetrics(

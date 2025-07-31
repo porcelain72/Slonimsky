@@ -14,6 +14,13 @@ protocol PatternGenerator {
     /// - Returns: Array of MIDI note information
     func generatePattern(parameters: PatternParameters) -> [MIDIInfo]
     
+    /// Generate a musical pattern with cyclical parameter support
+    /// - Parameters:
+    ///   - parameters: The pattern generation parameters
+    ///   - cycleIndex: The current cycle index for cyclical parameters
+    /// - Returns: Array of MIDI note information
+    func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo]
+    
     /// Estimate the number of notes that will be generated
     /// - Parameter parameters: The pattern generation parameters
     /// - Returns: Estimated note count
@@ -42,7 +49,11 @@ class BasePatternGenerator: PatternGenerator {
     }
     
     func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
-        fatalError("Subclasses must implement generatePattern")
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+        fatalError("Subclasses must implement generatePattern with cycleIndex")
     }
     
     func estimateNoteCount(parameters: PatternParameters) -> Int {
@@ -107,7 +118,7 @@ class BasePatternGenerator: PatternGenerator {
         
         // Calculate the original range and center
         let originalRange = notes.max()! - notes.min()!
-        let centerNote = notes.min()! + (originalRange / 2)
+        let _ = notes.min()! + (originalRange / 2)
         
         return notes.enumerated().map { index, note in
             let normalizedIndex = Double(index) / Double(notes.count - 1)
@@ -159,6 +170,69 @@ class BasePatternGenerator: PatternGenerator {
         } else {
             return settings.calculateVelocity(for: noteIndex, note: note)
         }
+    }
+    
+    // MARK: - Cyclical Parameter Helpers
+    
+    /// Apply cyclical parameter changes to a value
+    func applyCyclicalParameter(
+        baseValue: Double,
+        settings: CyclicalParameterSettings,
+        cycleIndex: Int
+    ) -> Double {
+        guard settings.isEnabled else { return baseValue }
+        
+        let adjustedCycle = cycleIndex % settings.maxCycles
+        let cyclicalValue = settings.minValue + (Double(adjustedCycle) * settings.stepSize)
+        
+        // Clamp to max value
+        let clampedValue = min(cyclicalValue, settings.maxValue)
+        
+        // Apply to base value based on operation type
+        switch settings.operationType {
+        case .replace:
+            return clampedValue
+        case .add:
+            return baseValue + clampedValue
+        case .multiply:
+            return baseValue * clampedValue
+        case .modulate:
+            let modulation = sin(Double(adjustedCycle) * .pi / Double(settings.maxCycles))
+            return baseValue + (modulation * settings.maxValue)
+        }
+    }
+    
+    /// Get cyclical parameter value for a specific parameter
+    func getCyclicalValue(
+        for parameter: CyclicalParameterType,
+        settings: CyclicalSettings,
+        cycleIndex: Int
+    ) -> Double? {
+        let parameterSettings: CyclicalParameterSettings?
+        
+        switch parameter {
+        case .interpolationNotes:
+            parameterSettings = settings.interpolationNotes
+        case .infrapolationNotes:
+            parameterSettings = settings.infrapolationNotes
+        case .ultrapolationNotes:
+            parameterSettings = settings.ultrapolationNotes
+        case .baseNoteDuration:
+            parameterSettings = settings.baseNoteDuration
+        case .rhythmicDensity:
+            parameterSettings = settings.rhythmicDensity
+        case .primaryInterval:
+            parameterSettings = settings.primaryInterval
+        case .secondaryInterval:
+            parameterSettings = settings.secondaryInterval
+        case .baseVelocity:
+            parameterSettings = settings.baseVelocity
+        case .velocityRange:
+            parameterSettings = settings.velocityRange
+        }
+        
+        guard let settings = parameterSettings, settings.isEnabled else { return nil }
+        return applyCyclicalParameter(baseValue: 0.0, settings: settings, cycleIndex: cycleIndex)
     }
 }
 
@@ -217,6 +291,7 @@ struct PatternMetadata {
     let noteCount: Int
     let pitchRange: ClosedRange<Int>
     let duration: TimeInterval
+    let cycleIndex: Int
     
     init(
         generatorName: String,
@@ -224,7 +299,8 @@ struct PatternMetadata {
         generationTime: TimeInterval,
         noteCount: Int,
         pitchRange: ClosedRange<Int>,
-        duration: TimeInterval
+        duration: TimeInterval,
+        cycleIndex: Int = 0
     ) {
         self.generatorName = generatorName
         self.parameterHash = parameterHash
@@ -232,6 +308,7 @@ struct PatternMetadata {
         self.noteCount = noteCount
         self.pitchRange = pitchRange
         self.duration = duration
+        self.cycleIndex = cycleIndex
     }
 }
 

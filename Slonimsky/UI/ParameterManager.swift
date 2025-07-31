@@ -99,6 +99,11 @@ class ParameterManager: ObservableObject {
     @Published var harmonicMode: HarmonicMode = .tonal {
         didSet { validateAndNotify() }
     }
+    
+    // Cyclical Parameters
+    @Published var cyclicalSettings: CyclicalSettings = CyclicalSettings() {
+        didSet { validateAndNotify() }
+    }
     @Published var chordGeneration: ChordSettings = .default {
         didSet { validateAndNotify() }
     }
@@ -198,7 +203,8 @@ class ParameterManager: ObservableObject {
             chordGeneration: chordGeneration,
             harmonicRhythm: harmonicRhythm,
             velocitySettings: velocitySettings,
-            toneShifting: toneShifting
+            toneShifting: toneShifting,
+            cyclicalSettings: cyclicalSettings
         )
     }
     
@@ -233,6 +239,7 @@ class ParameterManager: ObservableObject {
         harmonicRhythm = parameters.harmonicRhythm
         velocitySettings = parameters.velocitySettings
         toneShifting = parameters.toneShifting
+        cyclicalSettings = parameters.cyclicalSettings
         
         // Reset parameter hash to force regeneration
         lastParameterHash = 0
