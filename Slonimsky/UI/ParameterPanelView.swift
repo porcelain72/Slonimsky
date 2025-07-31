@@ -19,7 +19,7 @@ struct ParameterPanelView: View {
     @Binding var showRandomizeDialog: Bool
     
     // MARK: - State
-    @State private var expandedSections: Set<ParameterCategory> = [.basic, .intervals]
+    @State private var expandedSections: Set<ParameterCategory> = [.basic, .intervals, .rhythmicAccompaniment]
     @State private var showGeneratorPicker = false
     @State private var showValidationErrors = false
     @State private var showInfoPopup = false
@@ -98,6 +98,15 @@ struct ParameterPanelView: View {
                         icon: "slider.horizontal.3"
                     ) {
                         ExpressionParametersView(parameterManager: parameterManager)
+                    }
+                    
+                    // Rhythmic Accompaniment
+                    parameterSection(
+                        category: .rhythmicAccompaniment,
+                        title: "Rhythmic Accompaniment",
+                        icon: "drumsticks"
+                    ) {
+                        RhythmicAccompanimentView(parameterManager: parameterManager)
                     }
                     
                     // Auto-generation Settings
@@ -780,6 +789,78 @@ struct ExpressionParametersView: View {
             .padding()
             .background(Color(NSColor.controlBackgroundColor))
             .cornerRadius(6)
+        }
+    }
+}
+
+// MARK: - Rhythmic Accompaniment View
+
+struct RhythmicAccompanimentView: View {
+    @ObservedObject var parameterManager: ParameterManager
+    
+    var body: some View {
+        VStack(spacing: 12) {
+            // Enable/Disable Switch
+            HStack {
+                Text("Enable Rhythmic Accompaniment")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                Spacer()
+                Toggle("", isOn: $parameterManager.rhythmicAccompanimentEnabled)
+                    .toggleStyle(SwitchToggleStyle())
+            }
+            .padding()
+            .background(Color(NSColor.controlBackgroundColor))
+            .cornerRadius(6)
+            
+            if parameterManager.rhythmicAccompanimentEnabled {
+                // Style Selection
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Style:")
+                        Spacer()
+                        Picker("Style", selection: $parameterManager.rhythmicAccompanimentStyle) {
+                            ForEach(RhythmicAccompanimentStyle.allCases, id: \.self) { style in
+                                Text(style.rawValue).tag(style)
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                    }
+                }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
+                .cornerRadius(6)
+                
+                // Density Control
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Density:")
+                        Spacer()
+                        Text("\(String(format: "%.2f", parameterManager.rhythmicAccompanimentDensity))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Slider(value: $parameterManager.rhythmicAccompanimentDensity, in: 0.1...2.0)
+                }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
+                .cornerRadius(6)
+                
+                // Velocity Control
+                VStack(spacing: 8) {
+                    HStack {
+                        Text("Velocity:")
+                        Spacer()
+                        Text("\(String(format: "%.2f", parameterManager.rhythmicAccompanimentVelocity))")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                    }
+                    Slider(value: $parameterManager.rhythmicAccompanimentVelocity, in: 0.1...1.0)
+                }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
+                .cornerRadius(6)
+            }
         }
     }
 }

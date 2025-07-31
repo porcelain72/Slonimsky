@@ -35,19 +35,20 @@
 		98C309792E39333C000D9EC7 /* SheetMusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */; };
 		98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309742E39333C000D9EC7 /* MainContentView.swift */; };
 		98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097B2E39334F000D9EC7 /* MidiInfo.swift */; };
-		98C309882E3933F0000D9EC7 /* PatternGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */; };
-		98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */; };
-		98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */; };
-		98C3098B2E3940BA000D9EC7 /* ParameterApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309832E3940BA000D9EC7 /* ParameterApplicationTests.swift */; };
-		98C3098B2E3933F0000D9EC7 /* NoteSequenceGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */; };
+		98C309882E3933F0000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */; };
+		98C309892E3933F0000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */; };
+		98C3098A2E3933F0000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309822E393378000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift */; };
+		98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */; };
+		98C3098B2E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309832E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift */; };
 		98C3098E2E393BDF000D9EC7 /* Salieri in Frameworks */ = {isa = PBXBuildFile; productRef = 98C3098D2E393BDF000D9EC7 /* Salieri */; };
 		98C309942E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */; };
 		98C309962E3940B7000D9EC7 /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309922E3940B7000D9EC7 /* String+Localization.swift */; };
-		98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */; };
-		98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */; };
 		98C309972E3940B7000D9EC7 /* ParameterDescriptionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */; };
+		98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */; };
 		98C309982E3940B7000D9EC7 /* ParameterInfoPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */; };
+		98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */; };
 		98C309992E3940B7000D9EC7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 98C309952E3940B7000D9EC7 /* Localizable.strings */; };
+		98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -100,18 +101,19 @@
 		98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPanelView.swift; sourceTree = "<group>"; };
 		98C309742E39333C000D9EC7 /* MainContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
 		98C3097B2E39334F000D9EC7 /* MidiInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MidiInfo.swift; sourceTree = "<group>"; };
-		98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
-		98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
-		98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
-		98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
-		98C309832E3940BA000D9EC7 /* ParameterApplicationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/ParameterApplicationTests.swift; sourceTree = SOURCE_ROOT; };
+		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
+		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
+		98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
+		98C309822E393378000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIIntegrationTests.swift; sourceTree = SOURCE_ROOT; };
+		98C309832E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/ParameterApplicationTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309922E3940B7000D9EC7 /* String+Localization.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "String+Localization.swift"; path = "Slonimsky/Extensions/String+Localization.swift"; sourceTree = SOURCE_ROOT; };
-		98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UInt8+Clamping.swift"; path = "Slonimsky/Extensions/UInt8+Clamping.swift"; sourceTree = SOURCE_ROOT; };
-		98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterApplicationManager.swift; sourceTree = "<group>"; };
 		98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterDescriptionHelper.swift; sourceTree = "<group>"; };
+		98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; name = "UInt8+Clamping.swift"; path = "Slonimsky/Extensions/UInt8+Clamping.swift"; sourceTree = SOURCE_ROOT; };
 		98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AutoGenerationSettingsView.swift; sourceTree = "<group>"; };
 		98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterInfoPopupView.swift; sourceTree = "<group>"; };
+		98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterApplicationManager.swift; sourceTree = "<group>"; };
 		98C309952E3940B7000D9EC7 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
+		98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPopupView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -147,6 +149,7 @@
 				98692B3D2E2FBE0F00223430 /* SlonimskyTests */,
 				98692B472E2FBE0F00223430 /* SlonimskyUITests */,
 				98692B2A2E2FBE0200223430 /* Products */,
+				98C309992E3A7906000D9EC7 /* Recovered References */,
 			);
 			sourceTree = "<group>";
 		};
@@ -190,10 +193,10 @@
 			isa = PBXGroup;
 			children = (
 				98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */,
-				98C3097E2E393378000D9EC7 /* NoteSequenceGeneratorTests.swift */,
-				98C3097F2E393378000D9EC7 /* PatternGeneratorTests.swift */,
-				98C309802E393378000D9EC7 /* MIDIFileGeneratorTests.swift */,
-				98C309822E393378000D9EC7 /* MIDIIntegrationTests.swift */,
+				98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */,
+				98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */,
+				98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */,
+				98C309822E393378000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift */,
 			);
 			path = SlonimskyTests;
 			sourceTree = "<group>";
@@ -253,6 +256,7 @@
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
 				98C309722E39333C000D9EC7 /* ParameterPanelView.swift */,
 				98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */,
+				98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */,
 				98C309742E39333C000D9EC7 /* MainContentView.swift */,
 				98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */,
 				98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */,
@@ -260,7 +264,14 @@
 			path = UI;
 			sourceTree = "<group>";
 		};
-
+		98C309992E3A7906000D9EC7 /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				98C309832E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift */,
+			);
+			name = "Recovered References";
+			sourceTree = "<group>";
+		};
 		98C3099A2E3940B7000D9EC7 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
@@ -428,6 +439,7 @@
 				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
 				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
 				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
+				98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */,
 				98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */,
 				98C309642E393312000D9EC7 /* ModulationPatternGenerator.swift in Sources */,
 				98692B2D2E2FBE0200223430 /* SlonimskyApp.swift in Sources */,
@@ -451,12 +463,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				98C3098B2E3933F0000D9EC7 /* NoteSequenceGeneratorTests.swift in Sources */,
-				98C309882E3933F0000D9EC7 /* PatternGeneratorTests.swift in Sources */,
-				98C309892E3933F0000D9EC7 /* MIDIFileGeneratorTests.swift in Sources */,
+				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
+				98C309882E3933F0000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift in Sources */,
+				98C309892E3933F0000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift in Sources */,
 				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
-				98C3098A2E3933F0000D9EC7 /* MIDIIntegrationTests.swift in Sources */,
-				98C3098B2E3940BA000D9EC7 /* ParameterApplicationTests.swift in Sources */,
+				98C3098A2E3933F0000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift in Sources */,
+				98C3098B2E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

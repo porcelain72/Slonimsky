@@ -130,6 +130,25 @@ class ParameterManager: ObservableObject {
     @Published var autoGenerationDelay: TimeInterval = 1.0 // seconds
     @Published var selectedGeneratorForAutoGeneration = "Scale Pattern Generator"
     
+    // Automatic Generator Selection
+    @Published var automaticGeneratorSelectionEnabled = true
+    @Published var activeGenerators: [String] = ["Scale Pattern Generator"]
+    @Published var combinationMode: PatternCombinationMode = .sequential
+    
+    // Rhythmic Accompaniment Settings
+    @Published var rhythmicAccompanimentEnabled = false {
+        didSet { validateAndNotify() }
+    }
+    @Published var rhythmicAccompanimentDensity: Double = 1.0 {
+        didSet { validateAndNotify() }
+    }
+    @Published var rhythmicAccompanimentStyle: RhythmicAccompanimentStyle = .basic {
+        didSet { validateAndNotify() }
+    }
+    @Published var rhythmicAccompanimentVelocity: Double = 0.7 {
+        didSet { validateAndNotify() }
+    }
+    
     // MARK: - Private Properties
     private var cancellables = Set<AnyCancellable>()
     private let validationSubject = PassthroughSubject<Void, Never>()
@@ -140,6 +159,9 @@ class ParameterManager: ObservableObject {
     init() {
         setupBindings()
         loadDefaultPreset()
+        
+        // Initialize automatic generator selection
+        updateGeneratorSelection()
     }
     
     // MARK: - Public Methods
@@ -241,6 +263,8 @@ class ParameterManager: ObservableObject {
                 randomizeHarmonicParameters()
             case .expression:
                 randomizeExpressionParameters()
+            case .rhythmicAccompaniment:
+                randomizeRhythmicAccompanimentParameters()
             case .autoGeneration:
                 // Auto-generation doesn't need randomization
                 break
@@ -300,6 +324,109 @@ class ParameterManager: ObservableObject {
         return autoGenerationSubject.eraseToAnyPublisher()
     }
     
+    // MARK: - Auto-generation Methods
+    
+    private func setupAutoGeneration() {
+        // Implementation for auto-generation setup
+    }
+    
+    private func stopAutoGeneration() {
+        // Implementation for stopping auto-generation
+    }
+    
+    // MARK: - Automatic Generator Selection Methods
+    
+    /// Determine which generators should be active based on current parameter usage
+    func determineActiveGenerators() -> [String] {
+        guard automaticGeneratorSelectionEnabled else {
+            return [selectedGeneratorForAutoGeneration]
+        }
+        
+        var generators: Set<String> = []
+        
+        // Always include Scale Pattern Generator for basic parameters
+        generators.insert("Scale Pattern Generator")
+        
+        // Check interval parameters
+        if primaryInterval != 1 || secondaryInterval != 1 || 
+           intervalPattern != .ascending || intervalInversion || symmetricalIntervals {
+            generators.insert("Interval Pattern Generator")
+        }
+        
+        // Check modulation parameters
+        if interpolation.enabled || infrapolation.enabled || ultrapolation.enabled {
+            generators.insert("Modulation Pattern Generator")
+        }
+        
+        // Check directional parameters
+        if primaryDirection != .ascending || mirrorPoints > 0 || 
+           retrogradeSections || registerShifts != .none || contourPattern != .linear {
+            generators.insert("Contour Pattern Generator")
+        }
+        
+        // Check rhythmic parameters
+        if noteDurationPattern != .uniform || rhythmicDensity != 1.0 || 
+           syncopationLevel > 0 || metricModulation.enabled {
+            generators.insert("Rhythmic Pattern Generator")
+        }
+        
+        // Check harmonic parameters
+        if harmonicMode != .tonal || chordGeneration.enabled || 
+           harmonicRhythm.chordChangeFrequency != 4 {
+            generators.insert("Harmonic Pattern Generator")
+        }
+        
+        // Check symmetrical parameters
+        if symmetricalIntervals || mirrorPoints > 0 {
+            generators.insert("Symmetrical Pattern Generator")
+        }
+        
+        return Array(generators).sorted()
+    }
+    
+    /// Update active generators based on current parameter usage
+    func updateActiveGenerators() {
+        let newActiveGenerators = determineActiveGenerators()
+        if newActiveGenerators != activeGenerators {
+            activeGenerators = newActiveGenerators
+            print("🔄 Auto-selected generators: \(activeGenerators.joined(separator: ", "))")
+        }
+    }
+    
+    /// Determine the best combination mode based on active generators
+    func determineCombinationMode() -> PatternCombinationMode {
+        guard activeGenerators.count > 1 else { return .sequential }
+        
+        // Use layered mode if harmonic generator is active with others
+        if activeGenerators.contains("Harmonic Pattern Generator") && activeGenerators.count > 1 {
+            return .layered
+        }
+        
+        // Use interleaved mode for rhythmic + melodic combinations
+        if activeGenerators.contains("Rhythmic Pattern Generator") && 
+           (activeGenerators.contains("Scale Pattern Generator") || activeGenerators.contains("Interval Pattern Generator")) {
+            return .interleaved
+        }
+        
+        // Default to sequential for other combinations
+        return .sequential
+    }
+    
+    /// Update combination mode based on active generators
+    func updateCombinationMode() {
+        let newMode = determineCombinationMode()
+        if newMode != combinationMode {
+            combinationMode = newMode
+            print("🔄 Auto-selected combination mode: \(combinationMode.rawValue)")
+        }
+    }
+    
+    /// Complete update of generator selection based on current parameters
+    func updateGeneratorSelection() {
+        updateActiveGenerators()
+        updateCombinationMode()
+    }
+    
     // MARK: - Private Methods
     
     private func setupBindings() {
@@ -315,25 +442,13 @@ class ParameterManager: ObservableObject {
     private func validateAndNotify() {
         validationSubject.send()
         
+        // Update automatic generator selection
+        updateGeneratorSelection()
+        
         // Trigger auto-generation if enabled
         if autoGenerateEnabled {
             autoGenerationSubject.send()
         }
-    }
-    
-    private func setupAutoGeneration() {
-        stopAutoGeneration() // Clean up any existing subscription
-        
-        autoGenerationCancellable = autoGenerationSubject
-            .debounce(for: .seconds(autoGenerationDelay), scheduler: RunLoop.main)
-            .sink { [weak self] in
-                self?.objectWillChange.send()
-            }
-    }
-    
-    private func stopAutoGeneration() {
-        autoGenerationCancellable?.cancel()
-        autoGenerationCancellable = nil
     }
     
     func loadDefaultPreset() {
@@ -434,6 +549,13 @@ class ParameterManager: ObservableObject {
             shiftPattern: RegisterShiftPattern.allCases.randomElement() ?? .none
         )
     }
+    
+    private func randomizeRhythmicAccompanimentParameters() {
+        rhythmicAccompanimentEnabled = Bool.random()
+        rhythmicAccompanimentStyle = RhythmicAccompanimentStyle.allCases.randomElement() ?? .basic
+        rhythmicAccompanimentDensity = Double.random(in: 0.5...1.5)
+        rhythmicAccompanimentVelocity = Double.random(in: 0.3...1.0)
+    }
 }
 
 // MARK: - Supporting Types
@@ -447,6 +569,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     case rhythmic = "Rhythmic"
     case harmonic = "Harmonic"
     case expression = "Expression"
+    case rhythmicAccompaniment = "Rhythmic Accompaniment"
     case autoGeneration = "Auto-generation"
     
     var id: String { rawValue }
@@ -467,6 +590,8 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
             return "Harmonic mode, chord generation, rhythm"
         case .expression:
             return "Velocity, tone shifting, expression"
+        case .rhythmicAccompaniment:
+            return "Rhythmic accompaniment settings and controls"
         case .autoGeneration:
             return "Auto-generation settings and controls"
         }

@@ -645,5 +645,62 @@ final class PatternGeneratorTests: XCTestCase {
         XCTAssertNotEqual(12, result.count, "Complex parameters should affect note count")
     }
     
+    // MARK: - Automatic Generator Selection Tests
+    
+    func testAutomaticGeneratorSelection() {
+        let parameterManager = ParameterManager()
+        
+        // Test initial state
+        XCTAssertTrue(parameterManager.automaticGeneratorSelectionEnabled)
+        XCTAssertEqual(parameterManager.activeGenerators, ["Scale Pattern Generator"])
+        XCTAssertEqual(parameterManager.combinationMode, .sequential)
+        
+        // Test interval parameters activation
+        parameterManager.primaryInterval = 3
+        parameterManager.secondaryInterval = 5
+        parameterManager.intervalInversion = true
+        
+        // Should now include Interval Pattern Generator
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Scale Pattern Generator"))
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Interval Pattern Generator"))
+        XCTAssertEqual(parameterManager.combinationMode, .sequential)
+        
+        // Test modulation parameters activation
+        parameterManager.interpolation.enabled = true
+        parameterManager.interpolation.numberOfNotes = 2
+        
+        // Should now include Modulation Pattern Generator
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Modulation Pattern Generator"))
+        
+        // Test harmonic parameters activation
+        parameterManager.harmonicMode = .modal
+        parameterManager.chordGeneration.enabled = true
+        
+        // Should now include Harmonic Pattern Generator and use layered mode
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Harmonic Pattern Generator"))
+        XCTAssertEqual(parameterManager.combinationMode, .layered)
+        
+        // Test rhythmic parameters activation
+        parameterManager.noteDurationPattern = .alternating
+        parameterManager.rhythmicDensity = 1.5
+        
+        // Should now include Rhythmic Pattern Generator
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Rhythmic Pattern Generator"))
+        
+        // Test symmetrical parameters activation
+        parameterManager.symmetricalIntervals = true
+        parameterManager.mirrorPoints = 2
+        
+        // Should now include Symmetrical Pattern Generator
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Symmetrical Pattern Generator"))
+        
+        // Test disabling automatic selection
+        parameterManager.automaticGeneratorSelectionEnabled = false
+        parameterManager.updateGeneratorSelection()
+        
+        // Should revert to single generator
+        XCTAssertEqual(parameterManager.activeGenerators, [parameterManager.selectedGeneratorForAutoGeneration])
+    }
+    
 
 } 

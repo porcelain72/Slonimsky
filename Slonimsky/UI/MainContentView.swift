@@ -17,11 +17,11 @@ struct MainContentView: View {
     // MARK: - State Properties
     @State private var selectedGenerator: String = "Scale Pattern Generator"
     @State private var showPianoRoll = true
-    @State private var showSheetMusic = true
     @State private var showParameterControls = true
     @State private var isGenerating = false
     @State private var showPresetPicker = false
     @State private var showRandomizeDialog = false
+    @State private var showSheetMusicPopup = false
     
     // MARK: - Body
     var body: some View {
@@ -48,14 +48,6 @@ struct MainContentView: View {
                     )
                     .frame(minWidth: 400, maxWidth: .infinity)
                 }
-                
-                // Right Panel: Sheet Music
-                if showSheetMusic {
-                    SheetMusicPanelView(
-                        midiService: midiService
-                    )
-                    .frame(minWidth: 400, maxWidth: .infinity)
-                }
             }
             .navigationTitle("Slonimsky Pattern Generator")
             .toolbar {
@@ -71,10 +63,11 @@ struct MainContentView: View {
                         Text("Piano Roll")
                     }
                     
-                    Button(action: { showSheetMusic.toggle() }) {
-                        Image(systemName: showSheetMusic ? "music.note.list" : "music.note.list.slash")
+                    Button(action: { showSheetMusicPopup = true }) {
+                        Image(systemName: "music.note.list")
                         Text("Sheet Music")
                     }
+                    .disabled(midiService.currentPattern == nil)
                 }
                 
                 ToolbarItemGroup(placement: .primaryAction) {
@@ -104,6 +97,9 @@ struct MainContentView: View {
                 midiService: midiService,
                 isGenerating: $isGenerating
             )
+        }
+        .sheet(isPresented: $showSheetMusicPopup) {
+            SheetMusicPopupView(midiService: midiService)
         }
         .alert("Randomize Parameters", isPresented: $showRandomizeDialog) {
             Button("Randomize All") {
@@ -184,6 +180,6 @@ struct MainContentView: View {
 struct MainContentView_Previews: PreviewProvider {
     static var previews: some View {
         MainContentView()
-            .frame(minWidth: 1200, minHeight: 800)
+            .frame(minWidth: 800, minHeight: 600)
     }
 } 

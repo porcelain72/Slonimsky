@@ -215,6 +215,9 @@ class ModulationPatternGenerator: BasePatternGenerator {
     ) -> [Int] {
         var notes: [Int] = []
         
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
+        
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i
             let interpolatedNote = startNote + interval
@@ -235,6 +238,9 @@ class ModulationPatternGenerator: BasePatternGenerator {
     ) -> [Int] {
         var notes: [Int] = []
         
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
+        
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i
             let infrapolatedNote = baseNote - interval
@@ -254,6 +260,9 @@ class ModulationPatternGenerator: BasePatternGenerator {
         index: Int
     ) -> [Int] {
         var notes: [Int] = []
+        
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
         
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i

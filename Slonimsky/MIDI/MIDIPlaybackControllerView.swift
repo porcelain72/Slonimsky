@@ -155,7 +155,7 @@ struct MIDIPlaybackControllerView: View {
         }
         .padding(.horizontal, 16)
         .padding(.vertical, 12)
-        .frame(minHeight: 320.0)
+        .frame(height: 240.0)
        
         .background(Color(NSColor.controlBackgroundColor))
         .cornerRadius(12)

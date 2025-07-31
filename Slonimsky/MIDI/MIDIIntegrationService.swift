@@ -42,6 +42,9 @@ class MIDIIntegrationService: ObservableObject {
     func setupAutoGeneration(with parameterManager: ParameterManager) {
         self.parameterManager = parameterManager
         
+        // Set parameter manager in MIDI engine for rhythmic accompaniment
+        midiEngine.setParameterManager(parameterManager)
+        
         // Subscribe to auto-generation triggers
         parameterManager.autoGenerationPublisher
             .sink { [weak self] in
@@ -54,24 +57,48 @@ class MIDIIntegrationService: ObservableObject {
     private func handleAutoGeneration() {
         guard let parameterManager = parameterManager else { return }
         
-        let generatorName = parameterManager.selectedGeneratorForAutoGeneration
         let parameters = parameterManager.currentParameters
         
-        // Generate new pattern
-        guard let result = patternRegistry.generatePattern(
-            using: generatorName,
-            parameters: parameters
-        ) else {
-            print("❌ Auto-generation failed: pattern generation failed")
-            return
-        }
-        
-        // Update the MIDI sequence seamlessly
-        if midiEngine.updateSequence(with: result) {
-            self.currentPattern = result
-            print("🔄 Auto-generated new sequence successfully")
+        // Use automatic generator selection if enabled
+        if parameterManager.automaticGeneratorSelectionEnabled && parameterManager.activeGenerators.count > 1 {
+            // Use combined generation
+            guard let result = patternRegistry.generateCombinedPattern(
+                using: parameterManager.activeGenerators,
+                parameters: parameters,
+                combinationMode: parameterManager.combinationMode
+            ) else {
+                print("❌ Auto-generation failed: combined pattern generation failed")
+                return
+            }
+            
+            // Update the MIDI sequence seamlessly
+            if midiEngine.updateSequence(with: result) {
+                self.currentPattern = result
+                print("🔄 Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
+            } else {
+                print("❌ Auto-generation failed: sequence update failed")
+            }
         } else {
-            print("❌ Auto-generation failed: sequence update failed")
+            // Use single generator (either manual selection or automatic single generator)
+            let generatorName = parameterManager.automaticGeneratorSelectionEnabled ? 
+                parameterManager.activeGenerators.first ?? parameterManager.selectedGeneratorForAutoGeneration :
+                parameterManager.selectedGeneratorForAutoGeneration
+            
+            guard let result = patternRegistry.generatePattern(
+                using: generatorName,
+                parameters: parameters
+            ) else {
+                print("❌ Auto-generation failed: pattern generation failed")
+                return
+            }
+            
+            // Update the MIDI sequence seamlessly
+            if midiEngine.updateSequence(with: result) {
+                self.currentPattern = result
+                print("🔄 Auto-generated sequence with \(generatorName)")
+            } else {
+                print("❌ Auto-generation failed: sequence update failed")
+            }
         }
     }
     

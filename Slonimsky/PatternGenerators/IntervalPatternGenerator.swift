@@ -280,6 +280,9 @@ class IntervalPatternGenerator: BasePatternGenerator {
     ) -> [MIDIInfo] {
         var notes: [MIDIInfo] = []
         
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
+        
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i
             let interpolatedNote = startNote.note + interval
@@ -310,6 +313,9 @@ class IntervalPatternGenerator: BasePatternGenerator {
     ) -> [MIDIInfo] {
         var notes: [MIDIInfo] = []
         
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
+        
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i
             let infrapolatedNote = baseNote.note - interval
@@ -339,6 +345,9 @@ class IntervalPatternGenerator: BasePatternGenerator {
         velocitySettings: VelocitySettings
     ) -> [MIDIInfo] {
         var notes: [MIDIInfo] = []
+        
+        // Guard against numberOfNotes being 0
+        guard settings.numberOfNotes > 0 else { return notes }
         
         for i in 1...settings.numberOfNotes {
             let interval = settings.interval * i

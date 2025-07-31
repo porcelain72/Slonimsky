@@ -350,8 +350,8 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "451"
             endingLineNumber = "451"
-            landmarkName = "MIDIEngine"
-            landmarkType = "3">
+            landmarkName = "generateRhythmicAccompaniment(from:)"
+            landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -366,7 +366,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "447"
             endingLineNumber = "447"
-            landmarkName = "updateAvailableDestinations()"
+            landmarkName = "generateRhythmicAccompaniment(from:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -382,7 +382,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "129"
             endingLineNumber = "129"
-            landmarkName = "resume()"
+            landmarkName = "pause()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

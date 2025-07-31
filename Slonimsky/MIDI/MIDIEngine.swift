@@ -21,6 +21,9 @@ class MIDIEngine: ObservableObject {
     @Published var selectedDestination: MIDIDestination?
     @Published var isLooping = false
     
+    // MARK: - Parameter Manager Reference
+    private weak var parameterManager: ParameterManager?
+    
     // MARK: - Private Properties
     private var musicSequence: MusicSequence?
     private var musicPlayer: MusicPlayer?
@@ -45,6 +48,18 @@ class MIDIEngine: ObservableObject {
     }
     
     // MARK: - Public Methods
+    
+    /// Set the parameter manager reference
+    /// - Parameter manager: The parameter manager instance
+    func setParameterManager(_ manager: ParameterManager) {
+        self.parameterManager = manager
+    }
+    
+    /// Get the parameter manager reference
+    /// - Returns: The parameter manager or nil if not set
+    private func getParameterManager() -> ParameterManager? {
+        return parameterManager
+    }
     
     /// Generate a MusicSequence from pattern generation result
     /// - Parameter result: The pattern generation result
@@ -425,15 +440,88 @@ class MIDIEngine: ObservableObject {
     private func generateRhythmicAccompaniment(from notes: [MIDIInfo]) -> [MIDIInfo] {
         var rhythmNotes: [MIDIInfo] = []
         
-        // Create simple rhythmic pattern
+        // Get rhythmic accompaniment settings from parameter manager
+        guard let parameterManager = getParameterManager() else {
+            return rhythmNotes
+        }
+        
+        guard parameterManager.rhythmicAccompanimentEnabled else {
+            return rhythmNotes
+        }
+        
+        let style = parameterManager.rhythmicAccompanimentStyle
+        let density = parameterManager.rhythmicAccompanimentDensity
+        let velocity = parameterManager.rhythmicAccompanimentVelocity
+        
+        // Calculate base velocity (0-127)
+        let baseVelocity = UInt8(clamping: Int(velocity * 127))
+        
+        // Create rhythmic pattern based on style
         for (index, note) in notes.enumerated() {
-            if index % 4 == 0 {
-                // Bass drum
-                rhythmNotes.append(MIDIInfo(note: 36, velocity: 80, beatLength: 0.25))
-            }
-            if index % 2 == 1 {
-                // Hi-hat
-                rhythmNotes.append(MIDIInfo(note: 42, velocity: 60, beatLength: 0.25))
+            let densityMultiplier = Int(density * 4)
+            
+            switch style {
+            case .basic:
+                if index % densityMultiplier == 0 {
+                    // Bass drum
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                }
+                if index % (densityMultiplier / 2) == 1 {
+                    // Hi-hat
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                }
+                
+            case .jazz:
+                if index % densityMultiplier == 0 {
+                    // Bass drum
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                }
+                if index % (densityMultiplier / 2) == 1 {
+                    // Ride cymbal
+                    rhythmNotes.append(MIDIInfo(note: 51, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                }
+                if index % densityMultiplier == 2 {
+                    // Snare drum
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.9)), beatLength: 0.25))
+                }
+                
+            case .latin:
+                if index % densityMultiplier == 0 {
+                    // Conga
+                    rhythmNotes.append(MIDIInfo(note: 60, velocity: baseVelocity, beatLength: 0.25))
+                }
+                if index % (densityMultiplier / 2) == 1 {
+                    // Claves
+                    rhythmNotes.append(MIDIInfo(note: 75, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                }
+                if index % densityMultiplier == 2 {
+                    // Bongo
+                    rhythmNotes.append(MIDIInfo(note: 61, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                }
+                
+            case .electronic:
+                if index % densityMultiplier == 0 {
+                    // Kick drum
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                }
+                if index % (densityMultiplier / 2) == 1 {
+                    // Closed hi-hat
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.6)), beatLength: 0.25))
+                }
+                if index % densityMultiplier == 2 {
+                    // Snare drum
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                }
+                
+            case .orchestral:
+                if index % densityMultiplier == 0 {
+                    // Timpani
+                    rhythmNotes.append(MIDIInfo(note: 47, velocity: baseVelocity, beatLength: 0.5))
+                }
+                if index % (densityMultiplier / 2) == 1 {
+                    // Bass drum
+                    rhythmNotes.append(MIDIInfo(note: 35, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                }
             }
         }
         

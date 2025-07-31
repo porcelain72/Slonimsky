@@ -242,6 +242,15 @@ enum DurationPattern: String, CaseIterable, Codable {
     case random = "Random"
 }
 
+/// Rhythmic accompaniment styles
+enum RhythmicAccompanimentStyle: String, CaseIterable, Codable {
+    case basic = "Basic"
+    case jazz = "Jazz"
+    case latin = "Latin"
+    case electronic = "Electronic"
+    case orchestral = "Orchestral"
+}
+
 /// Harmonic modes for tonal context
 enum HarmonicMode: String, CaseIterable, Codable {
     case modal = "Modal"

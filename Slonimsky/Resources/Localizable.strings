@@ -57,6 +57,14 @@
 "expression_parameters_velocity" = "Velocity Settings: Control the dynamic intensity of each note. Creates expressive, human-like performances.";
 "expression_parameters_tone_shifting" = "Tone Shifting: Gradual pitch changes over time. Creates evolving, shifting tonal centers.";
 
+// Rhythmic Accompaniment Parameters Section
+"rhythmic_accompaniment_parameters_title" = "Rhythmic Accompaniment";
+"rhythmic_accompaniment_parameters_description" = "Add rhythmic accompaniment to your patterns. These parameters control drum patterns, percussion, and rhythmic backing tracks that complement your melodic patterns.";
+"rhythmic_accompaniment_parameters_enabled" = "Enable: Turn rhythmic accompaniment on or off. When enabled, drum patterns will be generated alongside your melodic patterns.";
+"rhythmic_accompaniment_parameters_style" = "Style: Choose the type of rhythmic accompaniment. Different styles use different drum sounds and patterns (Basic, Jazz, Latin, Electronic, Orchestral).";
+"rhythmic_accompaniment_parameters_density" = "Density: Control how many rhythmic notes are generated. Higher density creates busier, more complex rhythmic patterns.";
+"rhythmic_accompaniment_parameters_velocity" = "Velocity: Control the dynamic intensity of the rhythmic accompaniment. Higher values create louder, more prominent drum patterns.";
+
 /* Parameter Detail Descriptions */
 
 // Basic Parameter Details

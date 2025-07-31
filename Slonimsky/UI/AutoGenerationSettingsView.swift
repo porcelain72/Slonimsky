@@ -31,22 +31,70 @@ struct AutoGenerationSettingsView: View {
             }
             
             if parameterManager.autoGenerateEnabled {
-                // Generator Selection
+                // Automatic Generator Selection
                 VStack(alignment: .leading, spacing: 8) {
-                    Text("Generator")
-                        .font(.headline)
-                        .foregroundColor(.primary)
-                    
-                    Picker("Generator", selection: $parameterManager.selectedGeneratorForAutoGeneration) {
-                        Text("Scale Pattern Generator").tag("Scale Pattern Generator")
-                        Text("Interval Pattern Generator").tag("Interval Pattern Generator")
-                        Text("Harmonic Pattern Generator").tag("Harmonic Pattern Generator")
-                        Text("Symmetrical Pattern Generator").tag("Symmetrical Pattern Generator")
-                        Text("Contour Pattern Generator").tag("Contour Pattern Generator")
-                        Text("Rhythmic Pattern Generator").tag("Rhythmic Pattern Generator")
-                        Text("Modulation Pattern Generator").tag("Modulation Pattern Generator")
+                    HStack {
+                        Toggle("Automatic Generator Selection", isOn: $parameterManager.automaticGeneratorSelectionEnabled)
+                            .toggleStyle(SwitchToggleStyle())
+                        
+                        Spacer()
+                        
+                        if parameterManager.automaticGeneratorSelectionEnabled {
+                            Image(systemName: "brain.head.profile")
+                                .foregroundColor(.blue)
+                                .font(.title2)
+                        }
                     }
-                    .pickerStyle(MenuPickerStyle())
+                    
+                    if parameterManager.automaticGeneratorSelectionEnabled {
+                        // Show active generators
+                        VStack(alignment: .leading, spacing: 4) {
+                            Text("Active Generators:")
+                                .font(.subheadline)
+                                .foregroundColor(.secondary)
+                            
+                            ForEach(parameterManager.activeGenerators, id: \.self) { generator in
+                                HStack {
+                                    Image(systemName: "checkmark.circle.fill")
+                                        .foregroundColor(.green)
+                                        .font(.caption)
+                                    Text(generator)
+                                        .font(.caption)
+                                        .foregroundColor(.primary)
+                                }
+                            }
+                            
+                            if parameterManager.activeGenerators.count > 1 {
+                                HStack {
+                                    Image(systemName: "arrow.triangle.merge")
+                                        .foregroundColor(.orange)
+                                        .font(.caption)
+                                    Text("Combination Mode: \(parameterManager.combinationMode.rawValue)")
+                                        .font(.caption)
+                                        .foregroundColor(.secondary)
+                                }
+                            }
+                        }
+                        .padding(.leading, 8)
+                    } else {
+                        // Manual Generator Selection
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("Generator")
+                                .font(.headline)
+                                .foregroundColor(.primary)
+                            
+                            Picker("Generator", selection: $parameterManager.selectedGeneratorForAutoGeneration) {
+                                Text("Scale Pattern Generator").tag("Scale Pattern Generator")
+                                Text("Interval Pattern Generator").tag("Interval Pattern Generator")
+                                Text("Harmonic Pattern Generator").tag("Harmonic Pattern Generator")
+                                Text("Symmetrical Pattern Generator").tag("Symmetrical Pattern Generator")
+                                Text("Contour Pattern Generator").tag("Contour Pattern Generator")
+                                Text("Rhythmic Pattern Generator").tag("Rhythmic Pattern Generator")
+                                Text("Modulation Pattern Generator").tag("Modulation Pattern Generator")
+                            }
+                            .pickerStyle(MenuPickerStyle())
+                        }
+                    }
                 }
                 
                 // Delay Setting
@@ -88,10 +136,17 @@ struct AutoGenerationSettingsView: View {
                             .fontWeight(.medium)
                     }
                     
-                    Text("When enabled, new sequences will be automatically generated when parameters change. If looping is active, the new sequence will be used on the next iteration.")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .fixedSize(horizontal: false, vertical: true)
+                    if parameterManager.automaticGeneratorSelectionEnabled {
+                        Text("Automatic generator selection analyzes your active parameters and selects the most appropriate generators. Multiple generators can be combined automatically for complex patterns.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    } else {
+                        Text("When enabled, new sequences will be automatically generated when parameters change. If looping is active, the new sequence will be used on the next iteration.")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                            .fixedSize(horizontal: false, vertical: true)
+                    }
                 }
                 .padding(.top, 8)
             }
