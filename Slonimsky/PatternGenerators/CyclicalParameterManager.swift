@@ -69,30 +69,30 @@ class CyclicalParameterManager: ObservableObject {
         let modifiedInterpolation = ModulationSettings(
             numberOfNotes: Int(cyclicalSettings.interpolationNotes.currentValue(baseValue: Double(baseParameters.interpolation.numberOfNotes))),
             interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.interpolation.interval))),
-            direction: baseParameters.interpolation.direction,
-            rhythm: baseParameters.interpolation.rhythm
+            enabled: baseParameters.interpolation.enabled
         )
         
         let modifiedInfrapolation = ModulationSettings(
             numberOfNotes: Int(cyclicalSettings.infrapolationNotes.currentValue(baseValue: Double(baseParameters.infrapolation.numberOfNotes))),
             interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.infrapolation.interval))),
-            direction: baseParameters.infrapolation.direction,
-            rhythm: baseParameters.infrapolation.rhythm
+            enabled: baseParameters.infrapolation.enabled
         )
         
         let modifiedUltrapolation = ModulationSettings(
             numberOfNotes: Int(cyclicalSettings.ultrapolationNotes.currentValue(baseValue: Double(baseParameters.ultrapolation.numberOfNotes))),
             interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.ultrapolation.interval))),
-            direction: baseParameters.ultrapolation.direction,
-            rhythm: baseParameters.ultrapolation.rhythm
+            enabled: baseParameters.ultrapolation.enabled
         )
         
         // Create modified velocity settings
         let modifiedVelocitySettings = VelocitySettings(
-            baseVelocity: Int(cyclicalSettings.baseVelocity.currentValue(baseValue: Double(baseParameters.velocitySettings.baseVelocity))),
-            velocityRange: Int(cyclicalSettings.velocityRange.currentValue(baseValue: Double(baseParameters.velocitySettings.velocityRange))),
-            accentPattern: baseParameters.velocitySettings.accentPattern,
-            dynamicRange: baseParameters.velocitySettings.dynamicRange
+            baseVelocity: UInt8(cyclicalSettings.baseVelocity.currentValue(baseValue: Double(baseParameters.velocitySettings.baseVelocity))),
+            range: UInt8(cyclicalSettings.velocityRange.currentValue(baseValue: Double(baseParameters.velocitySettings.range))),
+            waveDepth: baseParameters.velocitySettings.waveDepth,
+            randomness: baseParameters.velocitySettings.randomness,
+            phase: baseParameters.velocitySettings.phase,
+            emphasisBeat: baseParameters.velocitySettings.emphasisBeat,
+            emphasisAmount: baseParameters.velocitySettings.emphasisAmount
         )
         
         return PatternParameters(

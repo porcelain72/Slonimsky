@@ -50,6 +50,7 @@
 		98C309992E3940B7000D9EC7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 98C309952E3940B7000D9EC7 /* Localizable.strings */; };
 		98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */; };
 		98C3099D2E3B893D000D9EC7 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
+		98C3099F2E3B8E64000D9EC7 /* CyclicalParameterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -116,6 +117,7 @@
 		98C309952E3940B7000D9EC7 /* Localizable.strings */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.strings; path = Localizable.strings; sourceTree = "<group>"; };
 		98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPopupView.swift; sourceTree = "<group>"; };
 		98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterSettings.swift; sourceTree = "<group>"; };
+		98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterManager.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -226,6 +228,7 @@
 		98C309542E393311000D9EC7 /* PatternGenerators */ = {
 			isa = PBXGroup;
 			children = (
+				98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */,
 				98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */,
 				98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */,
 				98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */,
@@ -454,6 +457,7 @@
 				98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */,
 				98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */,
 				98C309962E3940B7000D9EC7 /* String+Localization.swift in Sources */,
+				98C3099F2E3B8E64000D9EC7 /* CyclicalParameterManager.swift in Sources */,
 				98C3099D2E3B893D000D9EC7 /* CyclicalParameterSettings.swift in Sources */,
 				98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */,
 				98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */,

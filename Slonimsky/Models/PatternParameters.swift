@@ -38,8 +38,8 @@ struct PatternParameters: Codable, Equatable, Hashable {
     
     // MARK: - Rhythmic Patterns
     let noteDurationPattern: DurationPattern
-    let baseNoteDuration: TimeInterval
-    let rhythmicDensity: Double
+    var baseNoteDuration: TimeInterval
+    var rhythmicDensity: Double
     let syncopationLevel: Double
     let metricModulation: MetricModulationSettings
     
