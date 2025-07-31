@@ -6,9 +6,9 @@ final class MIDIFileGeneratorTests: XCTestCase {
     
     func testMIDITrackCreation() throws {
         let midiInfos = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 1.0),
-            MIDIInfo(note: 62, velocity: 75, beatLength: 0.5),
-            MIDIInfo(note: 64, velocity: 85, beatLength: 1.0)
+            MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0),
+            MIDIInfo(note: 62, velocity: 75, beatLength: 0.5, cycleIndex: 0),
+            MIDIInfo(note: 64, velocity: 85, beatLength: 1.0, cycleIndex: 0)
         ]
         
         let track = MIDITrack(notes: midiInfos)
@@ -20,9 +20,9 @@ final class MIDIFileGeneratorTests: XCTestCase {
     }
     
     func testMIDIInfoEquality() throws {
-        let midiInfo1 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0)
-        let midiInfo2 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0)
-        let midiInfo3 = MIDIInfo(note: 62, velocity: 80, beatLength: 1.0)
+        let midiInfo1 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo2 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo3 = MIDIInfo(note: 62, velocity: 80, beatLength: 1.0, cycleIndex: 0)
         
         XCTAssertEqual(midiInfo1, midiInfo2, "Identical MIDIInfo objects should be equal")
         XCTAssertNotEqual(midiInfo1, midiInfo3, "Different MIDIInfo objects should not be equal")
@@ -61,9 +61,9 @@ final class MIDIFileGeneratorTests: XCTestCase {
     
     func testMIDIInfoVelocityRange() throws {
         // Test valid velocity values
-        let midiInfo1 = MIDIInfo(note: 60, velocity: 1, beatLength: 1.0)
-        let midiInfo2 = MIDIInfo(note: 60, velocity: 127, beatLength: 1.0)
-        let midiInfo3 = MIDIInfo(note: 60, velocity: 64, beatLength: 1.0)
+        let midiInfo1 = MIDIInfo(note: 60, velocity: 1, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo2 = MIDIInfo(note: 60, velocity: 127, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo3 = MIDIInfo(note: 60, velocity: 64, beatLength: 1.0, cycleIndex: 0)
         
         XCTAssertEqual(midiInfo1.velocity, 1, "Minimum velocity should be 1")
         XCTAssertEqual(midiInfo2.velocity, 127, "Maximum velocity should be 127")
@@ -72,9 +72,9 @@ final class MIDIFileGeneratorTests: XCTestCase {
     
     func testMIDIInfoNoteRange() throws {
         // Test valid note values
-        let midiInfo1 = MIDIInfo(note: 0, velocity: 80, beatLength: 1.0)
-        let midiInfo2 = MIDIInfo(note: 127, velocity: 80, beatLength: 1.0)
-        let midiInfo3 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0) // Middle C
+        let midiInfo1 = MIDIInfo(note: 0, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo2 = MIDIInfo(note: 127, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo3 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0) // Middle C
         
         XCTAssertEqual(midiInfo1.note, 0, "Minimum note should be 0")
         XCTAssertEqual(midiInfo2.note, 127, "Maximum note should be 127")
@@ -82,9 +82,9 @@ final class MIDIFileGeneratorTests: XCTestCase {
     }
     
     func testMIDIInfoBeatLength() throws {
-        let midiInfo1 = MIDIInfo(note: 60, velocity: 80, beatLength: 0.25)
-        let midiInfo2 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0)
-        let midiInfo3 = MIDIInfo(note: 60, velocity: 80, beatLength: 4.0)
+        let midiInfo1 = MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0)
+        let midiInfo2 = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+        let midiInfo3 = MIDIInfo(note: 60, velocity: 80, beatLength: 4.0, cycleIndex: 0)
         
         XCTAssertEqual(midiInfo1.beatLength, 0.25, "Short beat length should be 0.25")
         XCTAssertEqual(midiInfo2.beatLength, 1.0, "Standard beat length should be 1.0")
@@ -98,7 +98,7 @@ final class MIDIFileGeneratorTests: XCTestCase {
     }
     
     func testMIDITrackSingleNote() throws {
-        let midiInfo = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0)
+        let midiInfo = MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)
         let track = MIDITrack(notes: [midiInfo])
         
         XCTAssertEqual(track.notes.count, 1, "Track should have 1 note")

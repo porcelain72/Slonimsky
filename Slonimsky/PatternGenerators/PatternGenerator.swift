@@ -56,6 +56,18 @@ class BasePatternGenerator: PatternGenerator {
         fatalError("Subclasses must implement generatePattern with cycleIndex")
     }
     
+    /// Apply cyclical changes to parameters for the current cycle
+    func applyCyclicalChanges(to parameters: PatternParameters, cycleIndex: Int) -> PatternParameters {
+        // Create a cyclical parameter manager with the current settings
+        let cyclicalManager = CyclicalParameterManager(cyclicalSettings: parameters.cyclicalSettings)
+        
+        // Set the current cycle
+        cyclicalManager.currentCycle = cycleIndex
+        
+        // Get the modified parameters
+        return cyclicalManager.getModifiedParameters(from: parameters)
+    }
+    
     func estimateNoteCount(parameters: PatternParameters) -> Int {
         fatalError("Subclasses must implement estimateNoteCount")
     }
@@ -217,6 +229,8 @@ class BasePatternGenerator: PatternGenerator {
             parameterSettings = settings.infrapolationNotes
         case .ultrapolationNotes:
             parameterSettings = settings.ultrapolationNotes
+        case .modulationInterval:
+            parameterSettings = settings.modulationInterval
         case .baseNoteDuration:
             parameterSettings = settings.baseNoteDuration
         case .rhythmicDensity:
@@ -229,6 +243,16 @@ class BasePatternGenerator: PatternGenerator {
             parameterSettings = settings.baseVelocity
         case .velocityRange:
             parameterSettings = settings.velocityRange
+        case .tempo:
+            parameterSettings = settings.tempo
+        case .rootNote:
+            parameterSettings = settings.rootNote
+        case .numberOfOctaves:
+            parameterSettings = settings.numberOfOctaves
+        case .divisionsOfOctave:
+            parameterSettings = settings.divisionsOfOctave
+        case .mirrorPoints:
+            parameterSettings = settings.mirrorPoints
         }
         
         guard let settings = parameterSettings, settings.isEnabled else { return nil }
@@ -292,6 +316,8 @@ struct PatternMetadata {
     let pitchRange: ClosedRange<Int>
     let duration: TimeInterval
     let cycleIndex: Int
+    let isCyclicalSequence: Bool
+    let totalCycles: Int
     
     init(
         generatorName: String,
@@ -300,7 +326,9 @@ struct PatternMetadata {
         noteCount: Int,
         pitchRange: ClosedRange<Int>,
         duration: TimeInterval,
-        cycleIndex: Int = 0
+        cycleIndex: Int = 0,
+        isCyclicalSequence: Bool = false,
+        totalCycles: Int = 1
     ) {
         self.generatorName = generatorName
         self.parameterHash = parameterHash
@@ -309,6 +337,8 @@ struct PatternMetadata {
         self.pitchRange = pitchRange
         self.duration = duration
         self.cycleIndex = cycleIndex
+        self.isCyclicalSequence = isCyclicalSequence
+        self.totalCycles = totalCycles
     }
 }
 

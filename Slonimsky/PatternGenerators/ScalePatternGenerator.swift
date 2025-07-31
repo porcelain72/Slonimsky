@@ -18,22 +18,29 @@ class ScalePatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate base scale notes
-        let baseNotes = generateBaseScale(parameters: parameters)
+        let baseNotes = generateBaseScale(parameters: modifiedParameters)
         
         // Use ParameterApplicationManager to apply parameters in correct order
         let finalNotes = ParameterApplicationManager.applyParameters(
             baseNotes: baseNotes,
-            parameters: parameters,
+            parameters: modifiedParameters,
             generatorType: "Scale"
         )
         
         // Apply Slonimsky modulations (final step)
         let modulatedNotes = applySlonimskyModulations(
             notes: finalNotes,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -42,7 +49,7 @@ class ScalePatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: modulatedNotes.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return modulatedNotes
@@ -184,7 +191,8 @@ class ScalePatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }
@@ -257,7 +265,8 @@ class ScalePatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: interpolatedNote,
                     velocity: velocity,
-                    beatLength: startNote.beatLength
+                    beatLength: startNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }
@@ -289,7 +298,8 @@ class ScalePatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: infrapolatedNote,
                     velocity: velocity,
-                    beatLength: baseNote.beatLength
+                    beatLength: baseNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }
@@ -322,7 +332,8 @@ class ScalePatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: ultrapolatedNote,
                     velocity: velocity,
-                    beatLength: baseNote.beatLength
+                    beatLength: baseNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }

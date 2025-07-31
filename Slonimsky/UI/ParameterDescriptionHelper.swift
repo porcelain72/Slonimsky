@@ -28,7 +28,7 @@ struct ParameterDescriptionHelper {
             return "harmonic_parameters_description".localized
         case .expression:
             return "expression_parameters_description".localized
-        case .rhythmicAccompaniment:
+        case .accompaniment:
             return "rhythmic_accompaniment_parameters_description".localized
         case .autoGeneration:
             return "auto_generation_parameters_description".localized
@@ -51,7 +51,7 @@ struct ParameterDescriptionHelper {
             return "harmonic_parameters_title".localized
         case .expression:
             return "expression_parameters_title".localized
-        case .rhythmicAccompaniment:
+        case .accompaniment:
             return "rhythmic_accompaniment_parameters_title".localized
         case .autoGeneration:
             return "auto_generation_parameters_title".localized
@@ -112,7 +112,7 @@ struct ParameterDescriptionHelper {
                 "expression_parameters_velocity".localized,
                 "expression_parameters_tone_shifting".localized
             ]
-        case .rhythmicAccompaniment:
+        case .accompaniment:
             return [
                 "rhythmic_accompaniment_parameters_enabled".localized,
                 "rhythmic_accompaniment_parameters_style".localized,

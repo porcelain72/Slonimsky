@@ -274,8 +274,8 @@ class ParameterManager: ObservableObject {
                 randomizeHarmonicParameters()
             case .expression:
                 randomizeExpressionParameters()
-            case .rhythmicAccompaniment:
-                randomizeRhythmicAccompanimentParameters()
+                    case .accompaniment:
+            randomizeRhythmicAccompanimentParameters()
             case .autoGeneration:
                 // Auto-generation doesn't need randomization
                 break
@@ -617,39 +617,4 @@ class ParameterManager: ObservableObject {
 // MARK: - Supporting Types
 
 /// Parameter categories for selective randomization
-enum ParameterCategory: String, CaseIterable, Identifiable {
-    case basic = "Basic"
-    case intervals = "Intervals"
-    case modulations = "Modulations"
-    case directional = "Directional"
-    case rhythmic = "Rhythmic"
-    case harmonic = "Harmonic"
-    case expression = "Expression"
-    case rhythmicAccompaniment = "Rhythmic Accompaniment"
-    case autoGeneration = "Auto-generation"
-    
-    var id: String { rawValue }
-    
-    var description: String {
-        switch self {
-        case .basic:
-            return "Root note, scale type, octaves, tempo"
-        case .intervals:
-            return "Primary/secondary intervals, patterns, inversions"
-        case .modulations:
-            return "Interpolation, infrapolation, ultrapolation"
-        case .directional:
-            return "Direction, mirror points, retrograde, contours"
-        case .rhythmic:
-            return "Duration patterns, density, syncopation"
-        case .harmonic:
-            return "Harmonic mode, chord generation, rhythm"
-        case .expression:
-            return "Velocity, tone shifting, expression"
-        case .rhythmicAccompaniment:
-            return "Rhythmic accompaniment settings and controls"
-        case .autoGeneration:
-            return "Auto-generation settings and controls"
-        }
-    }
-} 
+/// Note: ParameterCategory enum is now defined in ParameterPanelView.swift 

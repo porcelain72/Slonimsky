@@ -464,63 +464,63 @@ class MIDIEngine: ObservableObject {
             case .basic:
                 if index % densityMultiplier == 0 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Hi-hat
-                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
                 }
                 
             case .jazz:
                 if index % densityMultiplier == 0 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Ride cymbal
-                    rhythmNotes.append(MIDIInfo(note: 51, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 51, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Snare drum
-                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.9)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.9)), beatLength: 0.25, cycleIndex: 0))
                 }
                 
             case .latin:
                 if index % densityMultiplier == 0 {
                     // Conga
-                    rhythmNotes.append(MIDIInfo(note: 60, velocity: baseVelocity, beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 60, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Claves
-                    rhythmNotes.append(MIDIInfo(note: 75, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 75, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Bongo
-                    rhythmNotes.append(MIDIInfo(note: 61, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 61, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
                 }
                 
             case .electronic:
                 if index % densityMultiplier == 0 {
                     // Kick drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Closed hi-hat
-                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.6)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.6)), beatLength: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Snare drum
-                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
                 }
                 
             case .orchestral:
                 if index % densityMultiplier == 0 {
                     // Timpani
-                    rhythmNotes.append(MIDIInfo(note: 47, velocity: baseVelocity, beatLength: 0.5))
+                    rhythmNotes.append(MIDIInfo(note: 47, velocity: baseVelocity, beatLength: 0.5, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 35, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25))
+                    rhythmNotes.append(MIDIInfo(note: 35, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
                 }
             }
         }

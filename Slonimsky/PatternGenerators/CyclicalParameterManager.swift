@@ -54,6 +54,14 @@ class CyclicalParameterManager: ObservableObject {
             return cyclicalSettings.velocityRange.currentValue(baseValue: baseValue)
         case "tempo":
             return cyclicalSettings.tempo.currentValue(baseValue: baseValue)
+        case "rootNote":
+            return cyclicalSettings.rootNote.currentValue(baseValue: baseValue)
+        case "numberOfOctaves":
+            return cyclicalSettings.numberOfOctaves.currentValue(baseValue: baseValue)
+        case "divisionsOfOctave":
+            return cyclicalSettings.divisionsOfOctave.currentValue(baseValue: baseValue)
+        case "mirrorPoints":
+            return cyclicalSettings.mirrorPoints.currentValue(baseValue: baseValue)
         default:
             return baseValue
         }
@@ -96,10 +104,10 @@ class CyclicalParameterManager: ObservableObject {
         )
         
         return PatternParameters(
-            rootNote: baseParameters.rootNote,
+            rootNote: Int(cyclicalSettings.rootNote.currentValue(baseValue: Double(baseParameters.rootNote))),
             scaleType: baseParameters.scaleType,
-            numberOfOctaves: baseParameters.numberOfOctaves,
-            divisionsOfOctave: baseParameters.divisionsOfOctave,
+            numberOfOctaves: Int(cyclicalSettings.numberOfOctaves.currentValue(baseValue: Double(baseParameters.numberOfOctaves))),
+            divisionsOfOctave: Int(cyclicalSettings.divisionsOfOctave.currentValue(baseValue: Double(baseParameters.divisionsOfOctave))),
             tempo: cyclicalSettings.tempo.currentValue(baseValue: baseParameters.tempo),
             timeSignature: baseParameters.timeSignature,
             primaryInterval: Int(cyclicalSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
@@ -111,7 +119,7 @@ class CyclicalParameterManager: ObservableObject {
             infrapolation: modifiedInfrapolation,
             ultrapolation: modifiedUltrapolation,
             primaryDirection: baseParameters.primaryDirection,
-            mirrorPoints: baseParameters.mirrorPoints,
+            mirrorPoints: Int(cyclicalSettings.mirrorPoints.currentValue(baseValue: Double(baseParameters.mirrorPoints))),
             retrogradeSections: baseParameters.retrogradeSections,
             registerShifts: baseParameters.registerShifts,
             contourPattern: baseParameters.contourPattern,

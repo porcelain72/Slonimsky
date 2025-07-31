@@ -15,6 +15,14 @@ struct MIDIInfo : Equatable{
     let note: Int
     var velocity: UInt8
     var beatLength: Double
+    var cycleIndex: Int
+    
+    init(note: Int, velocity: UInt8, beatLength: Double, cycleIndex: Int = 0) {
+        self.note = note
+        self.velocity = velocity
+        self.beatLength = beatLength
+        self.cycleIndex = cycleIndex
+    }
 }
 
 

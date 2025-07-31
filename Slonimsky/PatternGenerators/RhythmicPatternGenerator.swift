@@ -18,45 +18,52 @@ class RhythmicPatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate base rhythmic structure
-        let rhythmicStructure = generateRhythmicStructure(parameters: parameters)
+        let rhythmicStructure = generateRhythmicStructure(parameters: modifiedParameters)
         
         // Apply rhythmic patterns and variations
         let variedRhythm = applyRhythmicVariations(
             structure: rhythmicStructure,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply syncopation
         let syncopatedRhythm = applySyncopation(
             rhythm: variedRhythm,
-            level: parameters.syncopationLevel
+            level: modifiedParameters.syncopationLevel
         )
         
         // Apply metric modulation
         let metricModulatedRhythm = applyMetricModulation(
             rhythm: syncopatedRhythm,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply rhythmic density
         let denseRhythm = applyRhythmicDensity(
             rhythm: metricModulatedRhythm,
-            density: parameters.rhythmicDensity
+            density: modifiedParameters.rhythmicDensity
         )
         
         // Convert to MIDIInfo with velocity and duration
         let midiSequence = convertToMIDIInfo(
             rhythm: denseRhythm,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply final rhythmic refinements
         let finalSequence = applyRhythmicRefinements(
             sequence: midiSequence,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -65,7 +72,7 @@ class RhythmicPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: finalSequence.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return finalSequence
@@ -433,7 +440,8 @@ class RhythmicPatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: rhythmicNote.note,
                 velocity: velocity,
-                beatLength: rhythmicNote.duration
+                beatLength: rhythmicNote.duration,
+                cycleIndex: 0
             )
         }
     }
@@ -501,7 +509,8 @@ class RhythmicPatternGenerator: BasePatternGenerator {
                     let harmonicMIDI = MIDIInfo(
                         note: harmonicNote,
                         velocity: UInt8(clamping: Int(note.velocity) - 10),
-                        beatLength: note.beatLength
+                        beatLength: note.beatLength,
+                        cycleIndex: 0
                     )
                     harmonizedSequence.append(harmonicMIDI)
                 }

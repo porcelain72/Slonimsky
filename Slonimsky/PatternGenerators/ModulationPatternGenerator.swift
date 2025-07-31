@@ -378,7 +378,8 @@ class ModulationPatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }
@@ -504,7 +505,8 @@ class ModulationPatternGenerator: BasePatternGenerator {
                 let syncopatedNote = MIDIInfo(
                     note: note.note,
                     velocity: UInt8(clamping: Int(note.velocity) - 20),
-                    beatLength: note.beatLength * 0.5
+                    beatLength: note.beatLength * 0.5,
+                    cycleIndex: 0
                 )
                 syncopatedSequence.append(syncopatedNote)
             }
@@ -533,7 +535,8 @@ class ModulationPatternGenerator: BasePatternGenerator {
                     let harmonicMIDI = MIDIInfo(
                         note: harmonicNote,
                         velocity: UInt8(clamping: Int(note.velocity) * Int(parameters.chordGeneration.velocityScale)),
-                        beatLength: note.beatLength
+                        beatLength: note.beatLength,
+                        cycleIndex: 0
                     )
                     harmonizedSequence.append(harmonicMIDI)
                 }

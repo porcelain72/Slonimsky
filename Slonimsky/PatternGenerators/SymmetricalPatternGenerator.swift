@@ -18,35 +18,42 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate base symmetrical structure
-        let baseStructure = generateBaseSymmetricalStructure(parameters: parameters)
+        let baseStructure = generateBaseSymmetricalStructure(parameters: modifiedParameters)
         
         // Apply symmetrical transformations
         let transformedStructure = applySymmetricalTransformations(
             structure: baseStructure,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply inversions and retrogrades
         let invertedStructure = applyInversionsAndRetrogrades(
             structure: transformedStructure,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply symmetrical scale patterns
         let scaleStructure = applySymmetricalScalePatterns(
             structure: invertedStructure,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply register shifts
         let noteValues = scaleStructure.map { $0.note }
         let shiftedNotes = applyRegisterShifts(
             notes: noteValues,
-            pattern: parameters.registerShifts,
-            maxShift: parameters.toneShifting.maxToneShift
+            pattern: modifiedParameters.registerShifts,
+            maxShift: modifiedParameters.toneShifting.maxToneShift
         )
         
         // Update the structure with shifted notes
@@ -58,13 +65,13 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
         // Convert to MIDIInfo with velocity and duration
         let midiSequence = convertToMIDIInfo(
             structure: shiftedStructure,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply final symmetrical refinements
         let finalSequence = applySymmetricalRefinements(
             sequence: midiSequence,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -73,7 +80,7 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: finalSequence.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return finalSequence
@@ -433,7 +440,8 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: symmetricalNote.note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }

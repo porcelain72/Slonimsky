@@ -27,6 +27,7 @@ class MIDIIntegrationService: ObservableObject {
     // MARK: - Private Properties
     private let midiEngine = MIDIEngine()
     private let patternRegistry = PatternGeneratorRegistry.shared
+    private let cyclicalSequenceGenerator = CyclicalSequenceGenerator()
     private var cancellables = Set<AnyCancellable>()
     private var parameterManager: ParameterManager?
     private var lastGeneratedPatternHash: Int = 0
@@ -103,57 +104,120 @@ class MIDIIntegrationService: ObservableObject {
             return
         }
         
-        // Use automatic generator selection if enabled
-        if parameterManager.automaticGeneratorSelectionEnabled && parameterManager.activeGenerators.count > 1 {
-            print("🔄 Using combined generation with \(parameterManager.activeGenerators.count) generators")
+        // Check if cyclical parameters are enabled
+        let enabledCyclicalParameters = parameters.cyclicalSettings.enabledParameters
+        let hasCyclicalParameters = !enabledCyclicalParameters.isEmpty
+        
+        if hasCyclicalParameters {
+            print("🔄 Cyclical parameters detected: \(enabledCyclicalParameters.keys.map { $0.rawValue }.joined(separator: ", "))")
             
-            // Use combined generation
-            guard let result = patternRegistry.generateCombinedPattern(
-                using: parameterManager.activeGenerators,
-                parameters: parameters,
-                combinationMode: parameterManager.combinationMode
-            ) else {
-                print("❌ Auto-generation failed: combined pattern generation failed")
-                errorMessage = "Combined pattern generation failed"
-                return
-            }
-            
-            // Update the MIDI sequence seamlessly
-            if midiEngine.updateSequence(with: result) {
-                self.currentPattern = result
-                self.lastGeneratedPatternHash = currentHash
-                self.errorMessage = nil
-                print("✅ Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
+            // Use automatic generator selection if enabled
+            if parameterManager.automaticGeneratorSelectionEnabled && parameterManager.activeGenerators.count > 1 {
+                print("🔄 Using combined cyclical generation with \(parameterManager.activeGenerators.count) generators")
+                
+                // Use combined cyclical generation
+                guard let result = cyclicalSequenceGenerator.generateCombinedCyclicalSequence(
+                    baseParameters: parameters,
+                    generatorNames: parameterManager.activeGenerators,
+                    combinationMode: parameterManager.combinationMode
+                ) else {
+                    print("❌ Auto-generation failed: combined cyclical pattern generation failed")
+                    errorMessage = "Combined cyclical pattern generation failed"
+                    return
+                }
+                
+                // Update the MIDI sequence seamlessly
+                if midiEngine.updateSequence(with: result) {
+                    self.currentPattern = result
+                    self.lastGeneratedPatternHash = currentHash
+                    self.errorMessage = nil
+                    print("✅ Auto-generated combined cyclical sequence with \(parameterManager.activeGenerators.count) generators")
+                } else {
+                    print("❌ Auto-generation failed: sequence update failed")
+                    errorMessage = "MIDI sequence update failed"
+                }
             } else {
-                print("❌ Auto-generation failed: sequence update failed")
-                errorMessage = "MIDI sequence update failed"
+                // Use single generator (either manual selection or automatic single generator)
+                let generatorName = parameterManager.automaticGeneratorSelectionEnabled ? 
+                    parameterManager.activeGenerators.first ?? parameterManager.selectedGeneratorForAutoGeneration :
+                    parameterManager.selectedGeneratorForAutoGeneration
+                
+                print("🔄 Using single generator with cyclical generation: \(generatorName)")
+                
+                guard let result = cyclicalSequenceGenerator.generateCyclicalSequence(
+                    baseParameters: parameters,
+                    generatorName: generatorName
+                ) else {
+                    print("❌ Auto-generation failed: cyclical pattern generation failed for \(generatorName)")
+                    errorMessage = "Cyclical pattern generation failed for \(generatorName)"
+                    return
+                }
+                
+                // Update the MIDI sequence seamlessly
+                if midiEngine.updateSequence(with: result) {
+                    self.currentPattern = result
+                    self.lastGeneratedPatternHash = currentHash
+                    self.errorMessage = nil
+                    print("✅ Auto-generated cyclical sequence with \(generatorName)")
+                } else {
+                    print("❌ Auto-generation failed: sequence update failed")
+                    errorMessage = "MIDI sequence update failed"
+                }
             }
         } else {
-            // Use single generator (either manual selection or automatic single generator)
-            let generatorName = parameterManager.automaticGeneratorSelectionEnabled ? 
-                parameterManager.activeGenerators.first ?? parameterManager.selectedGeneratorForAutoGeneration :
-                parameterManager.selectedGeneratorForAutoGeneration
-            
-            print("🔄 Using single generator: \(generatorName)")
-            
-            guard let result = patternRegistry.generatePattern(
-                using: generatorName,
-                parameters: parameters
-            ) else {
-                print("❌ Auto-generation failed: pattern generation failed for \(generatorName)")
-                errorMessage = "Pattern generation failed for \(generatorName)"
-                return
-            }
-            
-            // Update the MIDI sequence seamlessly
-            if midiEngine.updateSequence(with: result) {
-                self.currentPattern = result
-                self.lastGeneratedPatternHash = currentHash
-                self.errorMessage = nil
-                print("✅ Auto-generated sequence with \(generatorName)")
+            // No cyclical parameters, use standard generation
+            // Use automatic generator selection if enabled
+            if parameterManager.automaticGeneratorSelectionEnabled && parameterManager.activeGenerators.count > 1 {
+                print("🔄 Using combined generation with \(parameterManager.activeGenerators.count) generators")
+                
+                // Use combined generation
+                guard let result = patternRegistry.generateCombinedPattern(
+                    using: parameterManager.activeGenerators,
+                    parameters: parameters,
+                    combinationMode: parameterManager.combinationMode
+                ) else {
+                    print("❌ Auto-generation failed: combined pattern generation failed")
+                    errorMessage = "Combined pattern generation failed"
+                    return
+                }
+                
+                // Update the MIDI sequence seamlessly
+                if midiEngine.updateSequence(with: result) {
+                    self.currentPattern = result
+                    self.lastGeneratedPatternHash = currentHash
+                    self.errorMessage = nil
+                    print("✅ Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
+                } else {
+                    print("❌ Auto-generation failed: sequence update failed")
+                    errorMessage = "MIDI sequence update failed"
+                }
             } else {
-                print("❌ Auto-generation failed: sequence update failed")
-                errorMessage = "MIDI sequence update failed"
+                // Use single generator (either manual selection or automatic single generator)
+                let generatorName = parameterManager.automaticGeneratorSelectionEnabled ? 
+                    parameterManager.activeGenerators.first ?? parameterManager.selectedGeneratorForAutoGeneration :
+                    parameterManager.selectedGeneratorForAutoGeneration
+                
+                print("🔄 Using single generator: \(generatorName)")
+                
+                guard let result = patternRegistry.generatePattern(
+                    using: generatorName,
+                    parameters: parameters
+                ) else {
+                    print("❌ Auto-generation failed: pattern generation failed for \(generatorName)")
+                    errorMessage = "Pattern generation failed for \(generatorName)"
+                    return
+                }
+                
+                // Update the MIDI sequence seamlessly
+                if midiEngine.updateSequence(with: result) {
+                    self.currentPattern = result
+                    self.lastGeneratedPatternHash = currentHash
+                    self.errorMessage = nil
+                    print("✅ Auto-generated sequence with \(generatorName)")
+                } else {
+                    print("❌ Auto-generation failed: sequence update failed")
+                    errorMessage = "MIDI sequence update failed"
+                }
             }
         }
     }

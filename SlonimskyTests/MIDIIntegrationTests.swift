@@ -69,10 +69,10 @@ final class MIDIIntegrationTests: XCTestCase {
     func testMIDIEngineMusicSequenceGeneration() throws {
         // Create a simple pattern result
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25),
-            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25),
-            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25),
-            MIDIInfo(note: 65, velocity: 80, beatLength: 0.25)
+            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 65, velocity: 80, beatLength: 0.25, cycleIndex: 0)
         ]
         
         let metadata = PatternMetadata(
@@ -104,23 +104,23 @@ final class MIDIIntegrationTests: XCTestCase {
         // Test with various note configurations
         let testCases = [
             // Single note
-            [MIDIInfo(note: 60, velocity: 80, beatLength: 1.0)],
+            [MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)],
             // Multiple notes with different velocities
             [
-                MIDIInfo(note: 60, velocity: 64, beatLength: 0.5),
-                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5),
-                MIDIInfo(note: 64, velocity: 96, beatLength: 0.5)
+                MIDIInfo(note: 60, velocity: 64, beatLength: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 64, velocity: 96, beatLength: 0.5, cycleIndex: 0)
             ],
             // Notes with different durations
             [
-                MIDIInfo(note: 60, velocity: 80, beatLength: 0.25),
-                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5),
-                MIDIInfo(note: 64, velocity: 80, beatLength: 1.0)
+                MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 64, velocity: 80, beatLength: 1.0, cycleIndex: 0)
             ],
             // Edge cases
             [
-                MIDIInfo(note: 0, velocity: 1, beatLength: 0.1),   // Lowest note, lowest velocity
-                MIDIInfo(note: 127, velocity: 127, beatLength: 4.0) // Highest note, highest velocity
+                MIDIInfo(note: 0, velocity: 1, beatLength: 0.1, cycleIndex: 0),   // Lowest note, lowest velocity
+                MIDIInfo(note: 127, velocity: 127, beatLength: 4.0, cycleIndex: 0) // Highest note, highest velocity
             ]
         ]
         
@@ -202,9 +202,9 @@ final class MIDIIntegrationTests: XCTestCase {
     func testMIDIEngineExportWithSequence() throws {
         // Create a sequence and test export
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25),
-            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25),
-            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25)
+            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25, cycleIndex: 0)
         ]
         
         let metadata = PatternMetadata(
@@ -872,10 +872,10 @@ final class MIDIIntegrationTests: XCTestCase {
         
         // Create a simple pattern with known duration
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 1.0),  // 1 beat
-            MIDIInfo(note: 62, velocity: 80, beatLength: 1.0),  // 1 beat
-            MIDIInfo(note: 64, velocity: 80, beatLength: 1.0),  // 1 beat
-            MIDIInfo(note: 65, velocity: 80, beatLength: 1.0)   // 1 beat
+            MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 62, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 64, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 65, velocity: 80, beatLength: 1.0, cycleIndex: 0)   // 1 beat
         ]
         
         let metadata = PatternMetadata(

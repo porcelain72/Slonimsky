@@ -18,35 +18,42 @@ class ContourPatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate base melodic contour
-        let baseContour = generateBaseContour(parameters: parameters)
+        let baseContour = generateBaseContour(parameters: modifiedParameters)
         
         // Apply contour patterns and transformations
         let transformedContour = applyContourTransformations(
             contour: baseContour,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply contour analysis and refinement
         let analyzedContour = applyContourAnalysis(
             contour: transformedContour,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply contour-based variations
         let variedContour = applyContourVariations(
             contour: analyzedContour,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply register shifts
         let noteValues = variedContour.map { $0.note }
         let shiftedNotes = applyRegisterShifts(
             notes: noteValues,
-            pattern: parameters.registerShifts,
-            maxShift: parameters.toneShifting.maxToneShift
+            pattern: modifiedParameters.registerShifts,
+            maxShift: modifiedParameters.toneShifting.maxToneShift
         )
         
         // Update the contour with shifted notes
@@ -58,13 +65,13 @@ class ContourPatternGenerator: BasePatternGenerator {
         // Convert to MIDIInfo with velocity and duration
         let midiSequence = convertToMIDIInfo(
             contour: shiftedContour,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply final contour refinements
         let finalSequence = applyContourRefinements(
             sequence: midiSequence,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -73,7 +80,7 @@ class ContourPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: finalSequence.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return finalSequence
@@ -439,7 +446,8 @@ class ContourPatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: contourNote.note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }

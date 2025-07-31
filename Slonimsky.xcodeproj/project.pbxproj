@@ -51,6 +51,9 @@
 		98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */; };
 		98C3099D2E3B893D000D9EC7 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		98C3099F2E3B8E64000D9EC7 /* CyclicalParameterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */; };
+		98C309A22E3B8FC8000D9EC7 /* CycleControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */; };
+		98C309A32E3B8FC8000D9EC7 /* CyclicalParameterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */; };
+		98C309A52E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -118,6 +121,9 @@
 		98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPopupView.swift; sourceTree = "<group>"; };
 		98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterSettings.swift; sourceTree = "<group>"; };
 		98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterManager.swift; sourceTree = "<group>"; };
+		98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CycleControlView.swift; sourceTree = "<group>"; };
+		98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterView.swift; sourceTree = "<group>"; };
+		98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalSequenceGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -246,6 +252,7 @@
 		98C309672E39332A000D9EC7 /* MIDI */ = {
 			isa = PBXGroup;
 			children = (
+				98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */,
 				98C309682E39332A000D9EC7 /* MIDIPlaybackControllerView.swift */,
 				98C309692E39332A000D9EC7 /* MIDIEngine.swift */,
 				98C3096A2E39332A000D9EC7 /* MIDIIntegrationService.swift */,
@@ -257,6 +264,8 @@
 			isa = PBXGroup;
 			children = (
 				98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */,
+				98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */,
+				98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */,
 				98C3096F2E39333C000D9EC7 /* ParameterManager.swift */,
 				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
@@ -438,11 +447,14 @@
 				98C309752E39333C000D9EC7 /* ParameterManager.swift in Sources */,
 				98C309772E39333C000D9EC7 /* PianoRollPanelView.swift in Sources */,
 				98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */,
+				98C309A22E3B8FC8000D9EC7 /* CycleControlView.swift in Sources */,
 				98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */,
+				98C309A52E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift in Sources */,
 				98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */,
 				98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */,
 				98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */,
 				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
+				98C309A32E3B8FC8000D9EC7 /* CyclicalParameterView.swift in Sources */,
 				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
 				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
 				98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */,

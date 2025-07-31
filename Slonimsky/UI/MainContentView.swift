@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-/// Main content view with three-panel layout
+/// Main content view with HSplitView layout: NavigationView on left, PianoRoll on right
 struct MainContentView: View {
     
     // MARK: - State Objects
@@ -16,80 +16,120 @@ struct MainContentView: View {
     
     // MARK: - State Properties
     @State private var selectedGenerator: String = "Scale Pattern Generator"
-    @State private var showPianoRoll = true
-    @State private var showParameterControls = true
     @State private var isGenerating = false
     @State private var showPresetPicker = false
     @State private var showRandomizeDialog = false
     @State private var showSheetMusicPopup = false
+    @State private var showCyclicalParameters = false
+    @State private var selectedParameterCategory: ParameterCategory? = nil
     
     // MARK: - Body
     var body: some View {
-        NavigationView {
-            HSplitView {
-                // Left Panel: Parameter Controls
-                if showParameterControls {
-                    ParameterPanelView(
-                        parameterManager: parameterManager,
-                        selectedGenerator: $selectedGenerator,
-                        midiService: midiService,
-                        isGenerating: $isGenerating,
-                        showPresetPicker: $showPresetPicker,
-                        showRandomizeDialog: $showRandomizeDialog
-                    )
-                    .frame(minWidth: 350, maxWidth: 450)
+        HSplitView {
+            // Left Panel: NavigationView with Parameter Categories
+            VStack(spacing: 0) {
+                NavigationStack {
+                    parameterCategoriesList
+                        .navigationTitle("Parameters")
+                        .toolbar {
+                            ToolbarItemGroup(placement: .automatic) {
+                                Button(action: { showCyclicalParameters.toggle() }) {
+                                    Image(systemName: showCyclicalParameters ? "arrow.clockwise.circle.fill" : "arrow.clockwise.circle")
+                                    Text("Cycles")
+                                }
+                            }
+                            
+                            ToolbarItemGroup(placement: .primaryAction) {
+                                Button(action: { showPresetPicker = true }) {
+                                    Image(systemName: "list.bullet")
+                                    Text("Presets")
+                                }
+                                .disabled(isGenerating)
+                                
+                                Button(action: { showRandomizeDialog = true }) {
+                                    Image(systemName: "dice")
+                                    Text("Random")
+                                }
+                                .disabled(isGenerating)
+                            }
+                        }
                 }
                 
-                // Center Panel: Piano Roll
-                if showPianoRoll {
-                    PianoRollPanelView(
-                        midiService: midiService,
-                        parameterManager: parameterManager
-                    )
-                    .frame(minWidth: 400, maxWidth: .infinity)
+                // Generate Button
+                VStack(spacing: 12) {
+                    Divider()
+                    
+                    Button(action: generatePattern) {
+                        HStack {
+                            if isGenerating {
+                                ProgressView()
+                                    .scaleEffect(0.8)
+                                    .progressViewStyle(CircularProgressViewStyle())
+                            } else {
+                                Image(systemName: "play.circle.fill")
+                                    .font(.title2)
+                            }
+                            Text(isGenerating ? "Generating..." : "Generate Pattern")
+                                .font(.headline)
+                        }
+                        .frame(maxWidth: .infinity)
+                        .padding()
+                        .background(isGenerating ? Color.gray.opacity(0.3) : Color.blue)
+                        .foregroundColor(.white)
+                        .cornerRadius(8)
+                    }
+                    .disabled(isGenerating)
+                    .buttonStyle(PlainButtonStyle())
                 }
+                .padding()
+                .background(Color(NSColor.controlBackgroundColor))
             }
-            .navigationTitle("Slonimsky Pattern Generator")
-            .toolbar {
-                ToolbarItemGroup(placement: .automatic) {
-                    // Panel Visibility Toggles
-                    Button(action: { showParameterControls.toggle() }) {
-                        Image(systemName: showParameterControls ? "slider.horizontal.3" : "slider.horizontal.3.slash")
-                        Text("Parameters")
+            .frame(minWidth: 300, maxWidth: 400)
+            
+            // Right Panel: Piano Roll
+            VStack(spacing: 0) {
+                // Cycle Information Display
+                if let currentPattern = midiService.currentPattern,
+                   currentPattern.metadata.isCyclicalSequence {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                            .foregroundColor(.blue)
+                        Text("Cyclical Sequence: \(currentPattern.metadata.totalCycles) cycles")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
+                        Spacer()
+                        Text("\(currentPattern.notes.count) total notes")
+                            .font(.caption)
+                            .foregroundColor(.secondary)
                     }
-                    
-                    Button(action: { showPianoRoll.toggle() }) {
-                        Image(systemName: showPianoRoll ? "pianokeys" : "pianokeys.slash")
-                        Text("Piano Roll")
-                    }
-                    
-                    Button(action: { showSheetMusicPopup = true }) {
-                        Image(systemName: "music.note.list")
-                        Text("Sheet Music")
-                    }
-                    .disabled(midiService.currentPattern == nil)
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 8)
+                    .background(Color.blue.opacity(0.1))
                 }
                 
-                ToolbarItemGroup(placement: .primaryAction) {
-                    // Quick Actions
-                    Button(action: generateRandomPattern) {
-                        Image(systemName: "dice")
-                        Text("Random")
-                    }
-                    .disabled(isGenerating)
-                    
-                    Button(action: { showPresetPicker = true }) {
-                        Image(systemName: "list.bullet")
-                        Text("Presets")
-                    }
-                    .disabled(isGenerating)
-                    
-                    Button(action: exportCurrentPattern) {
-                        Image(systemName: "square.and.arrow.up")
-                        Text("Export")
-                    }
-                    .disabled(midiService.currentPattern == nil)
+                PianoRollPanelView(
+                    midiService: midiService,
+                    parameterManager: parameterManager
+                )
+            }
+            .frame(minWidth: 500, maxWidth: .infinity)
+        }
+        .navigationTitle("Slonimsky Pattern Generator")
+        .toolbar {
+            ToolbarItemGroup(placement: .automatic) {
+                Button(action: { showSheetMusicPopup = true }) {
+                    Image(systemName: "music.note.list")
+                    Text("Sheet Music")
                 }
+                .disabled(midiService.currentPattern == nil)
+            }
+            
+            ToolbarItemGroup(placement: .primaryAction) {
+                Button(action: exportCurrentPattern) {
+                    Image(systemName: "square.and.arrow.up")
+                    Text("Export")
+                }
+                .disabled(midiService.currentPattern == nil)
             }
         }
         .sheet(isPresented: $showPresetPicker) {
@@ -117,9 +157,77 @@ struct MainContentView: View {
         }
     }
     
+    // MARK: - Parameter Categories List
+    
+    private var parameterCategoriesList: some View {
+        List(ParameterCategory.allCases) { category in
+            NavigationLink(destination: parameterCategoryDetailView(for: category)) {
+                    HStack {
+                        Image(systemName: category.icon)
+                            .foregroundColor(.blue)
+                            .frame(width: 20)
+                        
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(category.title)
+                                .font(.headline)
+                            Text(category.description)
+                                .font(.caption)
+                                .foregroundColor(.secondary)
+                                .lineLimit(2)
+                        }
+                    }
+                    .padding()
+              
+            }
+        }
+        .listStyle(SidebarListStyle())
+    }
+    
+    // MARK: - Parameter Category Detail Views
+    
+    @ViewBuilder
+    private func parameterCategoryDetailView(for category: ParameterCategory) -> some View {
+        ScrollView{
+            Group{
+                switch category {
+                case .basic:
+                    BasicParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .intervals:
+                    IntervalParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .modulations:
+                    ModulationParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .directional:
+                    DirectionalParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .rhythmic:
+                    RhythmicParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .harmonic:
+                    HarmonicParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .expression:
+                    ExpressionParametersDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .accompaniment:
+                    RhythmicAccompanimentDetailView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
+                case .autoGeneration:
+                    AutoGenerationDetailView(parameterManager: parameterManager, midiService: midiService)
+                        .navigationTitle(category.title)
+                }
+            }
+            .padding()
+            Spacer()
+        }
+    }
+//    }
+    
     // MARK: - Actions
     
-    private func generateRandomPattern() {
+    private func generatePattern() {
         isGenerating = true
         
         midiService.generateRandomPattern { result in
@@ -128,10 +236,10 @@ struct MainContentView: View {
                 
                 switch result {
                 case .success(let pattern):
-                    print("✅ Random pattern generated: \(pattern.notes.count) notes")
+                    print("✅ Pattern generated: \(pattern.notes.count) notes")
                     updateSheetMusic(with: pattern)
                 case .failure(let error):
-                    print("❌ Random pattern generation failed: \(error)")
+                    print("❌ Pattern generation failed: \(error)")
                 }
             }
         }

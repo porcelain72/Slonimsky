@@ -179,6 +179,72 @@ class PatternGeneratorRegistry: ObservableObject {
         )
     }
     
+    /// Generate a combined pattern using multiple generators with cyclical parameters
+    /// - Parameters:
+    ///   - generatorNames: Array of generator names to use
+    ///   - parameters: The pattern generation parameters
+    ///   - combinationMode: How to combine the patterns
+    ///   - cycleIndex: The current cycle index for cyclical parameters
+    /// - Returns: Combined pattern result
+    func generateCombinedPattern(
+        using generatorNames: [String],
+        parameters: PatternParameters,
+        combinationMode: PatternCombinationMode = .sequential,
+        cycleIndex: Int = 0
+    ) -> PatternGenerationResult? {
+        var allNotes: [MIDIInfo] = []
+        var totalGenerationTime: TimeInterval = 0
+        var totalMemoryUsage: Int64 = 0
+        var allPitchRanges: [ClosedRange<Int>] = []
+        
+        for generatorName in generatorNames {
+            guard let result = generatePattern(using: generatorName, parameters: parameters, cycleIndex: cycleIndex) else {
+                continue
+            }
+            
+            switch combinationMode {
+            case .sequential:
+                allNotes.append(contentsOf: result.notes)
+            case .interleaved:
+                allNotes = interleaveNotes(allNotes, with: result.notes)
+            case .layered:
+                allNotes = layerNotes(allNotes, with: result.notes)
+            }
+            
+            totalGenerationTime += result.performance.generationTime
+            totalMemoryUsage += result.performance.memoryUsage
+            allPitchRanges.append(result.metadata.pitchRange)
+        }
+        
+        guard !allNotes.isEmpty else { return nil }
+        
+        let combinedPitchRange = allPitchRanges.reduce(allPitchRanges[0]) { range1, range2 in
+            min(range1.lowerBound, range2.lowerBound)...max(range1.upperBound, range2.upperBound)
+        }
+        
+        let metadata = PatternMetadata(
+            generatorName: "Combined (\(generatorNames.joined(separator: ", ")))",
+            parameterHash: parameters.hashValue.description,
+            generationTime: totalGenerationTime,
+            noteCount: allNotes.count,
+            pitchRange: combinedPitchRange,
+            duration: allNotes.reduce(0) { $0 + $1.beatLength },
+            cycleIndex: cycleIndex
+        )
+        
+        let performance = PerformanceMetrics(
+            generationTime: totalGenerationTime,
+            memoryUsage: totalMemoryUsage,
+            complexity: calculateComplexity(parameters: parameters) * Double(generatorNames.count)
+        )
+        
+        return PatternGenerationResult(
+            notes: allNotes,
+            metadata: metadata,
+            performance: performance
+        )
+    }
+    
     /// Get generator information for UI display
     /// - Returns: Array of generator info objects
     func getGeneratorInfo() -> [GeneratorInfo] {
@@ -287,7 +353,8 @@ class PatternGeneratorRegistry: ObservableObject {
                 result[index] = MIDIInfo(
                     note: result[index].note,
                     velocity: combinedVelocity,
-                    beatLength: result[index].beatLength
+                    beatLength: result[index].beatLength,
+                    cycleIndex: result[index].cycleIndex
                 )
             } else {
                 result.append(note)

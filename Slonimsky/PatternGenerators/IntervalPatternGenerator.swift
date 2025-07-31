@@ -18,37 +18,44 @@ class IntervalPatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate base interval sequence
-        let intervalSequence = generateIntervalSequence(parameters: parameters)
+        let intervalSequence = generateIntervalSequence(parameters: modifiedParameters)
         
         // Apply interval patterns (ascending, descending, alternating, etc.)
-        let patternSequence = applyIntervalPatterns(intervals: intervalSequence, parameters: parameters)
+        let patternSequence = applyIntervalPatterns(intervals: intervalSequence, parameters: modifiedParameters)
         
         // Convert intervals to absolute notes
         let absoluteNotes = convertIntervalsToNotes(
             intervals: patternSequence,
-            rootNote: parameters.rootNote
+            rootNote: modifiedParameters.rootNote
         )
         
         // Apply symmetrical transformations if enabled
         let symmetricalNotes = applySymmetricalTransformations(
             notes: absoluteNotes,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Use ParameterApplicationManager to apply remaining parameters in correct order
         let finalNotes = ParameterApplicationManager.applyParameters(
             baseNotes: symmetricalNotes,
-            parameters: parameters,
+            parameters: modifiedParameters,
             generatorType: "Interval"
         )
         
         // Apply Slonimsky modulations (final step)
         let modulatedNotes = applySlonimskyModulations(
             notes: finalNotes,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -57,7 +64,7 @@ class IntervalPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: modulatedNotes.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return modulatedNotes
@@ -225,7 +232,8 @@ class IntervalPatternGenerator: BasePatternGenerator {
             return MIDIInfo(
                 note: note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }
@@ -298,7 +306,8 @@ class IntervalPatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: interpolatedNote,
                     velocity: velocity,
-                    beatLength: startNote.beatLength
+                    beatLength: startNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }
@@ -330,7 +339,8 @@ class IntervalPatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: infrapolatedNote,
                     velocity: velocity,
-                    beatLength: baseNote.beatLength
+                    beatLength: baseNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }
@@ -363,7 +373,8 @@ class IntervalPatternGenerator: BasePatternGenerator {
                 notes.append(MIDIInfo(
                     note: ultrapolatedNote,
                     velocity: velocity,
-                    beatLength: baseNote.beatLength
+                    beatLength: baseNote.beatLength,
+                    cycleIndex: 0
                 ))
             }
         }

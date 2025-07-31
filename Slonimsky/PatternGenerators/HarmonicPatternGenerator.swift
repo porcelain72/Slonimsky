@@ -18,45 +18,52 @@ class HarmonicPatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        // Apply cyclical changes to parameters for the current cycle
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
         // Generate harmonic progression
-        let harmonicProgression = generateHarmonicProgression(parameters: parameters)
+        let harmonicProgression = generateHarmonicProgression(parameters: modifiedParameters)
         
         // Apply harmonic patterns and variations
         let variedHarmony = applyHarmonicVariations(
             progression: harmonicProgression,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply chord voicings
         let voicedHarmony = applyChordVoicings(
             harmony: variedHarmony,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply harmonic rhythm
         let rhythmicHarmony = applyHarmonicRhythm(
             harmony: voicedHarmony,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply harmonic tension
         let tensionedHarmony = applyHarmonicTension(
             harmony: rhythmicHarmony,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Convert to MIDIInfo with velocity and duration
         let midiSequence = convertToMIDIInfo(
             harmony: tensionedHarmony,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Apply final harmonic refinements
         let finalSequence = applyHarmonicRefinements(
             sequence: midiSequence,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
@@ -65,7 +72,7 @@ class HarmonicPatternGenerator: BasePatternGenerator {
         logPerformanceMetrics(
             generationTime: generationTime,
             noteCount: finalSequence.count,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         return finalSequence
@@ -482,7 +489,8 @@ class HarmonicPatternGenerator: BasePatternGenerator {
                 let midiNote = MIDIInfo(
                     note: note,
                     velocity: velocity,
-                    beatLength: duration
+                    beatLength: duration,
+                    cycleIndex: 0
                 )
                 
                 midiSequence.append(midiNote)

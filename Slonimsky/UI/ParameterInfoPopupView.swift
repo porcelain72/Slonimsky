@@ -135,7 +135,7 @@ struct ParameterInfoPopupView: View {
             return "music.note.list"
         case .expression:
             return "slider.horizontal.3"
-        case .rhythmicAccompaniment:
+        case .accompaniment:
             return "drumsticks"
         case .autoGeneration:
             return "arrow.clockwise"

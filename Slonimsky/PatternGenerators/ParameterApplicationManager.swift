@@ -261,7 +261,8 @@ class ParameterApplicationManager {
             return MIDIInfo(
                 note: note,
                 velocity: velocity,
-                beatLength: duration
+                beatLength: duration,
+                cycleIndex: 0
             )
         }
     }

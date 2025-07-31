@@ -5,12 +5,18 @@ public enum CyclicalParameterType: String, CaseIterable, Codable {
     case interpolationNotes = "Interpolation Notes"
     case infrapolationNotes = "Infrapolation Notes"
     case ultrapolationNotes = "Ultrapolation Notes"
+    case modulationInterval = "Modulation Interval"
     case baseNoteDuration = "Base Note Duration"
     case rhythmicDensity = "Rhythmic Density"
     case primaryInterval = "Primary Interval"
     case secondaryInterval = "Secondary Interval"
     case baseVelocity = "Base Velocity"
     case velocityRange = "Velocity Range"
+    case tempo = "Tempo"
+    case rootNote = "Root Note"
+    case numberOfOctaves = "Number of Octaves"
+    case divisionsOfOctave = "Divisions of Octave"
+    case mirrorPoints = "Mirror Points"
 }
 
 /// How cyclical values should be applied to base values
@@ -234,23 +240,61 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         maxCycles: 7
     )
     
+    // Basic Parameters
+    public var rootNote: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 48.0, // C3
+        maxValue: 72.0, // C5
+        stepSize: 1.0,
+        maxCycles: 25
+    )
+    
+    public var numberOfOctaves: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 1.0,
+        maxValue: 4.0,
+        stepSize: 1.0,
+        maxCycles: 4
+    )
+    
+    public var divisionsOfOctave: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 12.0,
+        maxValue: 24.0,
+        stepSize: 1.0,
+        maxCycles: 13
+    )
+    
+    // Directional Parameters
+    public var mirrorPoints: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.0,
+        maxValue: 5.0,
+        stepSize: 1.0,
+        maxCycles: 6
+    )
+    
     public init() {}
     
     /// Get all enabled cyclical parameters
-    public var enabledParameters: [String: CyclicalParameterSettings] {
-        var enabled: [String: CyclicalParameterSettings] = [:]
+    public var enabledParameters: [CyclicalParameterType: CyclicalParameterSettings] {
+        var enabled: [CyclicalParameterType: CyclicalParameterSettings] = [:]
         
-        if interpolationNotes.isEnabled { enabled["interpolationNotes"] = interpolationNotes }
-        if infrapolationNotes.isEnabled { enabled["infrapolationNotes"] = infrapolationNotes }
-        if ultrapolationNotes.isEnabled { enabled["ultrapolationNotes"] = ultrapolationNotes }
-        if modulationInterval.isEnabled { enabled["modulationInterval"] = modulationInterval }
-        if baseNoteDuration.isEnabled { enabled["baseNoteDuration"] = baseNoteDuration }
-        if rhythmicDensity.isEnabled { enabled["rhythmicDensity"] = rhythmicDensity }
-        if primaryInterval.isEnabled { enabled["primaryInterval"] = primaryInterval }
-        if secondaryInterval.isEnabled { enabled["secondaryInterval"] = secondaryInterval }
-        if baseVelocity.isEnabled { enabled["baseVelocity"] = baseVelocity }
-        if velocityRange.isEnabled { enabled["velocityRange"] = velocityRange }
-        if tempo.isEnabled { enabled["tempo"] = tempo }
+        if interpolationNotes.isEnabled { enabled[.interpolationNotes] = interpolationNotes }
+        if infrapolationNotes.isEnabled { enabled[.infrapolationNotes] = infrapolationNotes }
+        if ultrapolationNotes.isEnabled { enabled[.ultrapolationNotes] = ultrapolationNotes }
+        if modulationInterval.isEnabled { enabled[.modulationInterval] = modulationInterval }
+        if baseNoteDuration.isEnabled { enabled[.baseNoteDuration] = baseNoteDuration }
+        if rhythmicDensity.isEnabled { enabled[.rhythmicDensity] = rhythmicDensity }
+        if primaryInterval.isEnabled { enabled[.primaryInterval] = primaryInterval }
+        if secondaryInterval.isEnabled { enabled[.secondaryInterval] = secondaryInterval }
+        if baseVelocity.isEnabled { enabled[.baseVelocity] = baseVelocity }
+        if velocityRange.isEnabled { enabled[.velocityRange] = velocityRange }
+        if tempo.isEnabled { enabled[.tempo] = tempo }
+        if rootNote.isEnabled { enabled[.rootNote] = rootNote }
+        if numberOfOctaves.isEnabled { enabled[.numberOfOctaves] = numberOfOctaves }
+        if divisionsOfOctave.isEnabled { enabled[.divisionsOfOctave] = divisionsOfOctave }
+        if mirrorPoints.isEnabled { enabled[.mirrorPoints] = mirrorPoints }
         
         return enabled
     }
@@ -268,6 +312,10 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         baseVelocity.advanceCycle()
         velocityRange.advanceCycle()
         tempo.advanceCycle()
+        rootNote.advanceCycle()
+        numberOfOctaves.advanceCycle()
+        divisionsOfOctave.advanceCycle()
+        mirrorPoints.advanceCycle()
     }
     
     /// Reset all cycle counters
@@ -283,5 +331,9 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         baseVelocity.resetCycle()
         velocityRange.resetCycle()
         tempo.resetCycle()
+        rootNote.resetCycle()
+        numberOfOctaves.resetCycle()
+        divisionsOfOctave.resetCycle()
+        mirrorPoints.resetCycle()
     }
 } 
