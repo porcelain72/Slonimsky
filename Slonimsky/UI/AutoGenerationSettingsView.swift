@@ -12,6 +12,7 @@ struct AutoGenerationSettingsView: View {
     
     // MARK: - Properties
     @ObservedObject var parameterManager: ParameterManager
+    @ObservedObject var midiService: MIDIIntegrationService
     
     // MARK: - Body
     var body: some View {
@@ -126,6 +127,43 @@ struct AutoGenerationSettingsView: View {
                     }
                 }
                 
+                // Reset Button
+                if midiService.errorMessage != nil || midiService.isGenerating {
+                    VStack(alignment: .leading, spacing: 8) {
+                        HStack {
+                            Image(systemName: "exclamationmark.triangle")
+                                .foregroundColor(.orange)
+                            Text("Auto-generation Issue Detected")
+                                .font(.subheadline)
+                                .fontWeight(.medium)
+                                .foregroundColor(.orange)
+                        }
+                        
+                        if let errorMessage = midiService.errorMessage {
+                            Text("Error: \(errorMessage)")
+                                .font(.caption)
+                                .foregroundColor(.red)
+                        }
+                        
+                        Button(action: {
+                            midiService.resetAutoGeneration()
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.clockwise")
+                                Text("Reset Auto-generation")
+                            }
+                            .font(.caption)
+                            .foregroundColor(.white)
+                            .padding(.horizontal, 12)
+                            .padding(.vertical, 6)
+                            .background(Color.blue)
+                            .cornerRadius(6)
+                        }
+                        .buttonStyle(PlainButtonStyle())
+                    }
+                    .padding(.top, 8)
+                }
+                
                 // Info Text
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
@@ -158,6 +196,9 @@ struct AutoGenerationSettingsView: View {
 }
 
 #Preview {
-    AutoGenerationSettingsView(parameterManager: ParameterManager())
-        .padding()
+    AutoGenerationSettingsView(
+        parameterManager: ParameterManager(),
+        midiService: MIDIIntegrationService()
+    )
+    .padding()
 } 

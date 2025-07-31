@@ -25,6 +25,14 @@
 - **Pattern Analysis**: Real-time calculation of median tone and optimal scaling factors
 - **Height Constraint**: Maximum height constraint to prevent excessively tall piano rolls
 
+#### **Auto-Generation Flow Fixes**
+- **Proper Setup**: Fixed empty auto-generation setup/teardown methods
+- **Debounced Generation**: Added proper debouncing to prevent excessive pattern generation
+- **Error Handling**: Comprehensive error handling and user feedback
+- **Reset Mechanism**: Added reset functionality for stuck auto-generation
+- **Parameter Validation**: Validate parameters before generation attempts
+- **Enhanced Logging**: Detailed logging for debugging and monitoring
+
 ### 🔧 Technical Implementation
 
 #### **ParameterManager Enhancements**
@@ -69,6 +77,14 @@ func updateGeneratorSelection()
 - **Enhanced Note Positioning**: Improved note rendering with dynamic scaling
 - **Height Constraint System**: Maximum height constraint with intelligent scaling
 
+#### **Auto-Generation System Improvements**
+- **Subscription Management**: Proper setup and teardown of auto-generation subscriptions
+- **Debounced Publishers**: Intelligent debouncing to prevent excessive generation
+- **Error State Management**: Clear error states and recovery mechanisms
+- **Parameter Validation**: Pre-generation validation to prevent failures
+- **Reset Functionality**: Manual reset capability for stuck auto-generation
+- **Comprehensive Logging**: Detailed logging for debugging and monitoring
+
 ### 🎨 User Interface Changes
 
 #### **AutoGenerationSettingsView Updates**
@@ -77,6 +93,8 @@ func updateGeneratorSelection()
 - **Combination Mode Display**: Shows selected combination mode
 - **Enhanced Help Text**: Explains automatic selection feature
 - **Manual Fallback**: Traditional generator picker when automatic mode is disabled
+- **Reset Button**: Added reset button for stuck auto-generation with error display
+- **Error Handling**: Visual feedback for auto-generation errors and stuck states
 
 #### **MainContentView Changes**
 - **Layout Modification**: Removed Sheet Music panel from HSplitView
@@ -154,6 +172,23 @@ func testAutomaticGeneratorSelection()
    - Added maximum height constraint (600px) to prevent excessive height
    - Implemented smart height calculation based on available space
 
+ - `Slonimsky/UI/ParameterManager.swift`
+   - Fixed empty auto-generation setup/teardown methods
+   - Added proper debouncing for auto-generation
+   - Enhanced error handling and parameter validation
+   - Added comprehensive logging for debugging
+
+ - `Slonimsky/MIDI/MIDIIntegrationService.swift`
+   - Added parameter validation before generation
+   - Enhanced error handling with clear error messages
+   - Added reset functionality for stuck auto-generation
+   - Improved logging and debugging information
+
+ - `SlonimskyTests/AutoGenerationFlowTests.swift` *(New File)*
+   - Comprehensive test suite for auto-generation flow
+   - Tests for setup, parameter changes, error handling
+   - Tests for generator selection and reset functionality
+
 #### **Testing Files**
 - `SlonimskyTests/PatternGeneratorTests.swift`
   - Added comprehensive automatic generator selection tests
@@ -171,6 +206,7 @@ func testAutomaticGeneratorSelection()
 6. **Smart Piano Roll**: Auto-scaling and median tone centering for better pattern visualization
 7. **Improved Focus**: Automatic centering helps users focus on the most important parts of patterns
 8. **Reasonable Height**: Piano roll constrained to reasonable height for better usability
+9. **Reliable Auto-generation**: Fixed auto-generation flow with proper error handling and reset capability
 
 #### **Technical Improvements**
 1. **Modular Architecture**: Clean separation of concerns
@@ -181,6 +217,7 @@ func testAutomaticGeneratorSelection()
 6. **Dynamic Scaling**: Intelligent piano roll scaling based on pattern characteristics
 7. **Pattern Analysis**: Real-time calculation of median tones and optimal display parameters
 8. **Height Management**: Smart height constraint system for consistent UI layout
+9. **Robust Auto-generation**: Proper subscription management and error recovery
 
 ### 🔮 Future Considerations
 
@@ -221,7 +258,9 @@ func testAutomaticGeneratorSelection()
 4. **Edge Cases**: Some parameter combinations may need refinement
 5. **Piano Roll Scrolling**: Programmatic scrolling to median tone not yet implemented
 6. **Advanced Scaling**: More sophisticated scaling algorithms could be added
+7. **Auto-generation Monitoring**: Performance metrics and success rate tracking
 7. **Dynamic Height**: Height constraint could be made user-configurable
+8. **Advanced Auto-generation**: Smart retry logic and generation queue management
 
 ### 📝 Documentation
 

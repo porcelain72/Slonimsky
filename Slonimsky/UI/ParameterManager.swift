@@ -327,11 +327,42 @@ class ParameterManager: ObservableObject {
     // MARK: - Auto-generation Methods
     
     private func setupAutoGeneration() {
-        // Implementation for auto-generation setup
+        // Cancel any existing auto-generation subscription
+        autoGenerationCancellable?.cancel()
+        
+        // Set up debounced auto-generation
+        autoGenerationSubject
+            .debounce(for: .seconds(autoGenerationDelay), scheduler: RunLoop.main)
+            .sink { [weak self] in
+                self?.performAutoGeneration()
+            }
+            .store(in: &autoGenerationCancellable)
+        
+        print("🔄 Auto-generation enabled with \(autoGenerationDelay)s delay")
     }
     
     private func stopAutoGeneration() {
-        // Implementation for stopping auto-generation
+        // Cancel auto-generation subscription
+        autoGenerationCancellable?.cancel()
+        autoGenerationCancellable = nil
+        
+        print("🔄 Auto-generation disabled")
+    }
+    
+    private func performAutoGeneration() {
+        guard autoGenerateEnabled else { return }
+        
+        print("🔄 Performing auto-generation with \(activeGenerators.count) generators")
+        
+        // Validate parameters before generation
+        let errors = validateParameters()
+        if !errors.isEmpty {
+            print("❌ Auto-generation skipped due to validation errors: \(errors)")
+            return
+        }
+        
+        // Trigger auto-generation
+        autoGenerationSubject.send()
     }
     
     // MARK: - Automatic Generator Selection Methods
@@ -445,7 +476,7 @@ class ParameterManager: ObservableObject {
         // Update automatic generator selection
         updateGeneratorSelection()
         
-        // Trigger auto-generation if enabled
+        // Trigger auto-generation if enabled (will be debounced)
         if autoGenerateEnabled {
             autoGenerationSubject.send()
         }

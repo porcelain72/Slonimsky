@@ -51,16 +51,47 @@ class MIDIIntegrationService: ObservableObject {
                 self?.handleAutoGeneration()
             }
             .store(in: &cancellables)
+        
+        print("🔄 Auto-generation setup complete")
+    }
+    
+    /// Reset auto-generation state
+    func resetAutoGeneration() {
+        print("🔄 Resetting auto-generation state")
+        errorMessage = nil
+        isGenerating = false
+        generationProgress = 0.0
+        
+        // Force a new generation if auto-generation is enabled
+        if let parameterManager = parameterManager, parameterManager.autoGenerateEnabled {
+            print("🔄 Forcing auto-generation after reset")
+            handleAutoGeneration()
+        }
     }
     
     /// Handle auto-generation when parameters change
     private func handleAutoGeneration() {
-        guard let parameterManager = parameterManager else { return }
+        guard let parameterManager = parameterManager else { 
+            print("❌ Auto-generation failed: no parameter manager")
+            return 
+        }
+        
+        print("🔄 Starting auto-generation...")
         
         let parameters = parameterManager.currentParameters
         
+        // Validate parameters before generation
+        let errors = parameterManager.validateParameters()
+        if !errors.isEmpty {
+            print("❌ Auto-generation failed: parameter validation errors: \(errors)")
+            errorMessage = "Parameter validation failed: \(errors.joined(separator: ", "))"
+            return
+        }
+        
         // Use automatic generator selection if enabled
         if parameterManager.automaticGeneratorSelectionEnabled && parameterManager.activeGenerators.count > 1 {
+            print("🔄 Using combined generation with \(parameterManager.activeGenerators.count) generators")
+            
             // Use combined generation
             guard let result = patternRegistry.generateCombinedPattern(
                 using: parameterManager.activeGenerators,
@@ -68,15 +99,18 @@ class MIDIIntegrationService: ObservableObject {
                 combinationMode: parameterManager.combinationMode
             ) else {
                 print("❌ Auto-generation failed: combined pattern generation failed")
+                errorMessage = "Combined pattern generation failed"
                 return
             }
             
             // Update the MIDI sequence seamlessly
             if midiEngine.updateSequence(with: result) {
                 self.currentPattern = result
-                print("🔄 Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
+                self.errorMessage = nil
+                print("✅ Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
             } else {
                 print("❌ Auto-generation failed: sequence update failed")
+                errorMessage = "MIDI sequence update failed"
             }
         } else {
             // Use single generator (either manual selection or automatic single generator)
@@ -84,20 +118,25 @@ class MIDIIntegrationService: ObservableObject {
                 parameterManager.activeGenerators.first ?? parameterManager.selectedGeneratorForAutoGeneration :
                 parameterManager.selectedGeneratorForAutoGeneration
             
+            print("🔄 Using single generator: \(generatorName)")
+            
             guard let result = patternRegistry.generatePattern(
                 using: generatorName,
                 parameters: parameters
             ) else {
-                print("❌ Auto-generation failed: pattern generation failed")
+                print("❌ Auto-generation failed: pattern generation failed for \(generatorName)")
+                errorMessage = "Pattern generation failed for \(generatorName)"
                 return
             }
             
             // Update the MIDI sequence seamlessly
             if midiEngine.updateSequence(with: result) {
                 self.currentPattern = result
-                print("🔄 Auto-generated sequence with \(generatorName)")
+                self.errorMessage = nil
+                print("✅ Auto-generated sequence with \(generatorName)")
             } else {
                 print("❌ Auto-generation failed: sequence update failed")
+                errorMessage = "MIDI sequence update failed"
             }
         }
     }

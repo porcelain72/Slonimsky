@@ -115,7 +115,10 @@ struct ParameterPanelView: View {
                         title: "Auto-generation",
                         icon: "arrow.clockwise"
                     ) {
-                        AutoGenerationSettingsView(parameterManager: parameterManager)
+                        AutoGenerationSettingsView(
+                            parameterManager: parameterManager,
+                            midiService: midiService
+                        )
                     }
                 }
                 .padding()
