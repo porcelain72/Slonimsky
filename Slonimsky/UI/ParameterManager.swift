@@ -153,7 +153,8 @@ class ParameterManager: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let validationSubject = PassthroughSubject<Void, Never>()
     private let autoGenerationSubject = PassthroughSubject<Void, Never>()
-    private var autoGenerationCancellable: AnyCancellable?
+    private var autoGenerationCancellables = Set<AnyCancellable>()
+    private var lastParameterHash: Int = 0
     
     // MARK: - Initialization
     init() {
@@ -232,6 +233,9 @@ class ParameterManager: ObservableObject {
         harmonicRhythm = parameters.harmonicRhythm
         velocitySettings = parameters.velocitySettings
         toneShifting = parameters.toneShifting
+        
+        // Reset parameter hash to force regeneration
+        lastParameterHash = 0
     }
     
     /// Randomize all parameters
@@ -327,8 +331,8 @@ class ParameterManager: ObservableObject {
     // MARK: - Auto-generation Methods
     
     private func setupAutoGeneration() {
-        // Cancel any existing auto-generation subscription
-        autoGenerationCancellable?.cancel()
+        // Cancel any existing auto-generation subscriptions
+        autoGenerationCancellables.removeAll()
         
         // Set up debounced auto-generation
         autoGenerationSubject
@@ -336,15 +340,14 @@ class ParameterManager: ObservableObject {
             .sink { [weak self] in
                 self?.performAutoGeneration()
             }
-            .store(in: &autoGenerationCancellable)
+            .store(in: &autoGenerationCancellables)
         
         print("🔄 Auto-generation enabled with \(autoGenerationDelay)s delay")
     }
     
     private func stopAutoGeneration() {
-        // Cancel auto-generation subscription
-        autoGenerationCancellable?.cancel()
-        autoGenerationCancellable = nil
+        // Cancel auto-generation subscriptions
+        autoGenerationCancellables.removeAll()
         
         print("🔄 Auto-generation disabled")
     }
@@ -361,8 +364,9 @@ class ParameterManager: ObservableObject {
             return
         }
         
-        // Trigger auto-generation
-        autoGenerationSubject.send()
+        // Notify that auto-generation should be performed
+        // This will be handled by the MIDIIntegrationService
+        print("🔄 Auto-generation parameters validated, ready for generation")
     }
     
     // MARK: - Automatic Generator Selection Methods
@@ -419,8 +423,14 @@ class ParameterManager: ObservableObject {
     func updateActiveGenerators() {
         let newActiveGenerators = determineActiveGenerators()
         if newActiveGenerators != activeGenerators {
-            activeGenerators = newActiveGenerators
-            print("🔄 Auto-selected generators: \(activeGenerators.joined(separator: ", "))")
+            // Only update if the change is significant (not just reordering)
+            let oldSet = Set(activeGenerators)
+            let newSet = Set(newActiveGenerators)
+            
+            if oldSet != newSet {
+                activeGenerators = newActiveGenerators
+                print("🔄 Auto-selected generators: \(activeGenerators.joined(separator: ", "))")
+            }
         }
     }
     
@@ -473,11 +483,19 @@ class ParameterManager: ObservableObject {
     private func validateAndNotify() {
         validationSubject.send()
         
-        // Update automatic generator selection
-        updateGeneratorSelection()
+        // Check if parameters have actually changed significantly
+        let currentHash = currentParameters.hashValue
+        let parametersChanged = currentHash != lastParameterHash
+        lastParameterHash = currentHash
         
-        // Trigger auto-generation if enabled (will be debounced)
-        if autoGenerateEnabled {
+        // Only update generator selection if automatic selection is enabled
+        // and parameters have changed significantly
+        if automaticGeneratorSelectionEnabled && parametersChanged {
+            updateGeneratorSelection()
+        }
+        
+        // Trigger auto-generation if enabled and parameters changed (will be debounced)
+        if autoGenerateEnabled && parametersChanged {
             autoGenerationSubject.send()
         }
     }

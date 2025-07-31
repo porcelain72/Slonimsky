@@ -29,6 +29,7 @@ class MIDIIntegrationService: ObservableObject {
     private let patternRegistry = PatternGeneratorRegistry.shared
     private var cancellables = Set<AnyCancellable>()
     private var parameterManager: ParameterManager?
+    private var lastGeneratedPatternHash: Int = 0
     
     // MARK: - Initialization
     init() {
@@ -61,12 +62,19 @@ class MIDIIntegrationService: ObservableObject {
         errorMessage = nil
         isGenerating = false
         generationProgress = 0.0
+        lastGeneratedPatternHash = 0
         
         // Force a new generation if auto-generation is enabled
         if let parameterManager = parameterManager, parameterManager.autoGenerateEnabled {
             print("🔄 Forcing auto-generation after reset")
             handleAutoGeneration()
         }
+    }
+    
+    /// Reset pattern cache to force regeneration
+    func resetPatternCache() {
+        lastGeneratedPatternHash = 0
+        print("🔄 Pattern cache reset")
     }
     
     /// Handle auto-generation when parameters change
@@ -76,9 +84,16 @@ class MIDIIntegrationService: ObservableObject {
             return 
         }
         
-        print("🔄 Starting auto-generation...")
-        
         let parameters = parameterManager.currentParameters
+        let currentHash = parameters.hashValue
+        
+        // Check if we've already generated this exact pattern
+        if currentHash == lastGeneratedPatternHash && currentPattern != nil {
+            print("🔄 Pattern already generated for these parameters, skipping regeneration")
+            return
+        }
+        
+        print("🔄 Starting auto-generation...")
         
         // Validate parameters before generation
         let errors = parameterManager.validateParameters()
@@ -106,6 +121,7 @@ class MIDIIntegrationService: ObservableObject {
             // Update the MIDI sequence seamlessly
             if midiEngine.updateSequence(with: result) {
                 self.currentPattern = result
+                self.lastGeneratedPatternHash = currentHash
                 self.errorMessage = nil
                 print("✅ Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
             } else {
@@ -132,6 +148,7 @@ class MIDIIntegrationService: ObservableObject {
             // Update the MIDI sequence seamlessly
             if midiEngine.updateSequence(with: result) {
                 self.currentPattern = result
+                self.lastGeneratedPatternHash = currentHash
                 self.errorMessage = nil
                 print("✅ Auto-generated sequence with \(generatorName)")
             } else {
