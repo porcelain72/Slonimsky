@@ -30,8 +30,6 @@ struct ParameterDescriptionHelper {
             return "expression_parameters_description".localized
         case .accompaniment:
             return "rhythmic_accompaniment_parameters_description".localized
-        case .autoGeneration:
-            return "auto_generation_parameters_description".localized
         }
     }
     
@@ -53,8 +51,6 @@ struct ParameterDescriptionHelper {
             return "expression_parameters_title".localized
         case .accompaniment:
             return "rhythmic_accompaniment_parameters_title".localized
-        case .autoGeneration:
-            return "auto_generation_parameters_title".localized
         }
     }
     
@@ -118,12 +114,6 @@ struct ParameterDescriptionHelper {
                 "rhythmic_accompaniment_parameters_style".localized,
                 "rhythmic_accompaniment_parameters_density".localized,
                 "rhythmic_accompaniment_parameters_velocity".localized
-            ]
-        case .autoGeneration:
-            return [
-                "auto_generation_parameters_enabled".localized,
-                "auto_generation_parameters_generator".localized,
-                "auto_generation_parameters_delay".localized
             ]
         }
     }

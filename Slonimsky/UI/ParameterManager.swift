@@ -21,10 +21,30 @@ class ParameterManager: ObservableObject {
         didSet { validateAndNotify() }
     }
     @Published var numberOfOctaves: Int = 1 {
-        didSet { validateAndNotify() }
+        didSet { 
+            // Auto-correct invalid divisions when octaves change
+            if scaleType == .none {
+                let correctedDivisions = getNearestValidDivisions(divisionsOfOctave, for: numberOfOctaves)
+                if correctedDivisions != divisionsOfOctave {
+                    divisionsOfOctave = correctedDivisions
+                    return // Don't call validateAndNotify() again
+                }
+            }
+            validateAndNotify() 
+        }
     }
     @Published var divisionsOfOctave: Int = 12 {
-        didSet { validateAndNotify() }
+        didSet { 
+            // Auto-correct invalid divisions for Scale Type "None"
+            if scaleType == .none {
+                let correctedDivisions = getNearestValidDivisions(divisionsOfOctave, for: numberOfOctaves)
+                if correctedDivisions != divisionsOfOctave {
+                    divisionsOfOctave = correctedDivisions
+                    return // Don't call validateAndNotify() again
+                }
+            }
+            validateAndNotify() 
+        }
     }
     @Published var tempo: Double = 120.0 {
         didSet { validateAndNotify() }
@@ -163,11 +183,13 @@ class ParameterManager: ObservableObject {
     
     // MARK: - Initialization
     init() {
+        print("🎵 ParameterManager: Initializing with default parameters")
         setupBindings()
         loadDefaultPreset()
         
         // Initialize automatic generator selection
         updateGeneratorSelection()
+        print("🎵 ParameterManager: Initialization complete")
     }
     
     // MARK: - Public Methods
@@ -276,9 +298,6 @@ class ParameterManager: ObservableObject {
                 randomizeExpressionParameters()
                     case .accompaniment:
             randomizeRhythmicAccompanimentParameters()
-            case .autoGeneration:
-                // Auto-generation doesn't need randomization
-                break
             }
         }
     }
@@ -314,6 +333,15 @@ class ParameterManager: ObservableObject {
             errors.append("Divisions of octave must be between 2 and 24")
         }
         
+        // Validate divisions for Scale Type "None" (equal divisions)
+        if scaleType == .none {
+            let totalSemitones = 12 * numberOfOctaves
+            if totalSemitones % divisionsOfOctave != 0 {
+                let validDivisors = getValidDivisors(totalSemitones)
+                errors.append("Divisions (\(divisionsOfOctave)) is not a valid divisor of \(totalSemitones) semitones. Valid divisors: \(validDivisors.joined(separator: ", "))")
+            }
+        }
+        
         if tempo < 20 || tempo > 300 {
             errors.append("Tempo must be between 20 and 300 BPM")
         }
@@ -323,6 +351,53 @@ class ParameterManager: ObservableObject {
         }
         
         return errors
+    }
+    
+    /// Get valid divisors for a given number
+    private func getValidDivisors(_ number: Int) -> [String] {
+        var divisors: [Int] = []
+        for i in 1...number {
+            if number % i == 0 {
+                divisors.append(i)
+            }
+        }
+        return divisors.map { String($0) }
+    }
+    
+    /// Get the nearest valid divisor for the given divisions and octaves
+    private func getNearestValidDivisions(_ divisions: Int, for octaves: Int) -> Int {
+        let totalSemitones = 12 * octaves
+        let validDivisors = getValidDivisorsAsInts(totalSemitones)
+        
+        // If the current divisions is valid, keep it
+        if validDivisors.contains(divisions) {
+            return divisions
+        }
+        
+        // Find the nearest valid divisor
+        var nearest = validDivisors[0]
+        var minDistance = abs(divisions - nearest)
+        
+        for divisor in validDivisors {
+            let distance = abs(divisions - divisor)
+            if distance < minDistance {
+                minDistance = distance
+                nearest = divisor
+            }
+        }
+        
+        return nearest
+    }
+    
+    /// Get valid divisors as integers
+    private func getValidDivisorsAsInts(_ number: Int) -> [Int] {
+        var divisors: [Int] = []
+        for i in 1...number {
+            if number % i == 0 {
+                divisors.append(i)
+            }
+        }
+        return divisors
     }
     
     /// Get parameter change publisher
@@ -380,7 +455,11 @@ class ParameterManager: ObservableObject {
     
     /// Determine which generators should be active based on current parameter usage
     func determineActiveGenerators() -> [String] {
+        print("🎵 ParameterManager: Determining active generators")
+        print("   Automatic selection enabled: \(automaticGeneratorSelectionEnabled)")
+        
         guard automaticGeneratorSelectionEnabled else {
+            print("   Using manual selection: \(selectedGeneratorForAutoGeneration)")
             return [selectedGeneratorForAutoGeneration]
         }
         
@@ -388,42 +467,61 @@ class ParameterManager: ObservableObject {
         
         // Always include Scale Pattern Generator for basic parameters
         generators.insert("Scale Pattern Generator")
+        print("   Added Scale Pattern Generator (always active)")
         
         // Check interval parameters
         if primaryInterval != 1 || secondaryInterval != 1 || 
            intervalPattern != .ascending || intervalInversion || symmetricalIntervals {
             generators.insert("Interval Pattern Generator")
+            print("   Added Interval Pattern Generator (interval parameters active)")
         }
         
-        // Check modulation parameters
-        if interpolation.enabled || infrapolation.enabled || ultrapolation.enabled {
+        // Check modulation parameters - only add if enabled AND has notes to generate
+        // But don't add if ScalePatternGenerator is already active (it handles modulations internally)
+        if !generators.contains("Scale Pattern Generator") && 
+           ((interpolation.enabled && interpolation.numberOfNotes > 0) || 
+            (infrapolation.enabled && infrapolation.numberOfNotes > 0) || 
+            (ultrapolation.enabled && ultrapolation.numberOfNotes > 0)) {
             generators.insert("Modulation Pattern Generator")
+            print("   Added Modulation Pattern Generator (modulation parameters active)")
+        } else if generators.contains("Scale Pattern Generator") {
+            print("   Skipped Modulation Pattern Generator (ScalePatternGenerator handles modulations internally)")
         }
         
-        // Check directional parameters
-        if primaryDirection != .ascending || mirrorPoints > 0 || 
-           retrogradeSections || registerShifts != .none || contourPattern != .linear {
+        // Check directional parameters - only add Contour Pattern Generator for complex directional patterns
+        // that ScalePatternGenerator doesn't handle well internally
+        if (mirrorPoints > 0 || retrogradeSections || registerShifts != .none || contourPattern != .linear) {
             generators.insert("Contour Pattern Generator")
+            print("   Added Contour Pattern Generator (complex directional parameters active)")
+        } else if primaryDirection != .ascending {
+            // For simple directional changes (ascending/descending/alternating), 
+            // ScalePatternGenerator handles these internally, so don't add Contour Pattern Generator
+            print("   Skipped Contour Pattern Generator (ScalePatternGenerator handles simple directional patterns internally)")
         }
         
         // Check rhythmic parameters
         if noteDurationPattern != .uniform || rhythmicDensity != 1.0 || 
            syncopationLevel > 0 || metricModulation.enabled {
             generators.insert("Rhythmic Pattern Generator")
+            print("   Added Rhythmic Pattern Generator (rhythmic parameters active)")
         }
         
         // Check harmonic parameters
         if harmonicMode != .tonal || chordGeneration.enabled || 
            harmonicRhythm.chordChangeFrequency != 4 {
             generators.insert("Harmonic Pattern Generator")
+            print("   Added Harmonic Pattern Generator (harmonic parameters active)")
         }
         
         // Check symmetrical parameters
         if symmetricalIntervals || mirrorPoints > 0 {
             generators.insert("Symmetrical Pattern Generator")
+            print("   Added Symmetrical Pattern Generator (symmetrical parameters active)")
         }
         
-        return Array(generators).sorted()
+        let result = Array(generators).sorted()
+        print("   Final active generators: \(result)")
+        return result
     }
     
     /// Update active generators based on current parameter usage
@@ -443,20 +541,37 @@ class ParameterManager: ObservableObject {
     
     /// Determine the best combination mode based on active generators
     func determineCombinationMode() -> PatternCombinationMode {
-        guard activeGenerators.count > 1 else { return .sequential }
+        print("🎵 ParameterManager: Determining combination mode")
+        print("   Active generators count: \(activeGenerators.count)")
+        print("   Active generators: \(activeGenerators)")
+        
+        guard activeGenerators.count > 1 else { 
+            print("   Using sequential mode (single generator)")
+            return .sequential 
+        }
         
         // Use layered mode if harmonic generator is active with others
         if activeGenerators.contains("Harmonic Pattern Generator") && activeGenerators.count > 1 {
+            print("   Using layered mode (harmonic generator active)")
+            return .layered
+        }
+        
+        // Use layered mode for modulation + melodic combinations (modulations apply to existing notes)
+        if activeGenerators.contains("Modulation Pattern Generator") && 
+           (activeGenerators.contains("Scale Pattern Generator") || activeGenerators.contains("Interval Pattern Generator")) {
+            print("   Using layered mode (modulation + melodic combination)")
             return .layered
         }
         
         // Use interleaved mode for rhythmic + melodic combinations
         if activeGenerators.contains("Rhythmic Pattern Generator") && 
            (activeGenerators.contains("Scale Pattern Generator") || activeGenerators.contains("Interval Pattern Generator")) {
+            print("   Using interleaved mode (rhythmic + melodic combination)")
             return .interleaved
         }
         
         // Default to sequential for other combinations
+        print("   Using sequential mode (default for other combinations)")
         return .sequential
     }
     
@@ -508,6 +623,7 @@ class ParameterManager: ObservableObject {
     }
     
     func loadDefaultPreset() {
+        print("🎵 ParameterManager: Loading default preset")
         // Load a sensible default preset
         let defaultPreset = SlonimskyPreset(
             name: "Default",
@@ -515,7 +631,34 @@ class ParameterManager: ObservableObject {
             generatorName: "Scale Pattern Generator",
             parameters: PatternParameters.default
         )
+        
+        print("🎵 Default Parameters:")
+        print("   Root Note: \(PatternParameters.default.rootNote)")
+        print("   Scale Type: \(PatternParameters.default.scaleType.rawValue)")
+        print("   Number of Octaves: \(PatternParameters.default.numberOfOctaves)")
+        print("   Divisions of Octave: \(PatternParameters.default.divisionsOfOctave)")
+        print("   Tempo: \(PatternParameters.default.tempo)")
+        print("   Time Signature: \(PatternParameters.default.timeSignature.rawValue)")
+        print("   Primary Direction: \(PatternParameters.default.primaryDirection.rawValue)")
+        print("   Interval Pattern: \(PatternParameters.default.intervalPattern.rawValue)")
+        print("   Harmonic Mode: \(PatternParameters.default.harmonicMode.rawValue)")
+        print("   Chord Generation Enabled: \(PatternParameters.default.chordGeneration.enabled)")
+        print("   Chord Size: \(PatternParameters.default.chordGeneration.chordSize)")
+        print("   Harmonic Rhythm Chord Change Frequency: \(PatternParameters.default.harmonicRhythm.chordChangeFrequency)")
+        print("   Interpolation Enabled: \(PatternParameters.default.interpolation.enabled)")
+        print("   Infrapolation Enabled: \(PatternParameters.default.infrapolation.enabled)")
+        print("   Ultrapolation Enabled: \(PatternParameters.default.ultrapolation.enabled)")
+        print("   Metric Modulation Enabled: \(PatternParameters.default.metricModulation.enabled)")
+        
         loadPreset(defaultPreset)
+        print("🎵 ParameterManager: Default preset loaded")
+    }
+    
+    /// Reset all parameters to their default values
+    func resetToDefaults() {
+        print("🔄 ParameterManager: Resetting parameters to defaults")
+        loadDefaultPreset()
+        print("✅ ParameterManager: Parameters reset to defaults")
     }
     
     private func randomizeBasicParameters() {

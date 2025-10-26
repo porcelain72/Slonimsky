@@ -55,7 +55,7 @@ struct PianoRollPanelView: View {
             // Footer Controls
             pianoRollFooter
         }
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.garageBandBackground)
         .sheet(isPresented: $showNoteDetails) {
             NoteDetailsView(
                 midiService: midiService,
@@ -69,89 +69,52 @@ struct PianoRollPanelView: View {
         }
     }
     
-    // MARK: - Header
+    // MARK: - Header (Simplified for smaller space)
     
     private var pianoRollHeader: some View {
-        VStack(spacing: 8) {
+        VStack(spacing: 4) {
             HStack {
-                Image(systemName: "pianokeys")
-                    .font(.title2)
-                Text("Piano Roll")
-                    .font(.headline)
-                Spacer()
-                
-                // Zoom Controls
-                HStack(spacing: 8) {
+                // Zoom Controls (Compact)
+                HStack(spacing: 4) {
                     Button(action: zoomOut) {
                         Image(systemName: "minus.magnifyingglass")
+                            .font(.caption)
                     }
                     .buttonStyle(.bordered)
                     .disabled(zoomLevel <= 0.5)
+                    .font(.caption)
                     
                     Text("\(Int(zoomLevel * 100))%")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                        .frame(minWidth: 50)
+                        .font(.caption2)
+                        .foregroundColor(Color.garageBandSecondary)
+                        .frame(minWidth: 40)
                     
                     Button(action: zoomIn) {
                         Image(systemName: "plus.magnifyingglass")
+                            .font(.caption)
                     }
                     .buttonStyle(.bordered)
                     .disabled(zoomLevel >= 3.0)
-                    
-                    Divider()
-                        .frame(height: 20)
+                    .font(.caption)
                     
                     // Auto-scale Toggle
-                    Toggle("Auto-scale", isOn: $autoScaleEnabled)
+                    Toggle("Auto", isOn: $autoScaleEnabled)
                         .toggleStyle(SwitchToggleStyle())
-                        .font(.caption)
+                        .font(.caption2)
+                }
+                
+                Spacer()
+                
+                // Tonal Range (Compact)
+                if let pattern = midiService.currentPattern {
+                    Text("\(noteName(for: tonalRange.lowerBound))-\(noteName(for: tonalRange.upperBound))")
+                        .font(.caption2)
+                        .foregroundColor(Color.garageBandSecondary)
                 }
             }
-            
-            // Pattern Info
-            if let pattern = midiService.currentPattern {
-                VStack(spacing: 4) {
-                    HStack {
-                        Text("Pattern: \(pattern.metadata.generatorName)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Text("\(pattern.notes.count) notes")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Text("Duration: \(formatTime(pattern.metadata.duration))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    
-                    HStack {
-                        Text("Tonal Range: \(noteName(for: tonalRange.lowerBound)) - \(noteName(for: tonalRange.upperBound))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Text("Note Height: \(String(format: "%.1f", dynamicNoteHeight))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            } else {
-                HStack {
-                    Text("No pattern generated")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    Spacer()
-                }
-            }
-            
-            Divider()
         }
-        .padding()
+        .padding(.horizontal, 12)
+        .padding(.vertical, 6)
     }
     
     // MARK: - Piano Keys
@@ -176,10 +139,10 @@ struct PianoRollPanelView: View {
                     }
                 }
             }
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.garageBandPanel)
         }
         .frame(width: pianoKeysWidth, height: sharedHeight)
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .onChange(of: tonalRange) { _ in
             print("🎹 Piano keys updated for new tonal range: \(tonalRange.lowerBound)-\(tonalRange.upperBound)")
         }
@@ -226,7 +189,7 @@ struct PianoRollPanelView: View {
                     height: calculateConstrainedHeight(availableHeight: geometry.size.height)
                 )
             }
-            .background(Color(NSColor.windowBackgroundColor))
+            .background(Color.garageBandBackground)
             .onAppear {
                 if let pattern = midiService.currentPattern {
                     updateViewForNewPattern(pattern)
@@ -251,7 +214,7 @@ struct PianoRollPanelView: View {
     
     private var gridBackground: some View {
         Canvas { context, size in
-            let gridColor = Color(NSColor.controlBackgroundColor)
+            let gridColor = Color.garageBandPanel
             let gridWidth: CGFloat = 1.0
             
             // Vertical lines (time divisions)
@@ -288,41 +251,45 @@ struct PianoRollPanelView: View {
         }
     }
     
-    // MARK: - Footer
+    // MARK: - Footer (Simplified for smaller space)
     
     private var pianoRollFooter: some View {
-        VStack(spacing: 8) {
-            Divider()
-            
-            HStack {
-                // MIDI Playback Controls
-                MIDIPlaybackControllerView(midiService: midiService)
-                    .frame(minHeight: 120)
-                
-                Spacer()
-                
-                // Selection Controls
-                if !selectedNotes.isEmpty {
-                    HStack(spacing: 8) {
-                        Text("\(selectedNotes.count) selected")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Button("Details") {
-                            showNoteDetails = true
-                        }
-                        .buttonStyle(.bordered)
-                        
-                        Button("Delete") {
-                            deleteSelectedNotes()
-                        }
-                        .buttonStyle(.bordered)
-                        .foregroundColor(.red)
+        HStack {
+            // Selection Controls (Compact)
+            if !selectedNotes.isEmpty {
+                HStack(spacing: 4) {
+                    Text("\(selectedNotes.count)")
+                        .font(.caption2)
+                        .foregroundColor(Color.garageBandSecondary)
+                    
+                    Button("Details") {
+                        showNoteDetails = true
                     }
+                    .buttonStyle(.bordered)
+                    .font(.caption2)
                 }
             }
-            .padding()
+            
+            Spacer()
+            
+            // Quick controls (Compact)
+            HStack(spacing: 4) {
+                Button("Fit") {
+                    autoScaleEnabled = true
+                }
+                .buttonStyle(.bordered)
+                .font(.caption2)
+                
+                Button("Reset") {
+                    zoomLevel = 1.0
+                    scrollOffset = .zero
+                }
+                .buttonStyle(.bordered)
+                .font(.caption2)
+            }
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 4)
     }
     
     // MARK: - Actions
@@ -535,27 +502,27 @@ struct PianoKeyView: View {
     
     private var backgroundColor: Color {
         if isSelected {
-            return .accentColor.opacity(0.3)
+            return Color.garageBandAccent.opacity(0.3)
         } else if isHovered {
-            return Color(NSColor.controlBackgroundColor)
+            return Color.garageBandPanel
         } else {
-            return isBlackKey ? Color(NSColor.controlBackgroundColor) : Color(NSColor.windowBackgroundColor)
+            return isBlackKey ? Color.garageBandPanel : Color.garageBandBackground
         }
     }
     
     private var textColor: Color {
         if isSelected {
-            return .accentColor
+            return Color.garageBandAccent
         } else {
-            return isBlackKey ? .white : .primary
+            return isBlackKey ? .white : Color.garageBandText
         }
     }
     
     private var borderColor: Color {
         if isSelected {
-            return .accentColor
+            return Color.garageBandAccent
         } else {
-            return Color(NSColor.controlBackgroundColor)
+            return Color.garageBandPanel
         }
     }
 }
@@ -571,7 +538,7 @@ struct NoteView: View {
     
     private var noteColor: Color {
         if isSelected {
-            return .accentColor
+            return Color.garageBandAccent
         } else {
             return Color(hue: Double(note.note % 12) / 12.0, saturation: 0.7, brightness: 0.8)
         }
@@ -590,7 +557,7 @@ struct NoteView: View {
             .position(x: x + width / 2, y: y + 10 * zoomLevel)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(isSelected ? Color.accentColor : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.garageBandAccent : Color.clear, lineWidth: 2)
             )
             .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
     }
@@ -621,7 +588,7 @@ struct NoteDetailsView: View {
                                         Spacer()
                                         Text("MIDI \(note.note)")
                                             .font(.caption)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Color.garageBandSecondary)
                                     }
                                     
                                     HStack {
@@ -639,7 +606,7 @@ struct NoteDetailsView: View {
                                     .font(.caption)
                                 }
                                 .padding()
-                                .background(Color(NSColor.controlBackgroundColor))
+                                .background(Color.garageBandPanel)
                                 .cornerRadius(8)
                             }
                         }

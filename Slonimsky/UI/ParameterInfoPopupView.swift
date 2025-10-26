@@ -31,7 +31,7 @@ struct ParameterInfoPopupView: View {
         }
         .padding(20)
         .frame(width: 400, height: 500)
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.garageBandBackground)
         .cornerRadius(12)
         .shadow(radius: 10)
     }
@@ -42,17 +42,18 @@ struct ParameterInfoPopupView: View {
         HStack {
             Image(systemName: iconName)
                 .font(.title2)
-                .foregroundColor(.accentColor)
+                .foregroundColor(Color.garageBandAccent)
             
             Text(ParameterDescriptionHelper.sectionTitle(for: category))
                 .font(.headline)
                 .fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
             
             Spacer()
             
             Button(action: { dismiss() }) {
                 Image(systemName: "xmark.circle.fill")
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.garageBandSecondary)
                     .font(.title3)
             }
             .buttonStyle(.plain)
@@ -66,12 +67,13 @@ struct ParameterInfoPopupView: View {
             Text("Overview")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.garageBandText)
             
             Text(ParameterDescriptionHelper.sectionDescription(for: category))
                 .font(.body)
                 .lineLimit(nil)
                 .fixedSize(horizontal: false, vertical: true)
+                .foregroundColor(Color.garageBandText)
         }
     }
     
@@ -82,7 +84,7 @@ struct ParameterInfoPopupView: View {
             Text("Parameters")
                 .font(.subheadline)
                 .fontWeight(.medium)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.garageBandText)
             
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 8) {
@@ -90,13 +92,14 @@ struct ParameterInfoPopupView: View {
                         HStack(alignment: .top, spacing: 8) {
                             Image(systemName: "circle.fill")
                                 .font(.caption2)
-                                .foregroundColor(.accentColor)
+                                .foregroundColor(Color.garageBandAccent)
                                 .padding(.top, 4)
                             
                             Text(detail)
                                 .font(.body)
                                 .lineLimit(nil)
                                 .fixedSize(horizontal: false, vertical: true)
+                                .foregroundColor(Color.garageBandText)
                         }
                     }
                 }
@@ -137,8 +140,6 @@ struct ParameterInfoPopupView: View {
             return "slider.horizontal.3"
         case .accompaniment:
             return "drumsticks"
-        case .autoGeneration:
-            return "arrow.clockwise"
         }
     }
 }

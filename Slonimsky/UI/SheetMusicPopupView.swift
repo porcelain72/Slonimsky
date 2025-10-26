@@ -30,7 +30,7 @@ struct SheetMusicPopupView: View {
                 // Footer controls
                 sheetMusicFooter
             }
-            .background(Color(NSColor.windowBackgroundColor))
+            .background(Color.garageBandBackground)
             .navigationTitle("Sheet Music")
            // .navigationBarTitleDisplayMode(.inline)
             .toolbar {
@@ -51,7 +51,7 @@ struct SheetMusicPopupView: View {
                         
                         Text("\(Int(zoomLevel * 100))%")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                             .frame(minWidth: 50)
                         
                         Button(action: zoomIn) {
@@ -76,45 +76,45 @@ struct SheetMusicPopupView: View {
                     HStack {
                         Text("Pattern: \(pattern.metadata.generatorName)")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(Color.garageBandText)
                         
                         Spacer()
                         
                         Text("Generated in \(String(format: "%.3f", pattern.performance.generationTime))s")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                     }
                     
                     HStack {
                         Label("\(pattern.notes.count) notes", systemImage: "music.note")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                         
                         Spacer()
                         
                         Label("Duration: \(formatTime(pattern.metadata.duration))", systemImage: "clock")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                         
                         Spacer()
                         
                         Label("Range: \(pattern.metadata.pitchRange.lowerBound)-\(pattern.metadata.pitchRange.upperBound)", systemImage: "arrow.up.and.down")
                             .font(.subheadline)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                     }
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(8)
             } else {
                 HStack {
                     Text("No pattern available")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                     Spacer()
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(8)
             }
             
@@ -132,15 +132,15 @@ struct SheetMusicPopupView: View {
                 VStack(spacing: 16) {
                     Image(systemName: "music.note.list")
                         .font(.system(size: 64))
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                     
                     Text("Sheet Music Notation")
                         .font(.title2)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                     
                     Text("Sheet music notation will be implemented in a future update")
                         .font(.body)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                         .multilineTextAlignment(.center)
                         .padding(.horizontal)
                 }
@@ -152,7 +152,7 @@ struct SheetMusicPopupView: View {
                     VStack(spacing: 16) {
                         Text("Pattern Details")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(Color.garageBandText)
                         
                         VStack(alignment: .leading, spacing: 12) {
                             DetailRow(title: "Generator", value: pattern.metadata.generatorName)
@@ -164,14 +164,14 @@ struct SheetMusicPopupView: View {
                             DetailRow(title: "Complexity", value: "\(String(format: "%.2f", pattern.performance.complexity))")
                         }
                         .padding()
-                        .background(Color(NSColor.controlBackgroundColor))
+                        .background(Color.garageBandPanel)
                         .cornerRadius(8)
                         
                         // Note preview
                         VStack(spacing: 12) {
                             Text("Note Preview")
                                 .font(.headline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color.garageBandText)
                             
                             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 4), spacing: 8) {
                                 ForEach(Array(pattern.notes.prefix(20).enumerated()), id: \.offset) { index, note in
@@ -181,13 +181,13 @@ struct SheetMusicPopupView: View {
                                             .fontWeight(.medium)
                                         Text("v\(note.velocity)")
                                             .font(.caption2)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Color.garageBandSecondary)
                                         Text("\(String(format: "%.2f", note.beatLength))")
                                             .font(.caption2)
-                                            .foregroundColor(.secondary)
+                                            .foregroundColor(Color.garageBandSecondary)
                                     }
                                     .padding(8)
-                                    .background(Color(NSColor.windowBackgroundColor))
+                                    .background(Color.garageBandBackground)
                                     .cornerRadius(6)
                                 }
                             }
@@ -195,11 +195,11 @@ struct SheetMusicPopupView: View {
                             if pattern.notes.count > 20 {
                                 Text("... and \(pattern.notes.count - 20) more notes")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Color.garageBandSecondary)
                             }
                         }
                         .padding()
-                        .background(Color(NSColor.controlBackgroundColor))
+                        .background(Color.garageBandPanel)
                         .cornerRadius(8)
                     }
                     .padding()
@@ -234,7 +234,7 @@ struct SheetMusicPopupView: View {
                 // Status
                 Text("Sheet Music View")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundColor(Color.garageBandSecondary)
             }
             .padding()
         }
@@ -295,13 +295,13 @@ struct DetailRow: View {
         HStack {
             Text(title)
                 .font(.subheadline)
-                .foregroundColor(.primary)
+                .foregroundColor(Color.garageBandText)
             
             Spacer()
             
             Text(value)
                 .font(.subheadline)
-                .foregroundColor(.secondary)
+                .foregroundColor(Color.garageBandSecondary)
         }
     }
 }

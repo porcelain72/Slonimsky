@@ -12,13 +12,15 @@ struct CycleControlView: View {
             // Header
             HStack {
                 Image(systemName: "timer.circle.fill")
-                    .foregroundColor(.green)
+                    .foregroundColor(Color.garageBandAccent)
                 Text("Cycle Control")
                     .font(.headline)
+                    .foregroundColor(Color.garageBandText)
                 Spacer()
                 
                 // Auto-advance toggle
                 Toggle("Auto-advance", isOn: $isAutoAdvancing)
+                    .foregroundColor(Color.garageBandText)
                     .onChange(of: isAutoAdvancing) { newValue in
                         if newValue {
                             startAutoAdvance()
@@ -34,11 +36,12 @@ struct CycleControlView: View {
                     Text("Current Cycle")
                         .font(.subheadline)
                         .fontWeight(.medium)
+                        .foregroundColor(Color.garageBandText)
                     Spacer()
                     Text("\(parameterManager.cyclicalSettings.currentCycle)")
                         .font(.title2)
                         .fontWeight(.bold)
-                        .foregroundColor(.blue)
+                        .foregroundColor(Color.garageBandAccent)
                 }
                 
                 // Progress Bar
@@ -48,11 +51,11 @@ struct CycleControlView: View {
                 HStack {
                     Text("Progress: \(Int(cycleProgress * 100))%")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                     Spacer()
                     Text("Max: \(maxCycles)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                 }
             }
             
@@ -83,12 +86,13 @@ struct CycleControlView: View {
                     Text("Auto-advance Interval")
                         .font(.subheadline)
                         .fontWeight(.medium)
+                        .foregroundColor(Color.garageBandText)
                     
                     HStack {
                         Slider(value: $autoAdvanceInterval, in: 0.5...10.0, step: 0.5)
                         Text("\(String(format: "%.1f", autoAdvanceInterval))s")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                     }
                 }
             }
@@ -98,30 +102,32 @@ struct CycleControlView: View {
                 Text("Active Cyclical Parameters")
                     .font(.subheadline)
                     .fontWeight(.medium)
+                    .foregroundColor(Color.garageBandText)
                 
                 let activeParams = parameterManager.cyclicalSettings.enabledParameters
                 if activeParams.isEmpty {
                     Text("No cyclical parameters active")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                         .italic()
                 } else {
-                    ForEach(Array(activeParams.keys.sorted(by: { $0.rawValue < $1.rawValue })), id: \.self) { paramType in
+                    ForEach(activeParams.keys.sorted(by: { $0.rawValue < $1.rawValue }), id: \.self) { paramType in
                         if let settings = activeParams[paramType] {
                             HStack {
                                 Text(paramType.rawValue)
                                     .font(.caption)
+                                    .foregroundColor(Color.garageBandText)
                                 Spacer()
-                                Text("\(settings.currentCycle)/\(settings.maxCycles)")
+                                Text("\(settings.currentCycle)/\(Int(ceil((settings.maxValue - settings.minValue) / settings.stepSize)) + 1)")
                                     .font(.caption)
-                                    .foregroundColor(.secondary)
+                                    .foregroundColor(Color.garageBandSecondary)
                                 Text("\(String(format: "%.1f", settings.currentValue(baseValue: 0)))")
                                     .font(.caption)
-                                    .foregroundColor(.blue)
+                                    .foregroundColor(Color.garageBandAccent)
                                     .fontWeight(.medium)
                             }
                             .padding(.horizontal, 8)
                             .padding(.vertical, 4)
-                            .background(Color.green.opacity(0.1))
+                            .background(Color.garageBandAccent.opacity(0.1))
                             .cornerRadius(6)
                         }
                     }
@@ -129,7 +135,7 @@ struct CycleControlView: View {
             }
         }
         .padding()
-        .background(Color(.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .cornerRadius(12)
         .onDisappear {
             stopAutoAdvance()
@@ -139,15 +145,31 @@ struct CycleControlView: View {
     // MARK: - Computed Properties
     
     private var cycleProgress: Double {
-        let maxCycles = parameterManager.cyclicalSettings.maxCycles
+        let maxCycles = calculateMaxCycles()
         return maxCycles > 0 ? Double(parameterManager.cyclicalSettings.currentCycle) / Double(maxCycles) : 0.0
     }
     
     private var maxCycles: Int {
-        parameterManager.cyclicalSettings.maxCycles
+        calculateMaxCycles()
     }
     
     // MARK: - Methods
+    
+    private func calculateMaxCycles() -> Int {
+        let enabledParameters = parameterManager.cyclicalSettings.enabledParameters
+        var maxCycles = 1
+        
+        for (_, settings) in enabledParameters {
+            guard settings.isEnabled else { continue }
+            
+            let range = settings.maxValue - settings.minValue
+            let cyclesNeeded = Int(ceil(range / settings.stepSize)) + 1
+            
+            maxCycles = max(maxCycles, cyclesNeeded)
+        }
+        
+        return maxCycles
+    }
     
     private func nextCycle() {
         parameterManager.cyclicalSettings.advanceAllCycles()
@@ -223,7 +245,7 @@ extension CyclicalSettings {
     
     var maxCycles: Int {
         // Return the maximum cycles among all enabled parameters
-        return enabledParameters.values.map { $0.maxCycles }.max() ?? 0
+        return enabledParameters.values.map { Int(ceil(($0.maxValue - $0.minValue) / $0.stepSize)) + 1 }.max() ?? 0
     }
 }
 

@@ -114,23 +114,32 @@ class ParameterApplicationManager {
         var result: [Int] = []
         let rootNote = parameters.rootNote
         
+        // For Scale Type "None", use the calculated equal division interval
+        let interval: Int
+        if parameters.scaleType == .none {
+            let totalSemitones = 12 * parameters.numberOfOctaves
+            interval = totalSemitones / parameters.divisionsOfOctave
+        } else {
+            interval = parameters.primaryInterval
+        }
+        
         for (index, _) in notes.enumerated() {
-            let interval = index % 2 == 0 ? parameters.primaryInterval : parameters.secondaryInterval
+            let currentInterval = index % 2 == 0 ? interval : parameters.secondaryInterval
             
             switch parameters.intervalPattern {
             case .ascending:
-                result.append(rootNote + (index * interval))
+                result.append(rootNote + (index * currentInterval))
             case .descending:
-                result.append(rootNote - (index * interval))
+                result.append(rootNote - (index * currentInterval))
             case .alternating:
                 let direction = index % 2 == 0 ? 1 : -1
-                result.append(rootNote + (direction * index * interval))
+                result.append(rootNote + (direction * index * currentInterval))
             case .mirror:
                 let mirrorIndex = index % (parameters.mirrorPoints * 2)
                 let direction = mirrorIndex < parameters.mirrorPoints ? 1 : -1
-                result.append(rootNote + (direction * index * interval))
+                result.append(rootNote + (direction * index * currentInterval))
             case .retrograde:
-                result.append(rootNote + ((notes.count - 1 - index) * interval))
+                result.append(rootNote + ((notes.count - 1 - index) * currentInterval))
             }
         }
         

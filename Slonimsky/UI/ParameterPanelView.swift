@@ -32,9 +32,10 @@ struct ParameterPanelView: View {
                 NavigationLink(value: category) {
                     HStack {
                         Image(systemName: category.icon)
-                            .foregroundColor(.accentColor)
+                            .foregroundColor(Color.garageBandAccent)
                             .frame(width: 20)
                         Text(category.title)
+                            .foregroundColor(Color.garageBandText)
                         Spacer()
                     }
                 }
@@ -82,7 +83,6 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     case harmonic = "Harmonic"
     case expression = "Expression"
     case accompaniment = "Accompaniment"
-    case autoGeneration = "Auto-Generation"
     
     var id: String { rawValue }
     
@@ -96,7 +96,6 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .harmonic: return "Harmonic Parameters"
         case .expression: return "Expression Parameters"
         case .accompaniment: return "Rhythmic Accompaniment"
-        case .autoGeneration: return "Auto-generation"
         }
     }
     
@@ -110,7 +109,6 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .harmonic: return "music.note.list"
         case .expression: return "slider.horizontal.3"
         case .accompaniment: return "drumsticks"
-        case .autoGeneration: return "arrow.clockwise"
         }
     }
     
@@ -132,8 +130,6 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
             return "Velocity, tone shifting, expression"
         case .accompaniment:
             return "Rhythmic accompaniment settings and controls"
-        case .autoGeneration:
-            return "Auto-generation settings and controls"
         }
     }
 }
@@ -177,11 +173,6 @@ struct ParameterCategoryDetailView: View {
                         ExpressionParametersDetailView(parameterManager: parameterManager)
                     case .accompaniment:
                         RhythmicAccompanimentDetailView(parameterManager: parameterManager)
-                    case .autoGeneration:
-                        AutoGenerationDetailView(
-                            parameterManager: parameterManager,
-                            midiService: midiService
-                        )
                     }
                 }
                 .padding()
@@ -190,7 +181,7 @@ struct ParameterCategoryDetailView: View {
             // Footer
             categoryFooter
         }
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.garageBandBackground)
     }
     
     private var categoryHeader: some View {
@@ -206,7 +197,7 @@ struct ParameterCategoryDetailView: View {
                     showInfoPopup = true
                 }) {
                     Image(systemName: "info.circle")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                 }
                 .buttonStyle(.plain)
                 .help("Show parameter information")
@@ -217,7 +208,11 @@ struct ParameterCategoryDetailView: View {
                 HStack {
                     Text("Generator:")
                         .font(.subheadline)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     
                     Button(selectedGenerator) {
                         showGeneratorPicker = true
@@ -232,7 +227,7 @@ struct ParameterCategoryDetailView: View {
             Divider()
         }
         .padding()
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.garageBandBackground)
     }
     
     private var categoryFooter: some View {
@@ -264,7 +259,7 @@ struct ParameterCategoryDetailView: View {
             }
             .padding()
         }
-        .background(Color(NSColor.windowBackgroundColor))
+        .background(Color.garageBandBackground)
     }
 }
 
@@ -296,6 +291,9 @@ struct BasicParametersDetailView: View {
             // Scale Type
             HStack {
                 Text("Scale Type:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Scale Type", selection: $parameterManager.scaleType) {
                     ForEach(ScaleType.allCases, id: \.self) { scaleType in
@@ -303,6 +301,11 @@ struct BasicParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Number of Octaves with cycling
@@ -363,6 +366,9 @@ struct BasicParametersDetailView: View {
             // Time Signature
             HStack {
                 Text("Time Signature:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Time Signature", selection: $parameterManager.timeSignature) {
                     ForEach(TimeSignature.allCases, id: \.self) { signature in
@@ -370,6 +376,11 @@ struct BasicParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
         }
     }
@@ -419,6 +430,9 @@ struct IntervalParametersDetailView: View {
             // Interval Pattern
             HStack {
                 Text("Pattern:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Interval Pattern", selection: $parameterManager.intervalPattern) {
                     ForEach(IntervalPattern.allCases, id: \.self) { pattern in
@@ -426,13 +440,24 @@ struct IntervalParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Interval Inversion
             Toggle("Interval Inversion", isOn: $parameterManager.intervalInversion)
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             
             // Symmetrical Intervals
             Toggle("Symmetrical Intervals", isOn: $parameterManager.symmetricalIntervals)
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
         }
     }
 }
@@ -501,6 +526,9 @@ struct DirectionalParametersDetailView: View {
             // Primary Direction
             HStack {
                 Text("Direction:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Direction", selection: $parameterManager.primaryDirection) {
                     ForEach(Direction.allCases, id: \.self) { direction in
@@ -508,6 +536,11 @@ struct DirectionalParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Mirror Points with cycling
@@ -530,10 +563,16 @@ struct DirectionalParametersDetailView: View {
             
             // Retrograde Sections
             Toggle("Retrograde Sections", isOn: $parameterManager.retrogradeSections)
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             
             // Register Shifts
             HStack {
                 Text("Register Shifts:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Register Shifts", selection: $parameterManager.registerShifts) {
                     ForEach(RegisterShiftPattern.allCases, id: \.self) { pattern in
@@ -541,11 +580,19 @@ struct DirectionalParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Contour Pattern
             HStack {
                 Text("Contour:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Contour Pattern", selection: $parameterManager.contourPattern) {
                     ForEach(ContourPattern.allCases, id: \.self) { pattern in
@@ -553,6 +600,11 @@ struct DirectionalParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
         }
     }
@@ -566,6 +618,9 @@ struct RhythmicParametersDetailView: View {
             // Note Duration Pattern
             HStack {
                 Text("Duration Pattern:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Duration Pattern", selection: $parameterManager.noteDurationPattern) {
                     ForEach(DurationPattern.allCases, id: \.self) { pattern in
@@ -573,6 +628,11 @@ struct RhythmicParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Base Note Duration with cycling
@@ -616,18 +676,32 @@ struct RhythmicParametersDetailView: View {
             // Syncopation Level
             HStack {
                 Text("Syncopation:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Text("\(String(format: "%.2f", parameterManager.syncopationLevel))")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             Slider(value: $parameterManager.syncopationLevel, in: 0...1.0)
             
             // Metric Modulation
             Toggle("Metric Modulation", isOn: $parameterManager.metricModulation.enabled)
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             
             if parameterManager.metricModulation.enabled {
                 VStack(spacing: 8) {
                     HStack {
                         Text("Type:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Picker("Modulation Type", selection: $parameterManager.metricModulation.modulationType) {
                             ForEach(MetricModulationType.allCases, id: \.self) { type in
@@ -635,23 +709,48 @@ struct RhythmicParametersDetailView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     
                     HStack {
                         Text("Intensity:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Text("\(String(format: "%.2f", parameterManager.metricModulation.intensity))")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     Slider(value: $parameterManager.metricModulation.intensity, in: 0.1...1.0)
                     
                     HStack {
                         Text("Frequency:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Stepper("\(parameterManager.metricModulation.frequency)", value: $parameterManager.metricModulation.frequency, in: 1...16)
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(6)
             }
         }
@@ -666,6 +765,9 @@ struct HarmonicParametersDetailView: View {
             // Harmonic Mode
             HStack {
                 Text("Harmonic Mode:")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Picker("Harmonic Mode", selection: $parameterManager.harmonicMode) {
                     ForEach(HarmonicMode.allCases, id: \.self) { mode in
@@ -673,21 +775,44 @@ struct HarmonicParametersDetailView: View {
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             // Chord Generation
             Toggle("Chord Generation", isOn: $parameterManager.chordGeneration.enabled)
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             
             if parameterManager.chordGeneration.enabled {
                 VStack(spacing: 8) {
                     HStack {
                         Text("Chord Size:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Stepper("\(parameterManager.chordGeneration.chordSize)", value: $parameterManager.chordGeneration.chordSize, in: 2...6)
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     
                     HStack {
                         Text("Voicing:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Picker("Voicing Preference", selection: $parameterManager.chordGeneration.voicingPreference) {
                             ForEach(VoicingPreference.allCases, id: \.self) { preference in
@@ -695,17 +820,32 @@ struct HarmonicParametersDetailView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     
                     HStack {
                         Text("Velocity Scale:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Text("\(String(format: "%.2f", parameterManager.chordGeneration.velocityScale))")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     Slider(value: $parameterManager.chordGeneration.velocityScale, in: 0.1...1.0)
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(6)
             }
             
@@ -713,26 +853,56 @@ struct HarmonicParametersDetailView: View {
             VStack(spacing: 8) {
                 HStack {
                     Text("Chord Change Frequency:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(parameterManager.harmonicRhythm.chordChangeFrequency)", value: $parameterManager.harmonicRhythm.chordChangeFrequency, in: 1...16)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 
                 HStack {
                     Text("Syncopation:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.harmonicRhythm.syncopationLevel))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.harmonicRhythm.syncopationLevel, in: 0...1.0)
                 
                 HStack {
                     Text("Harmonic Tension:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.harmonicRhythm.harmonicTension))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.harmonicRhythm.harmonicTension, in: 0...1.0)
             }
             .padding()
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.garageBandPanel)
             .cornerRadius(6)
         }
     }
@@ -791,58 +961,133 @@ struct ExpressionParametersDetailView: View {
                 
                 HStack {
                     Text("Wave Depth:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.velocitySettings.waveDepth))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.velocitySettings.waveDepth, in: 0...1.0)
                 
                 HStack {
                     Text("Randomness:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.velocitySettings.randomness))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.velocitySettings.randomness, in: 0...1.0)
                 
                 HStack {
                     Text("Phase:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.velocitySettings.phase))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.velocitySettings.phase, in: 0...2 * .pi)
                 
                 HStack {
                     Text("Emphasis Beat:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(parameterManager.velocitySettings.emphasisBeat)", value: $parameterManager.velocitySettings.emphasisBeat, in: 1...16)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 
                 HStack {
                     Text("Emphasis Amount:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Text("\(String(format: "%.2f", parameterManager.velocitySettings.emphasisAmount))")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 Slider(value: $parameterManager.velocitySettings.emphasisAmount, in: 0...1.0)
             }
             .padding()
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.garageBandPanel)
             .cornerRadius(6)
             
             // Tone Shifting
             VStack(spacing: 8) {
                 HStack {
                     Text("Tone Increment:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(parameterManager.toneShifting.toneIncrement)", value: $parameterManager.toneShifting.toneIncrement, in: 0...24)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 
                 HStack {
                     Text("Max Tone Shift:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(parameterManager.toneShifting.maxToneShift)", value: $parameterManager.toneShifting.maxToneShift, in: 0...96)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 
                 HStack {
                     Text("Shift Pattern:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Picker("Shift Pattern", selection: $parameterManager.toneShifting.shiftPattern) {
                         ForEach(RegisterShiftPattern.allCases, id: \.self) { pattern in
@@ -850,10 +1095,13 @@ struct ExpressionParametersDetailView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 }
             }
             .padding()
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.garageBandPanel)
             .cornerRadius(6)
         }
     }
@@ -874,7 +1122,7 @@ struct RhythmicAccompanimentDetailView: View {
                     .toggleStyle(SwitchToggleStyle())
             }
             .padding()
-            .background(Color(NSColor.controlBackgroundColor))
+            .background(Color.garageBandPanel)
             .cornerRadius(6)
             
             if parameterManager.rhythmicAccompanimentEnabled {
@@ -882,6 +1130,11 @@ struct RhythmicAccompanimentDetailView: View {
                 VStack(spacing: 8) {
                     HStack {
                         Text("Style:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Picker("Style", selection: $parameterManager.rhythmicAccompanimentStyle) {
                             ForEach(RhythmicAccompanimentStyle.allCases, id: \.self) { style in
@@ -889,40 +1142,63 @@ struct RhythmicAccompanimentDetailView: View {
                             }
                         }
                         .pickerStyle(MenuPickerStyle())
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(6)
                 
                 // Density Control
                 VStack(spacing: 8) {
                     HStack {
                         Text("Density:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Text("\(String(format: "%.2f", parameterManager.rhythmicAccompanimentDensity))")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     Slider(value: $parameterManager.rhythmicAccompanimentDensity, in: 0.1...2.0)
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(6)
                 
                 // Velocity Control
                 VStack(spacing: 8) {
                     HStack {
                         Text("Velocity:")
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                         Spacer()
                         Text("\(String(format: "%.2f", parameterManager.rhythmicAccompanimentVelocity))")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     }
                     Slider(value: $parameterManager.rhythmicAccompanimentVelocity, in: 0.1...1.0)
                 }
                 .padding()
-                .background(Color(NSColor.controlBackgroundColor))
+                .background(Color.garageBandPanel)
                 .cornerRadius(6)
             }
         }
@@ -987,8 +1263,14 @@ struct CyclicalParameterControl<T: Comparable>: View {
         VStack(spacing: 8) {
             HStack {
                 Text("\(title):")
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 Text(formatter(value))
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
             }
             
             Slider(value: Binding(
@@ -1003,7 +1285,7 @@ struct CyclicalParameterControl<T: Comparable>: View {
             ), in: Double(truncating: range.lowerBound as! NSNumber)...Double(truncating: range.upperBound as! NSNumber))
             
             // Cyclical Controls
-            HStack {
+            VStack(alignment: .leading, spacing: 8) {
                 Toggle("Cyclical", isOn: Binding(
                     get: { cyclicalSettings?.isEnabled ?? false },
                     set: { isEnabled in
@@ -1011,23 +1293,123 @@ struct CyclicalParameterControl<T: Comparable>: View {
                             cyclicalSettings = CyclicalParameterSettings(
                                 isEnabled: true,
                                 minValue: Double(truncating: defaultValue as! NSNumber),
-                                maxValue: Double(truncating: defaultValue as! NSNumber),
-                                maxCycles: 4
+                                maxValue: Double(truncating: defaultValue as! NSNumber)
                             )
                         } else {
                             cyclicalSettings = nil
                         }
                     }
                 ))
+                .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 
-                Spacer()
-                
+                // Show cyclical configuration when enabled
                 if cyclicalSettings?.isEnabled == true {
-                    Button("Configure") {
-                        // TODO: Show cyclical configuration sheet
-                    }
-                    .buttonStyle(.bordered)
+                    VStack(alignment: .leading, spacing: 8) {
+                        // Min/Max Values
+                        HStack {
+                            VStack(alignment: .leading) {
+                                Text("Min Value")
+                                    .font(.caption)
+                                    .foregroundColor(Color.garageBandText)
+                                TextField("0", text: Binding(
+                                    get: { 
+                                        let value = cyclicalSettings?.minValue ?? Double(truncating: defaultValue as! NSNumber)
+                                        return String(format: "%.0f", value)
+                                    },
+                                    set: { newValue in
+                                        if let doubleValue = Double(newValue) {
+                                            cyclicalSettings?.minValue = doubleValue
+                                        }
+                                    }
+                                ))
+                                .textFieldStyle(.roundedBorder)
+                            }
+                            
+                            VStack(alignment: .leading) {
+                                Text("Max Value")
                     .font(.caption)
+                                    .foregroundColor(Color.garageBandText)
+                                TextField("10", text: Binding(
+                                    get: { 
+                                        let value = cyclicalSettings?.maxValue ?? Double(truncating: defaultValue as! NSNumber)
+                                        return String(format: "%.0f", value)
+                                    },
+                                    set: { newValue in
+                                        if let doubleValue = Double(newValue) {
+                                            cyclicalSettings?.maxValue = doubleValue
+                                        }
+                                    }
+                                ))
+                                .textFieldStyle(.roundedBorder)
+                            }
+                        }
+                        
+                        // Step Size
+                        VStack(alignment: .leading) {
+                            Text("Step Size")
+                                .font(.caption)
+                                .foregroundColor(Color.garageBandText)
+                            TextField("1", text: Binding(
+                                get: { 
+                                    let value = cyclicalSettings?.stepSize ?? 1.0
+                                    return String(format: "%.0f", value)
+                                },
+                                set: { newValue in
+                                    if let doubleValue = Double(newValue) {
+                                        cyclicalSettings?.stepSize = doubleValue
+                                    }
+                                }
+                            ))
+                            .textFieldStyle(.roundedBorder)
+                        }
+                        
+                        
+                        // Operation Type
+                        VStack(alignment: .leading) {
+                            Text("Operation Type")
+                                .font(.caption)
+                                .foregroundColor(Color.garageBandText)
+                            Picker("Operation", selection: Binding(
+                                get: { cyclicalSettings?.operationType ?? .replace },
+                                set: { newValue in
+                                    cyclicalSettings?.operationType = newValue
+                                }
+                            )) {
+                                ForEach(CyclicalOperationType.allCases, id: \.self) { operation in
+                                    Text(operation.rawValue).tag(operation)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .foregroundColor(Color.garageBandText)
+                        }
+                        
+                        // Reset After Max
+                        Toggle("Reset After Max", isOn: Binding(
+                            get: { cyclicalSettings?.resetAfterMax ?? false },
+                            set: { newValue in
+                                cyclicalSettings?.resetAfterMax = newValue
+                            }
+                        ))
+                        .foregroundColor(Color.garageBandText)
+                        
+                        // Current Cycle Display
+                        HStack {
+                            Text("Current Cycle: \(cyclicalSettings?.currentCycle ?? 0)")
+                                .font(.caption)
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            Button("Reset") {
+                                cyclicalSettings?.currentCycle = 0
+                            }
+                            .buttonStyle(.bordered)
+                            .controlSize(.small)
+                        }
+                    }
+                    .padding()
+                    .background(Color.garageBandPanel.opacity(0.5))
+                    .cornerRadius(8)
                 }
             }
         }
@@ -1045,6 +1427,9 @@ struct CyclicalModulationSection: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack {
                 Toggle(title, isOn: $settings.enabled)
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 Spacer()
                 
                 if settings.enabled {
@@ -1055,33 +1440,55 @@ struct CyclicalModulationSection: View {
                                 cyclicalSettings = CyclicalParameterSettings(
                                     isEnabled: true,
                                     minValue: Double(settings.numberOfNotes),
-                                    maxValue: Double(settings.numberOfNotes),
-                                    maxCycles: 4
+                                    maxValue: Double(settings.numberOfNotes)
                                 )
                             } else {
                                 cyclicalSettings = nil
                             }
                         }
                     ))
+                    .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
                 }
             }
             
             if settings.enabled {
                 HStack {
                     Text("Notes:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(settings.numberOfNotes)", value: $settings.numberOfNotes, in: 1...10)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
                 
                 HStack {
                     Text("Interval:")
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                     Spacer()
                     Stepper("\(settings.interval)", value: $settings.interval, in: 1...12)
+                        .foregroundColor(Color.garageBandText)
+                .background(Color.garageBandPanel)
+                .cornerRadius(4)
+                        .background(Color.garageBandPanel)
+                        .cornerRadius(4)
                 }
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .cornerRadius(6)
     }
 }

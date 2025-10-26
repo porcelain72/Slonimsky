@@ -73,29 +73,46 @@ class CyclicalParameterManager: ObservableObject {
         
         var modifiedSettings = cyclicalSettings
         
+        // Update all parameter settings with the current cycle
+        modifiedSettings.interpolationNotes.currentCycle = currentCycle
+        modifiedSettings.infrapolationNotes.currentCycle = currentCycle
+        modifiedSettings.ultrapolationNotes.currentCycle = currentCycle
+        modifiedSettings.modulationInterval.currentCycle = currentCycle
+        modifiedSettings.baseNoteDuration.currentCycle = currentCycle
+        modifiedSettings.rhythmicDensity.currentCycle = currentCycle
+        modifiedSettings.primaryInterval.currentCycle = currentCycle
+        modifiedSettings.secondaryInterval.currentCycle = currentCycle
+        modifiedSettings.baseVelocity.currentCycle = currentCycle
+        modifiedSettings.velocityRange.currentCycle = currentCycle
+        modifiedSettings.tempo.currentCycle = currentCycle
+        modifiedSettings.rootNote.currentCycle = currentCycle
+        modifiedSettings.numberOfOctaves.currentCycle = currentCycle
+        modifiedSettings.divisionsOfOctave.currentCycle = currentCycle
+        modifiedSettings.mirrorPoints.currentCycle = currentCycle
+        
         // Create modified modulation settings
         let modifiedInterpolation = ModulationSettings(
-            numberOfNotes: Int(cyclicalSettings.interpolationNotes.currentValue(baseValue: Double(baseParameters.interpolation.numberOfNotes))),
-            interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.interpolation.interval))),
+            numberOfNotes: Int(modifiedSettings.interpolationNotes.currentValue(baseValue: Double(baseParameters.interpolation.numberOfNotes))),
+            interval: Int(modifiedSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.interpolation.interval))),
             enabled: baseParameters.interpolation.enabled
         )
         
         let modifiedInfrapolation = ModulationSettings(
-            numberOfNotes: Int(cyclicalSettings.infrapolationNotes.currentValue(baseValue: Double(baseParameters.infrapolation.numberOfNotes))),
-            interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.infrapolation.interval))),
+            numberOfNotes: Int(modifiedSettings.infrapolationNotes.currentValue(baseValue: Double(baseParameters.infrapolation.numberOfNotes))),
+            interval: Int(modifiedSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.infrapolation.interval))),
             enabled: baseParameters.infrapolation.enabled
         )
         
         let modifiedUltrapolation = ModulationSettings(
-            numberOfNotes: Int(cyclicalSettings.ultrapolationNotes.currentValue(baseValue: Double(baseParameters.ultrapolation.numberOfNotes))),
-            interval: Int(cyclicalSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.ultrapolation.interval))),
+            numberOfNotes: Int(modifiedSettings.ultrapolationNotes.currentValue(baseValue: Double(baseParameters.ultrapolation.numberOfNotes))),
+            interval: Int(modifiedSettings.modulationInterval.currentValue(baseValue: Double(baseParameters.ultrapolation.interval))),
             enabled: baseParameters.ultrapolation.enabled
         )
         
         // Create modified velocity settings
         let modifiedVelocitySettings = VelocitySettings(
-            baseVelocity: UInt8(cyclicalSettings.baseVelocity.currentValue(baseValue: Double(baseParameters.velocitySettings.baseVelocity))),
-            range: UInt8(cyclicalSettings.velocityRange.currentValue(baseValue: Double(baseParameters.velocitySettings.range))),
+            baseVelocity: UInt8(modifiedSettings.baseVelocity.currentValue(baseValue: Double(baseParameters.velocitySettings.baseVelocity))),
+            range: UInt8(modifiedSettings.velocityRange.currentValue(baseValue: Double(baseParameters.velocitySettings.range))),
             waveDepth: baseParameters.velocitySettings.waveDepth,
             randomness: baseParameters.velocitySettings.randomness,
             phase: baseParameters.velocitySettings.phase,
@@ -104,14 +121,14 @@ class CyclicalParameterManager: ObservableObject {
         )
         
         return PatternParameters(
-            rootNote: Int(cyclicalSettings.rootNote.currentValue(baseValue: Double(baseParameters.rootNote))),
+            rootNote: Int(modifiedSettings.rootNote.currentValue(baseValue: Double(baseParameters.rootNote))),
             scaleType: baseParameters.scaleType,
-            numberOfOctaves: Int(cyclicalSettings.numberOfOctaves.currentValue(baseValue: Double(baseParameters.numberOfOctaves))),
-            divisionsOfOctave: Int(cyclicalSettings.divisionsOfOctave.currentValue(baseValue: Double(baseParameters.divisionsOfOctave))),
-            tempo: cyclicalSettings.tempo.currentValue(baseValue: baseParameters.tempo),
+            numberOfOctaves: Int(modifiedSettings.numberOfOctaves.currentValue(baseValue: Double(baseParameters.numberOfOctaves))),
+            divisionsOfOctave: Int(modifiedSettings.divisionsOfOctave.currentValue(baseValue: Double(baseParameters.divisionsOfOctave))),
+            tempo: modifiedSettings.tempo.currentValue(baseValue: baseParameters.tempo),
             timeSignature: baseParameters.timeSignature,
-            primaryInterval: Int(cyclicalSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
-            secondaryInterval: Int(cyclicalSettings.secondaryInterval.currentValue(baseValue: Double(baseParameters.secondaryInterval))),
+            primaryInterval: Int(modifiedSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
+            secondaryInterval: Int(modifiedSettings.secondaryInterval.currentValue(baseValue: Double(baseParameters.secondaryInterval))),
             intervalPattern: baseParameters.intervalPattern,
             intervalInversion: baseParameters.intervalInversion,
             symmetricalIntervals: baseParameters.symmetricalIntervals,
@@ -119,13 +136,13 @@ class CyclicalParameterManager: ObservableObject {
             infrapolation: modifiedInfrapolation,
             ultrapolation: modifiedUltrapolation,
             primaryDirection: baseParameters.primaryDirection,
-            mirrorPoints: Int(cyclicalSettings.mirrorPoints.currentValue(baseValue: Double(baseParameters.mirrorPoints))),
+            mirrorPoints: Int(modifiedSettings.mirrorPoints.currentValue(baseValue: Double(baseParameters.mirrorPoints))),
             retrogradeSections: baseParameters.retrogradeSections,
             registerShifts: baseParameters.registerShifts,
             contourPattern: baseParameters.contourPattern,
             noteDurationPattern: baseParameters.noteDurationPattern,
-            baseNoteDuration: cyclicalSettings.baseNoteDuration.currentValue(baseValue: baseParameters.baseNoteDuration),
-            rhythmicDensity: cyclicalSettings.rhythmicDensity.currentValue(baseValue: baseParameters.rhythmicDensity),
+            baseNoteDuration: modifiedSettings.baseNoteDuration.currentValue(baseValue: baseParameters.baseNoteDuration),
+            rhythmicDensity: modifiedSettings.rhythmicDensity.currentValue(baseValue: baseParameters.rhythmicDensity),
             syncopationLevel: baseParameters.syncopationLevel,
             metricModulation: baseParameters.metricModulation,
             harmonicMode: baseParameters.harmonicMode,
@@ -178,6 +195,17 @@ class CyclicalParameterManager: ObservableObject {
     
     private func getMaxCycles() -> Int {
         let enabledParams = cyclicalSettings.enabledParameters
-        return enabledParams.values.map { $0.maxCycles }.max() ?? 1
+        var maxCycles = 1
+        
+        for (_, settings) in enabledParams {
+            guard settings.isEnabled else { continue }
+            
+            let range = settings.maxValue - settings.minValue
+            let cyclesNeeded = Int(ceil(range / settings.stepSize)) + 1
+            
+            maxCycles = max(maxCycles, cyclesNeeded)
+        }
+        
+        return maxCycles
     }
 } 

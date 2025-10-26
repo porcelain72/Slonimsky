@@ -163,6 +163,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
 /// Scale types based on Slonimsky's Thesaurus
 enum ScaleType: String, CaseIterable, Codable {
+    case none = "None"
     case chromatic = "Chromatic"
     case diatonic = "Diatonic"
     case pentatonic = "Pentatonic"
@@ -174,6 +175,8 @@ enum ScaleType: String, CaseIterable, Codable {
     
     var intervals: [Int] {
         switch self {
+        case .none:
+            return [] // No predefined intervals - will use equal divisions
         case .chromatic:
             return Array(1...12)
         case .diatonic:

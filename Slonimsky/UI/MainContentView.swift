@@ -14,6 +14,11 @@ struct MainContentView: View {
     @StateObject private var midiService = MIDIIntegrationService()
     @StateObject private var parameterManager = ParameterManager()
     
+    init() {
+        print("🎵 MainContentView: Initializing")
+        print("🎵 MainContentView: Creating ParameterManager and MIDIIntegrationService")
+    }
+    
     // MARK: - State Properties
     @State private var selectedGenerator: String = "Scale Pattern Generator"
     @State private var isGenerating = false
@@ -21,117 +26,21 @@ struct MainContentView: View {
     @State private var showRandomizeDialog = false
     @State private var showSheetMusicPopup = false
     @State private var showCyclicalParameters = false
-    @State private var selectedParameterCategory: ParameterCategory? = nil
+    @State private var selectedParameterCategory: ParameterCategory? = .basic
     
     // MARK: - Body
     var body: some View {
-        HSplitView {
-            // Left Panel: NavigationView with Parameter Categories
-            VStack(spacing: 0) {
-                NavigationStack {
-                    parameterCategoriesList
-                        .navigationTitle("Parameters")
-                        .toolbar {
-                            ToolbarItemGroup(placement: .automatic) {
-                                Button(action: { showCyclicalParameters.toggle() }) {
-                                    Image(systemName: showCyclicalParameters ? "arrow.clockwise.circle.fill" : "arrow.clockwise.circle")
-                                    Text("Cycles")
-                                }
-                            }
-                            
-                            ToolbarItemGroup(placement: .primaryAction) {
-                                Button(action: { showPresetPicker = true }) {
-                                    Image(systemName: "list.bullet")
-                                    Text("Presets")
-                                }
-                                .disabled(isGenerating)
-                                
-                                Button(action: { showRandomizeDialog = true }) {
-                                    Image(systemName: "dice")
-                                    Text("Random")
-                                }
-                                .disabled(isGenerating)
-                            }
-                        }
-                }
-                
-                // Generate Button
-                VStack(spacing: 12) {
-                    Divider()
-                    
-                    Button(action: generatePattern) {
-                        HStack {
-                            if isGenerating {
-                                ProgressView()
-                                    .scaleEffect(0.8)
-                                    .progressViewStyle(CircularProgressViewStyle())
-                            } else {
-                                Image(systemName: "play.circle.fill")
-                                    .font(.title2)
-                            }
-                            Text(isGenerating ? "Generating..." : "Generate Pattern")
-                                .font(.headline)
-                        }
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(isGenerating ? Color.gray.opacity(0.3) : Color.blue)
-                        .foregroundColor(.white)
-                        .cornerRadius(8)
-                    }
-                    .disabled(isGenerating)
-                    .buttonStyle(PlainButtonStyle())
-                }
-                .padding()
-                .background(Color(NSColor.controlBackgroundColor))
-            }
-            .frame(minWidth: 300, maxWidth: 400)
+        HStack(spacing: 0) {
+            // Left: Parameter List
+            parameterListPanel
             
-            // Right Panel: Piano Roll
-            VStack(spacing: 0) {
-                // Cycle Information Display
-                if let currentPattern = midiService.currentPattern,
-                   currentPattern.metadata.isCyclicalSequence {
-                    HStack {
-                        Image(systemName: "arrow.clockwise")
-                            .foregroundColor(.blue)
-                        Text("Cyclical Sequence: \(currentPattern.metadata.totalCycles) cycles")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        Spacer()
-                        Text("\(currentPattern.notes.count) total notes")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(Color.blue.opacity(0.1))
-                }
-                
-                PianoRollPanelView(
-                    midiService: midiService,
-                    parameterManager: parameterManager
-                )
-            }
-            .frame(minWidth: 500, maxWidth: .infinity)
-        }
-        .navigationTitle("Slonimsky Pattern Generator")
-        .toolbar {
-            ToolbarItemGroup(placement: .automatic) {
-                Button(action: { showSheetMusicPopup = true }) {
-                    Image(systemName: "music.note.list")
-                    Text("Sheet Music")
-                }
-                .disabled(midiService.currentPattern == nil)
-            }
+            // Center: Selected Parameter Controls
+            parameterDetailPanel
             
-            ToolbarItemGroup(placement: .primaryAction) {
-                Button(action: exportCurrentPattern) {
-                    Image(systemName: "square.and.arrow.up")
-                    Text("Export")
-                }
-                .disabled(midiService.currentPattern == nil)
-            }
+            // Right: MIDI Controls Sidebar
+            midiControlsSidebar
         }
+        .background(Color.garageBandBackground)
         .sheet(isPresented: $showPresetPicker) {
             PresetPickerView(
                 midiService: midiService,
@@ -157,31 +66,236 @@ struct MainContentView: View {
         }
     }
     
-    // MARK: - Parameter Categories List
+    // MARK: - Panel Views
     
-    private var parameterCategoriesList: some View {
-        List(ParameterCategory.allCases) { category in
-            NavigationLink(destination: parameterCategoryDetailView(for: category)) {
+    private var parameterListPanel: some View {
+        VStack(spacing: 0) {
+            // Parameters Header
+            HStack {
+                Text("Parameters")
+                    .font(.headline)
+                    .foregroundColor(Color.garageBandText)
+                Spacer()
+                Button("Cycles") {
+                    showCyclicalParameters.toggle()
+                }
+                .buttonStyle(.bordered)
+                .foregroundColor(Color.garageBandAccent)
+            }
+            .padding()
+            .background(Color.garageBandPanel)
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.garageBandBorder),
+                alignment: .bottom
+            )
+            
+            // Parameter List
+            List(ParameterCategory.allCases, selection: $selectedParameterCategory) { category in
                     HStack {
                         Image(systemName: category.icon)
-                            .foregroundColor(.blue)
+                        .foregroundColor(Color.garageBandAccent)
                             .frame(width: 20)
                         
                         VStack(alignment: .leading, spacing: 2) {
                             Text(category.title)
                                 .font(.headline)
+                            .foregroundColor(Color.garageBandText)
                             Text(category.description)
                                 .font(.caption)
-                                .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                                 .lineLimit(2)
-                        }
                     }
+                }
+                .padding()
+                .contentShape(Rectangle())
+                .onTapGesture {
+                    selectedParameterCategory = category
+                }
+                .background(
+                    selectedParameterCategory == category ? 
+                    Color.garageBandAccent.opacity(0.2) : Color.clear
+                )
+            }
+            .listStyle(SidebarListStyle())
+            .scrollContentBackground(.hidden)
+            .background(Color.garageBandBackground)
+            
+            // Reset and Generate Buttons
+            VStack(spacing: 12) {
+                Divider()
+                    .background(Color.garageBandBorder)
+                
+                // Reset Button
+                Button(action: {
+                    parameterManager.resetToDefaults()
+                }) {
+                    HStack {
+                        Image(systemName: "arrow.clockwise")
+                            .font(.title3)
+                        Text("Reset to Defaults")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 10)
+                    .padding(.horizontal, 16)
+                    .background(Color.garageBandPanel)
+                    .foregroundColor(Color.garageBandText)
+                    .cornerRadius(6)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 6)
+                            .stroke(Color.garageBandBorder, lineWidth: 1)
+                    )
+                }
+                .buttonStyle(PlainButtonStyle())
+                
+                // Generate Button
+                Button(action: generatePattern) {
+                    HStack {
+                        if isGenerating {
+                            ProgressView()
+                                .scaleEffect(0.8)
+                                .progressViewStyle(CircularProgressViewStyle(tint: Color.garageBandText))
+                        } else {
+                            Image(systemName: "play.circle.fill")
+                                .font(.title2)
+                        }
+                        Text(isGenerating ? "Generating..." : "Generate Pattern")
+                            .font(.headline)
+                    }
+                    .frame(maxWidth: .infinity)
                     .padding()
-              
+                    .background(isGenerating ? Color.garageBandSecondary.opacity(0.3) : Color.garageBandAccent)
+                    .foregroundColor(.white)
+                    .cornerRadius(8)
+                }
+                .disabled(isGenerating)
+                .buttonStyle(PlainButtonStyle())
+            }
+            .padding()
+            .background(Color.garageBandPanel)
+        }
+        .frame(width: 250)
+        .background(Color.garageBandBackground)
+    }
+    
+    private var parameterDetailPanel: some View {
+        VStack(spacing: 0) {
+            // Detail Header
+            HStack {
+                if let category = selectedParameterCategory {
+                    Image(systemName: category.icon)
+                        .font(.title2)
+                        .foregroundColor(Color.garageBandAccent)
+                    Text(category.title)
+                        .font(.headline)
+                        .foregroundColor(Color.garageBandText)
+                } else {
+                    Text("Select a Parameter Category")
+                        .font(.headline)
+                        .foregroundColor(Color.garageBandSecondary)
+                }
+                Spacer()
+            }
+            .padding()
+            .background(Color.garageBandPanel)
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.garageBandBorder),
+                alignment: .bottom
+            )
+            
+            // Parameter Controls
+            if let category = selectedParameterCategory {
+                ScrollView {
+                    parameterCategoryDetailView(for: category)
+                        .padding()
+                }
+                .background(Color.garageBandBackground)
+            } else {
+                VStack {
+                    Spacer()
+                    Text("Choose a parameter category from the list to configure settings")
+                        .font(.subheadline)
+                        .foregroundColor(Color.garageBandSecondary)
+                        .multilineTextAlignment(.center)
+                    Spacer()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .background(Color.garageBandBackground)
             }
         }
-        .listStyle(SidebarListStyle())
+        .frame(maxWidth: .infinity)
     }
+    
+    private var midiControlsSidebar: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            // MIDI Header
+            HStack {
+                Image(systemName: "music.note")
+                    .font(.title2)
+                    .foregroundColor(Color.garageBandAccent)
+                Text("MIDI")
+                    .font(.headline)
+                    .foregroundColor(Color.garageBandText)
+                Spacer()
+                
+                Button("Sheet Music") {
+                    showSheetMusicPopup = true
+                }
+                .buttonStyle(.bordered)
+                .foregroundColor(Color.garageBandAccent)
+                .disabled(midiService.currentPattern == nil)
+            }
+            .padding()
+            .background(Color.garageBandPanel)
+            .overlay(
+                Rectangle()
+                    .frame(height: 1)
+                    .foregroundColor(Color.garageBandBorder),
+                alignment: .bottom
+            )
+            
+            // MIDI Controls - Top Aligned
+            MIDIPlaybackControllerView(midiService: midiService)
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            
+            // Auto-generation Settings
+            VStack(alignment: .leading, spacing: 0) {
+                // Auto-generation Header
+                HStack {
+                    Image(systemName: "arrow.clockwise.circle")
+                        .font(.title2)
+                        .foregroundColor(Color.garageBandAccent)
+                    Text("Auto-generation")
+                        .font(.headline)
+                        .foregroundColor(Color.garageBandText)
+                    Spacer()
+                }
+                .padding()
+                .background(Color.garageBandPanel)
+                .overlay(
+                    Rectangle()
+                        .frame(height: 1)
+                        .foregroundColor(Color.garageBandBorder),
+                    alignment: .bottom
+                )
+                
+                // Auto-generation Settings
+                AutoGenerationSettingsView(
+                    parameterManager: parameterManager,
+                    midiService: midiService
+                )
+                .frame(maxWidth: .infinity, alignment: .topLeading)
+            }
+        }
+        .frame(width: 300, alignment: .topLeading)
+        .background(Color.garageBandBackground)
+    }
+    
     
     // MARK: - Parameter Category Detail Views
     
@@ -214,9 +328,6 @@ struct MainContentView: View {
                 case .accompaniment:
                     RhythmicAccompanimentDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
-                case .autoGeneration:
-                    AutoGenerationDetailView(parameterManager: parameterManager, midiService: midiService)
-                        .navigationTitle(category.title)
                 }
             }
             .padding()
@@ -228,18 +339,113 @@ struct MainContentView: View {
     // MARK: - Actions
     
     private func generatePattern() {
+        print("🎵 MainContentView: Generate Pattern button pressed")
+        print("🎵 MainContentView: Current parameters:")
+        print("   Root Note: \(parameterManager.rootNote)")
+        print("   Scale Type: \(parameterManager.scaleType.rawValue)")
+        print("   Number of Octaves: \(parameterManager.numberOfOctaves)")
+        print("   Active Generators: \(parameterManager.activeGenerators)")
+        print("   Combination Mode: \(parameterManager.combinationMode.rawValue)")
+        
         isGenerating = true
         
-        midiService.generateRandomPattern { result in
-            DispatchQueue.main.async {
-                isGenerating = false
+        // Use current parameters instead of random ones
+        let currentParameters = parameterManager.currentParameters
+        
+        // Check if cyclical parameters are enabled
+        let enabledCyclicalParameters = currentParameters.cyclicalSettings.enabledParameters
+        let hasCyclicalParameters = !enabledCyclicalParameters.isEmpty
+        
+        if hasCyclicalParameters {
+            print("🔄 Cyclical parameters detected: \(enabledCyclicalParameters.keys.map { $0.rawValue }.joined(separator: ", "))")
+            
+            // Use cyclical generation
+            if parameterManager.activeGenerators.count > 1 {
+                print("🔄 Using combined cyclical generation with \(parameterManager.activeGenerators.count) generators")
                 
-                switch result {
-                case .success(let pattern):
-                    print("✅ Pattern generated: \(pattern.notes.count) notes")
-                    updateSheetMusic(with: pattern)
-                case .failure(let error):
-                    print("❌ Pattern generation failed: \(error)")
+                midiService.generateCombinedCyclicalPatternAndMIDI(
+                    using: parameterManager.activeGenerators,
+                    parameters: currentParameters,
+                    combinationMode: parameterManager.combinationMode
+                ) { result in
+                    DispatchQueue.main.async {
+                        isGenerating = false
+                        
+                        switch result {
+                        case .success(let pattern):
+                            print("✅ MainContentView: Cyclical pattern generated successfully")
+                            print("   Generated \(pattern.notes.count) notes")
+                            print("   Generation time: \(pattern.performance.generationTime)s")
+                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
+                            updateSheetMusic(with: pattern)
+                        case .failure(let error):
+                            print("❌ MainContentView: Cyclical pattern generation failed: \(error)")
+                        }
+                    }
+                }
+            } else {
+                let generatorName = parameterManager.activeGenerators.first ?? "Scale Pattern Generator"
+                print("🔄 Using single generator with cyclical generation: \(generatorName)")
+                
+                midiService.generateCyclicalPatternAndMIDI(using: generatorName, parameters: currentParameters) { result in
+                    DispatchQueue.main.async {
+                        isGenerating = false
+                        
+                        switch result {
+                        case .success(let pattern):
+                            print("✅ MainContentView: Cyclical pattern generated successfully")
+                            print("   Generated \(pattern.notes.count) notes")
+                            print("   Generation time: \(pattern.performance.generationTime)s")
+                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
+                            updateSheetMusic(with: pattern)
+                        case .failure(let error):
+                            print("❌ MainContentView: Cyclical pattern generation failed: \(error)")
+                        }
+                    }
+                }
+            }
+        } else {
+            // No cyclical parameters, use regular generation
+            if parameterManager.activeGenerators.count > 1 {
+                midiService.generateCombinedPatternAndMIDI(
+                    using: parameterManager.activeGenerators,
+                    parameters: currentParameters,
+                    combinationMode: parameterManager.combinationMode
+                ) { result in
+                    DispatchQueue.main.async {
+                        isGenerating = false
+                        
+                        switch result {
+                        case .success(let pattern):
+                            print("✅ MainContentView: Pattern generated successfully")
+                            print("   Generated \(pattern.notes.count) notes")
+                            print("   Generation time: \(pattern.performance.generationTime)s")
+                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
+                            updateSheetMusic(with: pattern)
+                        case .failure(let error):
+                            print("❌ MainContentView: Pattern generation failed: \(error)")
+                        }
+                    }
+                }
+            } else {
+                // Use single generator
+                let generatorName = parameterManager.activeGenerators.first ?? "Scale Pattern Generator"
+                
+                midiService.generatePatternAndMIDI(using: generatorName, parameters: currentParameters) { result in
+                DispatchQueue.main.async {
+                    isGenerating = false
+                    
+                    switch result {
+                    case .success(let pattern):
+                            print("✅ MainContentView: Pattern generated successfully")
+                            print("   Generated \(pattern.notes.count) notes")
+                            print("   Generation time: \(pattern.performance.generationTime)s")
+                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
+                        updateSheetMusic(with: pattern)
+                    case .failure(let error):
+                            print("❌ MainContentView: Pattern generation failed: \(error)")
+                        }
+                    }
                 }
             }
         }

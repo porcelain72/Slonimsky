@@ -96,7 +96,7 @@ final class MIDIIntegrationTests: XCTestCase {
             performance: performance
         )
         
-        let sequence = midiEngine.generateMusicSequence(from: result)
+        let sequence = midiEngine.generateMusicSequence(from: result, parameters: basicParameters)
         XCTAssertNotNil(sequence)
     }
     
@@ -146,7 +146,7 @@ final class MIDIIntegrationTests: XCTestCase {
                 performance: performance
             )
             
-            let sequence = midiEngine.generateMusicSequence(from: result)
+            let sequence = midiEngine.generateMusicSequence(from: result, parameters: basicParameters)
             XCTAssertNotNil(sequence, "Sequence generation failed for test case \(index)")
         }
     }
@@ -228,7 +228,7 @@ final class MIDIIntegrationTests: XCTestCase {
             performance: performance
         )
         
-        let sequence = midiEngine.generateMusicSequence(from: result)
+        let sequence = midiEngine.generateMusicSequence(from: result, parameters: basicParameters)
         XCTAssertNotNil(sequence)
         
         let tempURL = FileManager.default.temporaryDirectory.appendingPathComponent("test_export.mid")
@@ -900,7 +900,7 @@ final class MIDIIntegrationTests: XCTestCase {
         )
         
         // Generate sequence
-        let sequence = midiEngine.generateMusicSequence(from: result)
+        let sequence = midiEngine.generateMusicSequence(from: result, parameters: basicParameters)
         XCTAssertNotNil(sequence)
         
         // Enable looping

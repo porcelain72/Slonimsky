@@ -44,9 +44,6 @@ public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
     /// The current cycle value (0-based)
     public var currentCycle: Int = 0
     
-    /// The maximum number of cycles before resetting
-    public var maxCycles: Int = 4
-    
     /// Whether to reset to minValue after reaching maxCycles
     public var resetAfterMax: Bool = true
     
@@ -62,7 +59,6 @@ public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
         maxValue: Double = 10.0,
         stepSize: Double = 1.0,
         currentCycle: Int = 0,
-        maxCycles: Int = 4,
         resetAfterMax: Bool = true,
         cycleType: CycleType = .increment
     ) {
@@ -71,7 +67,6 @@ public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
         self.maxValue = maxValue
         self.stepSize = stepSize
         self.currentCycle = currentCycle
-        self.maxCycles = maxCycles
         self.resetAfterMax = resetAfterMax
         self.cycleType = cycleType
     }
@@ -87,6 +82,7 @@ public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
         case .decrement:
             cycleValue = maxValue - (Double(currentCycle) * stepSize)
         case .oscillate:
+            let maxCycles = Int(ceil((maxValue - minValue) / stepSize)) + 1
             let halfCycles = maxCycles / 2
             let cycleInHalf = currentCycle % (halfCycles * 2)
             if cycleInHalf < halfCycles {
@@ -107,6 +103,7 @@ public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
     public mutating func advanceCycle() {
         guard isEnabled else { return }
         
+        let maxCycles = Int(ceil((maxValue - minValue) / stepSize)) + 1
         currentCycle += 1
         
         if currentCycle >= maxCycles {
@@ -152,32 +149,28 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 0.0,
         maxValue: 5.0,
-        stepSize: 1.0,
-        maxCycles: 6
+        stepSize: 1.0
     )
     
     public var infrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
         maxValue: 5.0,
-        stepSize: 1.0,
-        maxCycles: 6
+        stepSize: 1.0
     )
     
     public var ultrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
         maxValue: 5.0,
-        stepSize: 1.0,
-        maxCycles: 6
+        stepSize: 1.0
     )
     
     public var modulationInterval: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
         maxValue: 12.0,
-        stepSize: 1.0,
-        maxCycles: 12
+        stepSize: 1.0
     )
     
     // Rhythmic Parameters
@@ -185,16 +178,14 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 0.25,
         maxValue: 2.0,
-        stepSize: 0.25,
-        maxCycles: 8
+        stepSize: 0.25
     )
     
     public var rhythmicDensity: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.5,
         maxValue: 2.0,
-        stepSize: 0.25,
-        maxCycles: 7
+        stepSize: 0.25
     )
     
     // Interval Parameters
@@ -202,16 +193,14 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 1.0,
         maxValue: 12.0,
-        stepSize: 1.0,
-        maxCycles: 12
+        stepSize: 1.0
     )
     
     public var secondaryInterval: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
         maxValue: 12.0,
-        stepSize: 1.0,
-        maxCycles: 12
+        stepSize: 1.0
     )
     
     // Velocity Parameters
@@ -219,16 +208,14 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 40.0,
         maxValue: 100.0,
-        stepSize: 10.0,
-        maxCycles: 7
+        stepSize: 10.0
     )
     
     public var velocityRange: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 10.0,
         maxValue: 50.0,
-        stepSize: 5.0,
-        maxCycles: 9
+        stepSize: 5.0
     )
     
     // Tempo Parameters
@@ -236,8 +223,7 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 60.0,
         maxValue: 180.0,
-        stepSize: 20.0,
-        maxCycles: 7
+        stepSize: 20.0
     )
     
     // Basic Parameters
@@ -245,24 +231,21 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 48.0, // C3
         maxValue: 72.0, // C5
-        stepSize: 1.0,
-        maxCycles: 25
+        stepSize: 1.0
     )
     
     public var numberOfOctaves: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
         maxValue: 4.0,
-        stepSize: 1.0,
-        maxCycles: 4
+        stepSize: 1.0
     )
     
     public var divisionsOfOctave: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 12.0,
         maxValue: 24.0,
-        stepSize: 1.0,
-        maxCycles: 13
+        stepSize: 1.0
     )
     
     // Directional Parameters
@@ -270,8 +253,7 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         isEnabled: false,
         minValue: 0.0,
         maxValue: 5.0,
-        stepSize: 1.0,
-        maxCycles: 6
+        stepSize: 1.0
     )
     
     public init() {}

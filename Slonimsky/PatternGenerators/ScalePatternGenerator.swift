@@ -24,11 +24,25 @@ class ScalePatternGenerator: BasePatternGenerator {
     override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
+        print("🎵 ScalePatternGenerator: Starting pattern generation")
+        print("   Root Note: \(parameters.rootNote)")
+        print("   Scale Type: \(parameters.scaleType.rawValue)")
+        print("   Number of Octaves: \(parameters.numberOfOctaves)")
+        print("   Divisions of Octave: \(parameters.divisionsOfOctave)")
+        print("   Primary Direction: \(parameters.primaryDirection.rawValue)")
+        print("   Interval Pattern: \(parameters.intervalPattern.rawValue)")
+        print("   Interpolation Enabled: \(parameters.interpolation.enabled) (\(parameters.interpolation.numberOfNotes) notes)")
+        print("   Infrapolation Enabled: \(parameters.infrapolation.enabled) (\(parameters.infrapolation.numberOfNotes) notes)")
+        print("   Ultrapolation Enabled: \(parameters.ultrapolation.enabled) (\(parameters.ultrapolation.numberOfNotes) notes)")
+        print("   Metric Modulation Enabled: \(parameters.metricModulation.enabled)")
+        
         // Apply cyclical changes to parameters for the current cycle
         let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
         
         // Generate base scale notes
         let baseNotes = generateBaseScale(parameters: modifiedParameters)
+        print("   Generated base scale notes: \(baseNotes)")
+        print("   Base scale note count: \(baseNotes.count)")
         
         // Use ParameterApplicationManager to apply parameters in correct order
         let finalNotes = ParameterApplicationManager.applyParameters(
@@ -36,14 +50,22 @@ class ScalePatternGenerator: BasePatternGenerator {
             parameters: modifiedParameters,
             generatorType: "Scale"
         )
+        print("   After parameter application: \(finalNotes.count) notes")
         
         // Apply Slonimsky modulations (final step)
         let modulatedNotes = applySlonimskyModulations(
             notes: finalNotes,
             parameters: modifiedParameters
         )
+        print("   After modulations: \(modulatedNotes.count) notes")
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
+        
+        // Log the actual generated notes
+        print("   Generated MIDI notes:")
+        for (index, note) in modulatedNotes.enumerated() {
+            print("     \(index + 1): Note \(note.note), Velocity \(note.velocity), Duration \(note.beatLength)")
+        }
         
         // Log performance metrics
         logPerformanceMetrics(
@@ -52,6 +74,7 @@ class ScalePatternGenerator: BasePatternGenerator {
             parameters: modifiedParameters
         )
         
+        print("🎵 ScalePatternGenerator: Pattern generation complete")
         return modulatedNotes
     }
     
@@ -89,89 +112,110 @@ class ScalePatternGenerator: BasePatternGenerator {
     // MARK: - Private Methods
     
     private func generateBaseScale(parameters: PatternParameters) -> [Int] {
-        let scaleIntervals = parameters.scaleType.intervals
         var notes: [Int] = []
         
-        for octave in 0..<parameters.numberOfOctaves {
-            let rootNote = parameters.rootNote + (octave * 12)
+        print("   Generating base scale:")
+        print("     Scale type: \(parameters.scaleType.rawValue)")
+        print("     Number of octaves: \(parameters.numberOfOctaves)")
+        print("     Divisions per octave: \(parameters.divisionsOfOctave)")
+        
+        if parameters.scaleType == .none {
+            // Use equal divisions of the octave
+            notes = generateEqualDivisions(parameters: parameters)
+        } else {
+            // Use predefined scale intervals
+            let scaleIntervals = parameters.scaleType.intervals
+            print("     Scale intervals: \(scaleIntervals)")
             
-            for (index, interval) in scaleIntervals.enumerated() {
-                let note: Int
-                if index == 0 {
-                    // First note is the root note
-                    note = rootNote
-                } else {
-                    // Calculate accumulated intervals for subsequent notes
-                    let accumulatedInterval = scaleIntervals.prefix(index).reduce(0, +)
-                    note = rootNote + accumulatedInterval
-                }
+            for octave in 0..<parameters.numberOfOctaves {
+                let rootNote = parameters.rootNote + (octave * 12)
+                print("     Octave \(octave): Root note \(rootNote)")
                 
-                // Ensure note is within valid MIDI range
-                if note >= 0 && note <= 127 {
-                    notes.append(note)
-                }
-                
-                // Stop if we've reached the desired number of divisions for this octave
-                if (index + 1) >= parameters.divisionsOfOctave {
-                    break
+                for (index, interval) in scaleIntervals.enumerated() {
+                    let note: Int
+                    if index == 0 {
+                        // First note is the root note
+                        note = rootNote
+                    } else {
+                        // For chromatic scale, each note should be exactly one semitone higher
+                        // For other scales, use the interval from the root note
+                        if parameters.scaleType == .chromatic {
+                            note = rootNote + index
+                        } else {
+                            // For non-chromatic scales, use accumulated intervals
+                            let accumulatedInterval = scaleIntervals.prefix(index).reduce(0, +)
+                            note = rootNote + accumulatedInterval
+                        }
+                    }
+                    
+                    print("       Note \(index): Interval \(interval), MIDI note \(note)")
+                    
+                    // Ensure note is within valid MIDI range
+                    if note >= 0 && note <= 127 {
+                        notes.append(note)
+                    }
+                    
+                    // For chromatic scales, respect divisionsOfOctave parameter
+                    // For diatonic scales (pentatonic, major, minor, etc.), use natural scale structure
+                    if parameters.scaleType == .chromatic && (index + 1) >= parameters.divisionsOfOctave {
+                        print("       Stopping at division \(index + 1) (limit: \(parameters.divisionsOfOctave))")
+                        break
+                    }
                 }
             }
+        }
+        
+        print("     Final base scale notes: \(notes)")
+        return notes
+    }
+    
+    private func generateEqualDivisions(parameters: PatternParameters) -> [Int] {
+        let totalSemitones = 12 * parameters.numberOfOctaves
+        let divisions = parameters.divisionsOfOctave
+        
+        print("     Using equal divisions:")
+        print("       Total semitones: \(totalSemitones)")
+        print("       Divisions: \(divisions)")
+        
+        // Validate that divisions is a valid divisor of totalSemitones
+        guard totalSemitones % divisions == 0 else {
+            print("       ❌ Invalid divisions: \(divisions) is not a divisor of \(totalSemitones)")
+            print("       Valid divisors of \(totalSemitones): \(getValidDivisors(totalSemitones))")
+            print("       🛡️ Safety fallback: Using 1 division to prevent crash")
+            // Safety fallback: use 1 division to prevent crash
+            return [parameters.rootNote]
+        }
+        
+        let interval = totalSemitones / divisions
+        print("       Interval: \(interval) semitones")
+        
+        var notes: [Int] = []
+        var currentNote = parameters.rootNote
+        
+        for i in 0..<divisions {
+            print("       Note \(i): MIDI note \(currentNote)")
+            
+            // Ensure note is within valid MIDI range
+            if currentNote >= 0 && currentNote <= 127 {
+                notes.append(currentNote)
+            }
+            
+            currentNote += interval
         }
         
         return notes
     }
     
-    private func applyDirectionalPatterns(notes: [Int], parameters: PatternParameters) -> [Int] {
-        switch parameters.intervalPattern {
-        case .ascending:
-            return notes.sorted()
-            
-        case .descending:
-            return notes.sorted(by: >)
-            
-        case .alternating:
-            return applyAlternatingPattern(notes: notes)
-            
-        case .mirror:
-            return applyMirrorPattern(notes: notes, mirrorPoints: parameters.mirrorPoints)
-            
-        case .retrograde:
-            return notes.reversed()
-        }
-    }
-    
-    private func applyAlternatingPattern(notes: [Int]) -> [Int] {
-        let sortedNotes = notes.sorted()
-        var result: [Int] = []
-        
-        for i in 0..<sortedNotes.count {
-            if i % 2 == 0 {
-                result.append(sortedNotes[i / 2])
-            } else {
-                result.append(sortedNotes[sortedNotes.count - 1 - (i / 2)])
+    private func getValidDivisors(_ number: Int) -> [Int] {
+        var divisors: [Int] = []
+        for i in 1...number {
+            if number % i == 0 {
+                divisors.append(i)
             }
         }
-        
-        return result
+        return divisors
     }
     
-    private func applyMirrorPattern(notes: [Int], mirrorPoints: Int) -> [Int] {
-        guard mirrorPoints > 0 else { return notes }
-        
-        let sortedNotes = notes.sorted()
-        var result: [Int] = []
-        
-        for i in 0..<sortedNotes.count {
-            let mirrorIndex = i % (mirrorPoints * 2)
-            if mirrorIndex < mirrorPoints {
-                result.append(sortedNotes[i])
-            } else {
-                result.append(sortedNotes[mirrorPoints * 2 - 1 - mirrorIndex])
-            }
-        }
-        
-        return result
-    }
     
     private func convertToMIDIInfo(notes: [Int], parameters: PatternParameters) -> [MIDIInfo] {
         return notes.enumerated().map { index, note in
@@ -254,8 +298,9 @@ class ScalePatternGenerator: BasePatternGenerator {
             let interval = settings.interval * i
             let interpolatedNote = startNote.note + interval
             
-            // Ensure note is within valid range and doesn't exceed the target note
-            if interpolatedNote < endNote.note && interpolatedNote >= 0 && interpolatedNote <= 127 {
+            // Ensure note is within valid MIDI range (0-127)
+            // Allow notes beyond the target note for extended interpolation
+            if interpolatedNote >= 0 && interpolatedNote <= 127 {
                 let velocity = calculateVelocity(
                     for: i,
                     note: interpolatedNote,
@@ -322,7 +367,8 @@ class ScalePatternGenerator: BasePatternGenerator {
             let interval = settings.interval * i
             let ultrapolatedNote = nextNote.note - interval
             
-            if ultrapolatedNote > baseNote.note && ultrapolatedNote >= 0 && ultrapolatedNote <= 127 {
+            // Allow notes beyond the base note for extended ultrapolation
+            if ultrapolatedNote >= 0 && ultrapolatedNote <= 127 {
                 let velocity = calculateVelocity(
                     for: i,
                     note: ultrapolatedNote,

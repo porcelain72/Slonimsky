@@ -104,7 +104,7 @@ struct ChordSettings: Codable, Equatable, Hashable {
     var voicingPreference: VoicingPreference
     var velocityScale: Double
     
-    init(enabled: Bool = true, chordSize: Int = 3, voicingPreference: VoicingPreference = .close, velocityScale: Double = 0.8) {
+    init(enabled: Bool = false, chordSize: Int = 3, voicingPreference: VoicingPreference = .close, velocityScale: Double = 0.8) {
         self.enabled = enabled
         self.chordSize = chordSize
         self.voicingPreference = voicingPreference

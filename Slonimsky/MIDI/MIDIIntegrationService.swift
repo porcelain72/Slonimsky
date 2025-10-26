@@ -18,6 +18,7 @@ class MIDIIntegrationService: ObservableObject {
     @Published var lastGenerationTime: TimeInterval = 0.0
     @Published var errorMessage: String?
     @Published var isLooping = false
+    @Published var autosaveEnabled = false
     
     // MARK: - Computed Properties
     var isPlaying: Bool {
@@ -127,11 +128,14 @@ class MIDIIntegrationService: ObservableObject {
                 }
                 
                 // Update the MIDI sequence seamlessly
-                if midiEngine.updateSequence(with: result) {
+                if midiEngine.updateSequence(with: result, parameters: parameters) {
                     self.currentPattern = result
                     self.lastGeneratedPatternHash = currentHash
                     self.errorMessage = nil
                     print("✅ Auto-generated combined cyclical sequence with \(parameterManager.activeGenerators.count) generators")
+                    
+                    // Autosave if enabled
+                    self.autosaveCurrentPattern()
                 } else {
                     print("❌ Auto-generation failed: sequence update failed")
                     errorMessage = "MIDI sequence update failed"
@@ -154,11 +158,14 @@ class MIDIIntegrationService: ObservableObject {
                 }
                 
                 // Update the MIDI sequence seamlessly
-                if midiEngine.updateSequence(with: result) {
+                if midiEngine.updateSequence(with: result, parameters: parameters) {
                     self.currentPattern = result
                     self.lastGeneratedPatternHash = currentHash
                     self.errorMessage = nil
                     print("✅ Auto-generated cyclical sequence with \(generatorName)")
+                    
+                    // Autosave if enabled
+                    self.autosaveCurrentPattern()
                 } else {
                     print("❌ Auto-generation failed: sequence update failed")
                     errorMessage = "MIDI sequence update failed"
@@ -182,11 +189,14 @@ class MIDIIntegrationService: ObservableObject {
                 }
                 
                 // Update the MIDI sequence seamlessly
-                if midiEngine.updateSequence(with: result) {
+                if midiEngine.updateSequence(with: result, parameters: parameters) {
                     self.currentPattern = result
                     self.lastGeneratedPatternHash = currentHash
                     self.errorMessage = nil
                     print("✅ Auto-generated combined sequence with \(parameterManager.activeGenerators.count) generators")
+                    
+                    // Autosave if enabled
+                    self.autosaveCurrentPattern()
                 } else {
                     print("❌ Auto-generation failed: sequence update failed")
                     errorMessage = "MIDI sequence update failed"
@@ -209,11 +219,14 @@ class MIDIIntegrationService: ObservableObject {
                 }
                 
                 // Update the MIDI sequence seamlessly
-                if midiEngine.updateSequence(with: result) {
+                if midiEngine.updateSequence(with: result, parameters: parameters) {
                     self.currentPattern = result
                     self.lastGeneratedPatternHash = currentHash
                     self.errorMessage = nil
                     print("✅ Auto-generated sequence with \(generatorName)")
+                    
+                    // Autosave if enabled
+                    self.autosaveCurrentPattern()
                 } else {
                     print("❌ Auto-generation failed: sequence update failed")
                     errorMessage = "MIDI sequence update failed"
@@ -255,7 +268,7 @@ class MIDIIntegrationService: ObservableObject {
             }
             
             // Create MIDI sequence
-            guard let _ = self.midiEngine.generateMusicSequence(from: result) else {
+            guard let _ = self.midiEngine.generateMusicSequence(from: result, parameters: parameters) else {
                 DispatchQueue.main.async {
                     self.isGenerating = false
                     self.errorMessage = "Failed to create MIDI sequence"
@@ -271,6 +284,10 @@ class MIDIIntegrationService: ObservableObject {
                 self.generationProgress = 1.0
                 self.lastGenerationTime = generationTime
                 self.currentPattern = result
+                
+                // Autosave if enabled
+                self.autosaveCurrentPattern()
+                
                 completion(.success(result))
             }
         }
@@ -312,7 +329,7 @@ class MIDIIntegrationService: ObservableObject {
             }
             
             // Create MIDI sequence
-            guard let _ = self.midiEngine.generateMusicSequence(from: result) else {
+            guard let _ = self.midiEngine.generateMusicSequence(from: result, parameters: parameters) else {
                 DispatchQueue.main.async {
                     self.isGenerating = false
                     self.errorMessage = "Failed to create MIDI sequence"
@@ -328,6 +345,10 @@ class MIDIIntegrationService: ObservableObject {
                 self.generationProgress = 1.0
                 self.lastGenerationTime = generationTime
                 self.currentPattern = result
+                
+                // Autosave if enabled
+                self.autosaveCurrentPattern()
+                
                 completion(.success(result))
             }
         }
@@ -407,6 +428,64 @@ class MIDIIntegrationService: ObservableObject {
     /// - Parameter destination: The destination to select
     func setSelectedDestination(_ destination: MIDIDestination) {
         midiEngine.selectedDestination = destination
+    }
+    
+    /// Toggle autosave functionality
+    func toggleAutosave() {
+        autosaveEnabled.toggle()
+        print("💾 Autosave \(autosaveEnabled ? "enabled" : "disabled")")
+    }
+    
+    /// Autosave current pattern if autosave is enabled
+    private func autosaveCurrentPattern() {
+        guard autosaveEnabled, let pattern = currentPattern else { return }
+        
+        // Create autosave directory if it doesn't exist
+        let documentsPath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let slonimskyPath = documentsPath.appendingPathComponent("Slonimsky")
+        let sequencesPath = slonimskyPath.appendingPathComponent("Sequences")
+        
+        do {
+            try FileManager.default.createDirectory(at: sequencesPath, withIntermediateDirectories: true, attributes: nil)
+        } catch {
+            print("❌ Failed to create autosave directory: \(error)")
+            return
+        }
+        
+        // Generate descriptive filename
+        let filename = generateAutosaveFilename(for: pattern)
+        let fileURL = sequencesPath.appendingPathComponent(filename)
+        
+        // Save the MIDI file
+        let success = midiEngine.exportToMIDI(url: fileURL)
+        if success {
+            print("💾 Autosaved sequence: \(filename)")
+        } else {
+            print("❌ Failed to autosave sequence: \(filename)")
+        }
+    }
+    
+    /// Generate a descriptive filename for autosave
+    private func generateAutosaveFilename(for pattern: PatternGenerationResult) -> String {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd_HH-mm-ss"
+        let timestamp = formatter.string(from: Date())
+        
+        let generatorName = pattern.metadata.generatorName.replacingOccurrences(of: " ", with: "")
+        let noteCount = pattern.metadata.noteCount
+        let pitchRange = pattern.metadata.pitchRange
+        let isCyclical = pattern.metadata.isCyclicalSequence
+        
+        // Create a descriptive suffix based on available metadata
+        var suffix = "\(noteCount)notes"
+        if isCyclical {
+            suffix += "_cycle\(pattern.metadata.cycleIndex)"
+        }
+        if pitchRange.lowerBound != pitchRange.upperBound {
+            suffix += "_range\(pitchRange.lowerBound)-\(pitchRange.upperBound)"
+        }
+        
+        return "\(generatorName)_\(suffix)_\(timestamp).mid"
     }
     
     /// Get playback status
@@ -540,6 +619,125 @@ class MIDIIntegrationService: ObservableObject {
                 shiftPattern: RegisterShiftPattern.allCases.randomElement() ?? .none
             )
         )
+    }
+    
+    /// Generate a cyclical pattern and create MIDI sequence
+    /// - Parameters:
+    ///   - generatorName: Name of the pattern generator to use
+    ///   - parameters: Pattern generation parameters
+    ///   - completion: Completion handler with result
+    func generateCyclicalPatternAndMIDI(
+        using generatorName: String,
+        parameters: PatternParameters,
+        completion: @escaping (Result<PatternGenerationResult, Error>) -> Void
+    ) {
+        isGenerating = true
+        generationProgress = 0.0
+        errorMessage = nil
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            let startTime = CFAbsoluteTimeGetCurrent()
+            
+            // Generate cyclical pattern
+            guard let result = self.cyclicalSequenceGenerator.generateCyclicalSequence(
+                baseParameters: parameters,
+                generatorName: generatorName
+            ) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to generate cyclical pattern"
+                    completion(.failure(MIDIIntegrationError.patternGenerationFailed))
+                }
+                return
+            }
+            
+            // Create MIDI sequence
+            guard let _ = self.midiEngine.generateMusicSequence(from: result, parameters: parameters) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to create MIDI sequence"
+                    completion(.failure(MIDIIntegrationError.midiSequenceCreationFailed))
+                }
+                return
+            }
+            
+            let generationTime = CFAbsoluteTimeGetCurrent() - startTime
+            
+            DispatchQueue.main.async {
+                self.isGenerating = false
+                self.generationProgress = 1.0
+                self.lastGenerationTime = generationTime
+                self.currentPattern = result
+                
+                // Autosave if enabled
+                self.autosaveCurrentPattern()
+                
+                completion(.success(result))
+            }
+        }
+    }
+    
+    /// Generate a combined cyclical pattern using multiple generators
+    /// - Parameters:
+    ///   - generatorNames: Array of generator names to use
+    ///   - parameters: Pattern generation parameters
+    ///   - combinationMode: How to combine the patterns
+    ///   - completion: Completion handler with result
+    func generateCombinedCyclicalPatternAndMIDI(
+        using generatorNames: [String],
+        parameters: PatternParameters,
+        combinationMode: PatternCombinationMode = .sequential,
+        completion: @escaping (Result<PatternGenerationResult, Error>) -> Void
+    ) {
+        isGenerating = true
+        generationProgress = 0.0
+        errorMessage = nil
+        
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+            
+            let startTime = CFAbsoluteTimeGetCurrent()
+            
+            // Generate combined cyclical pattern
+            guard let result = self.cyclicalSequenceGenerator.generateCombinedCyclicalSequence(
+                baseParameters: parameters,
+                generatorNames: generatorNames,
+                combinationMode: combinationMode
+            ) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to generate combined cyclical pattern"
+                    completion(.failure(MIDIIntegrationError.patternGenerationFailed))
+                }
+                return
+            }
+            
+            // Create MIDI sequence
+            guard let _ = self.midiEngine.generateMusicSequence(from: result, parameters: parameters) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to create MIDI sequence"
+                    completion(.failure(MIDIIntegrationError.midiSequenceCreationFailed))
+                }
+                return
+            }
+            
+            let generationTime = CFAbsoluteTimeGetCurrent() - startTime
+            
+            DispatchQueue.main.async {
+                self.isGenerating = false
+                self.generationProgress = 1.0
+                self.lastGenerationTime = generationTime
+                self.currentPattern = result
+                
+                // Autosave if enabled
+                self.autosaveCurrentPattern()
+                
+                completion(.success(result))
+            }
+        }
     }
 }
 

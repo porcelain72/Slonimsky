@@ -24,18 +24,43 @@ class CyclicalSequenceGenerator {
             return patternRegistry.generatePattern(using: generatorName, parameters: baseParameters)
         }
         
-        // Determine the maximum number of cycles needed
-        let maxCycles = enabledParameters.values.map { $0.maxCycles }.max() ?? 1
+        // Calculate the maximum number of cycles needed based on parameter ranges
+        let maxCycles = calculateMaxCycles(for: enabledParameters)
         
         print("🔄 Generating cyclical sequence with \(maxCycles) cycles")
         
         var allNotes: [MIDIInfo] = []
         var totalGenerationTime: TimeInterval = 0.0
         var totalNoteCount = 0
+        var actualCycles = 0
         
         // Generate patterns for each cycle
         for cycleIndex in 0..<maxCycles {
             print("🔄 Generating cycle \(cycleIndex + 1)/\(maxCycles)")
+
+            // Check if any parameter would exceed its maximum value in the next cycle
+            var shouldStop = false
+            for (parameterType, settings) in enabledParameters {
+                // Calculate the current value for this cycle
+                let currentValue = settings.minValue + (Double(cycleIndex) * settings.stepSize)
+                // Calculate the value for the next cycle
+                let nextValue = settings.minValue + (Double(cycleIndex + 1) * settings.stepSize)
+                
+                if settings.cycleType == .increment && nextValue > settings.maxValue {
+                    print("🔄 Parameter \(parameterType.rawValue) would exceed max value \(settings.maxValue) at cycle \(cycleIndex + 1)")
+                    shouldStop = true
+                    break
+                } else if settings.cycleType == .decrement && nextValue < settings.minValue {
+                    print("🔄 Parameter \(parameterType.rawValue) would exceed min value \(settings.minValue) at cycle \(cycleIndex + 1)")
+                    shouldStop = true
+                    break
+                }
+            }
+            
+            if shouldStop {
+                print("🔄 Stopping generation: parameter reached maximum value")
+                break
+            }
             
             guard let cycleResult = patternRegistry.generatePattern(
                 using: generatorName,
@@ -56,6 +81,7 @@ class CyclicalSequenceGenerator {
             allNotes.append(contentsOf: cycleNotes)
             totalGenerationTime += cycleResult.metadata.generationTime
             totalNoteCount += cycleResult.metadata.noteCount
+            actualCycles += 1
             
             print("✅ Cycle \(cycleIndex + 1): \(cycleResult.notes.count) notes")
         }
@@ -73,16 +99,16 @@ class CyclicalSequenceGenerator {
             duration: calculateTotalDuration(notes: allNotes),
             cycleIndex: 0, // Base cycle for combined result
             isCyclicalSequence: true,
-            totalCycles: maxCycles
+            totalCycles: actualCycles
         )
         
         let performance = PerformanceMetrics(
             generationTime: totalGenerationTime,
             memoryUsage: 0, // We don't track memory usage in cyclical generation
-            complexity: Double(maxCycles)
+            complexity: Double(actualCycles)
         )
         
-        print("✅ Generated cyclical sequence: \(allNotes.count) total notes across \(maxCycles) cycles")
+        print("✅ Generated cyclical sequence: \(allNotes.count) total notes across \(actualCycles) cycles")
         
         return PatternGenerationResult(
             notes: allNotes,
@@ -113,18 +139,43 @@ class CyclicalSequenceGenerator {
             )
         }
         
-        // Determine the maximum number of cycles needed
-        let maxCycles = enabledParameters.values.map { $0.maxCycles }.max() ?? 1
+        // Calculate the maximum number of cycles needed based on parameter ranges
+        let maxCycles = calculateMaxCycles(for: enabledParameters)
         
         print("🔄 Generating combined cyclical sequence with \(maxCycles) cycles using \(generatorNames.count) generators")
         
         var allNotes: [MIDIInfo] = []
         var totalGenerationTime: TimeInterval = 0.0
         var totalNoteCount = 0
+        var actualCycles = 0
         
         // Generate combined patterns for each cycle
         for cycleIndex in 0..<maxCycles {
             print("🔄 Generating combined cycle \(cycleIndex + 1)/\(maxCycles)")
+            
+            // Check if any parameter would exceed its maximum value in the next cycle
+            var shouldStop = false
+            for (parameterType, settings) in enabledParameters {
+                // Calculate the current value for this cycle
+                let currentValue = settings.minValue + (Double(cycleIndex) * settings.stepSize)
+                // Calculate the value for the next cycle
+                let nextValue = settings.minValue + (Double(cycleIndex + 1) * settings.stepSize)
+                
+                if settings.cycleType == .increment && nextValue > settings.maxValue {
+                    print("🔄 Parameter \(parameterType.rawValue) would exceed max value \(settings.maxValue) at cycle \(cycleIndex + 1)")
+                    shouldStop = true
+                    break
+                } else if settings.cycleType == .decrement && nextValue < settings.minValue {
+                    print("🔄 Parameter \(parameterType.rawValue) would exceed min value \(settings.minValue) at cycle \(cycleIndex + 1)")
+                    shouldStop = true
+                    break
+                }
+            }
+            
+            if shouldStop {
+                print("🔄 Stopping generation: parameter reached maximum value")
+                break
+            }
             
             guard let cycleResult = patternRegistry.generateCombinedPattern(
                 using: generatorNames,
@@ -146,6 +197,7 @@ class CyclicalSequenceGenerator {
             allNotes.append(contentsOf: cycleNotes)
             totalGenerationTime += cycleResult.metadata.generationTime
             totalNoteCount += cycleResult.metadata.noteCount
+            actualCycles += 1
             
             print("✅ Combined cycle \(cycleIndex + 1): \(cycleResult.notes.count) notes")
         }
@@ -163,16 +215,16 @@ class CyclicalSequenceGenerator {
             duration: calculateTotalDuration(notes: allNotes),
             cycleIndex: 0, // Base cycle for combined result
             isCyclicalSequence: true,
-            totalCycles: maxCycles
+            totalCycles: actualCycles
         )
         
         let performance = PerformanceMetrics(
             generationTime: totalGenerationTime,
             memoryUsage: 0, // We don't track memory usage in cyclical generation
-            complexity: Double(maxCycles) * Double(generatorNames.count)
+            complexity: Double(actualCycles) * Double(generatorNames.count)
         )
         
-        print("✅ Generated combined cyclical sequence: \(allNotes.count) total notes across \(maxCycles) cycles")
+        print("✅ Generated combined cyclical sequence: \(allNotes.count) total notes across \(actualCycles) cycles")
         
         return PatternGenerationResult(
             notes: allNotes,
@@ -195,5 +247,21 @@ class CyclicalSequenceGenerator {
     
     private func calculateTotalDuration(notes: [MIDIInfo]) -> TimeInterval {
         return notes.reduce(0.0) { $0 + $1.beatLength }
+    }
+    
+    /// Calculate the maximum number of cycles needed based on parameter ranges
+    private func calculateMaxCycles(for enabledParameters: [CyclicalParameterType: CyclicalParameterSettings]) -> Int {
+        var maxCycles = 1
+        
+        for (_, settings) in enabledParameters {
+            guard settings.isEnabled else { continue }
+            
+            let range = settings.maxValue - settings.minValue
+            let cyclesNeeded = Int(ceil(range / settings.stepSize)) + 1
+            
+            maxCycles = max(maxCycles, cyclesNeeded)
+        }
+        
+        return maxCycles
     }
 } 

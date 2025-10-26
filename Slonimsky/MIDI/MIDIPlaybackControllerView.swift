@@ -14,126 +14,188 @@ struct MIDIPlaybackControllerView: View {
     @ObservedObject var midiService: MIDIIntegrationService
     @State private var playbackStatus: PlaybackStatus = PlaybackStatus(isPlaying: false, currentTime: 0.0, totalDuration: 0.0)
     @State private var updateTimer: Timer?
+    @State private var sendToExternalMIDI: Bool = false
+    @State private var externalMIDIPlaybackStatus: PlaybackStatus = PlaybackStatus(isPlaying: false, currentTime: 0.0, totalDuration: 0.0)
+    @State private var externalMIDITimer: Timer?
     
     // MARK: - Body
     var body: some View {
-        VStack(spacing: 20) {
-          //  Spacer()
-            
-            // Playback Controls
-            HStack(spacing: 20) {
-                // Play/Pause Button
+        VStack(alignment: .leading, spacing: 16) {
+            // Playback Controls - Proper Playback Button Style
+            HStack(spacing: 8) {
+                // Play/Pause Button - Proper Playback Style
                 Button(action: togglePlayback) {
-                    Image(systemName: playbackStatus.isPlaying ? "pause.circle.fill" : "play.circle.fill")
-                        .font(.system(size: 32))
+                    Image(systemName: playbackStatus.isPlaying ? "pause.fill" : "play.fill")
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(playbackStatus.isPlaying ? .orange : .green)
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle()
+                                .fill(playbackStatus.isPlaying ? Color.orange.opacity(0.15) : Color.green.opacity(0.15))
+                        )
                 }
                 .disabled(midiService.currentPattern == nil)
                 .buttonStyle(.plain)
                 
-                // Stop Button
+                // Stop Button - Proper Playback Style
                 Button(action: stopPlayback) {
-                    Image(systemName: "stop.circle.fill")
-                        .font(.system(size: 32))
+                    Image(systemName: "stop.fill")
+                        .font(.system(size: 18, weight: .medium))
                         .foregroundColor(.red)
+                        .frame(width: 32, height: 32)
+                        .background(
+                            Circle()
+                                .fill(Color.red.opacity(0.15))
+                        )
                 }
                 .disabled(midiService.currentPattern == nil || !playbackStatus.isPlaying)
                 .buttonStyle(.plain)
-
-                // Loop Button
-                Button(action: toggleLooping) {
-                    Image(systemName: midiService.isLooping ? "repeat.circle.fill" : "repeat.circle")
-                        .font(.system(size: 32))
-                        .foregroundColor(midiService.isLooping ? .teal : .gray)
-                }
-                .disabled(midiService.currentPattern == nil)
-                .help("Toggle looping")
-                .buttonStyle(.plain)
-
+                
+                Spacer()
+                
                 // Export Button
                 Button(action: exportMIDI) {
-                    Image(systemName: "square.and.arrow.up.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.blue)
+                    Image(systemName: "square.and.arrow.up")
+                        .font(.system(size: 16, weight: .medium))
+                        .foregroundColor(midiService.currentPattern == nil ? .secondary : .blue)
                 }
                 .disabled(midiService.currentPattern == nil)
                 .buttonStyle(.plain)
-
-                // External MIDI Button
-                Button(action: sendToExternalMIDI) {
-                    Image(systemName: "music.note.circle.fill")
-                        .font(.system(size: 32))
-                        .foregroundColor(.purple)
-                }
-                .disabled(midiService.currentPattern == nil || midiService.getAvailableDestinations().isEmpty)
-                .buttonStyle(.plain)
-
+                .help("Export MIDI")
             }
-            .padding(.top, 8)
-            Spacer()
-            // Progress Bar
-            if midiService.currentPattern != nil {
-                VStack(spacing: 8) {
-                    ProgressView(value: playbackStatus.progress)
-                        .progressViewStyle(LinearProgressViewStyle())
-                        .scaleEffect(y: 2)
-                    
-                    HStack {
-                        Text(formatTime(playbackStatus.currentTime))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Text(formatTime(playbackStatus.totalDuration))
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
-                }
-            }
-           // Spacer()
-            // Status Information
+            
+            // Progress Section
             VStack(spacing: 8) {
-                if let pattern = midiService.currentPattern {
+                // External MIDI Mode Indicator
+                if sendToExternalMIDI {
                     HStack {
-                        Text("Pattern: \(pattern.metadata.generatorName)")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Text("\(pattern.notes.count) notes")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
+                        Image(systemName: "music.note")
+                            .font(.system(size: 12))
+                            .foregroundColor(.purple)
+                        Text("External MIDI Mode")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(.purple)
                     }
-                    
-                    HStack {
-                        Text("Generation: \(String(format: "%.3f", midiService.lastGenerationTime))s")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                        
-                        Spacer()
-                        
-                        Text("Duration: \(formatTime(playbackStatus.totalDuration))")
-                            .font(.caption)
-                            .foregroundColor(.secondary)
-                    }
+                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
+                    .background(
+                        RoundedRectangle(cornerRadius: 4)
+                            .fill(Color.purple.opacity(0.1))
+                    )
                 }
                 
-                if let errorMessage = midiService.errorMessage {
-                    Text(errorMessage)
-                        .font(.caption)
-                        .foregroundColor(.red)
-                        .padding(.horizontal)
+                // Progress Bar - Show for both internal and external MIDI
+                ProgressView(value: sendToExternalMIDI ? externalMIDIPlaybackStatus.progress : playbackStatus.progress)
+                    .progressViewStyle(LinearProgressViewStyle(tint: sendToExternalMIDI ? .purple : .accentColor))
+                    .scaleEffect(y: 1.5)
+                    .opacity(midiService.currentPattern == nil ? 0.3 : 1.0)
+                
+                // Time Display - Show for both internal and external MIDI
+                HStack {
+                    Text(formatTime(sendToExternalMIDI ? externalMIDIPlaybackStatus.currentTime : playbackStatus.currentTime))
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(midiService.currentPattern == nil ? Color(red: 0.7, green: 0.7, blue: 0.7) : Color(red: 0.9, green: 0.9, blue: 0.9))
+                    
+                    Spacer()
+                    
+                    Text(formatTime(sendToExternalMIDI ? externalMIDIPlaybackStatus.totalDuration : playbackStatus.totalDuration))
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(midiService.currentPattern == nil ? Color(red: 0.7, green: 0.7, blue: 0.7) : Color(red: 0.9, green: 0.9, blue: 0.9))
                 }
             }
             
-            // MIDI Destination Picker
+            // Pattern Information
+            VStack(alignment: .leading, spacing: 6) {
+                HStack {
+                    Text("Pattern")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
+                    Spacer()
+                    Text(midiService.currentPattern?.metadata.generatorName ?? "No Pattern")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(midiService.currentPattern == nil ? Color(red: 0.7, green: 0.7, blue: 0.7) : Color(red: 0.9, green: 0.9, blue: 0.9))
+                }
+                
+                HStack {
+                    Text("Notes")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
+                    Spacer()
+                    Text("\(midiService.currentPattern?.notes.count ?? 0)")
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(midiService.currentPattern == nil ? Color(red: 0.7, green: 0.7, blue: 0.7) : Color(red: 0.9, green: 0.9, blue: 0.9))
+                }
+                
+                if midiService.lastGenerationTime > 0 {
+                    HStack {
+                        Text("Generated")
+                            .font(.system(size: 12, weight: .medium))
+                            .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
+                        Spacer()
+                        Text("\(String(format: "%.2f", midiService.lastGenerationTime))s")
+                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                            .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
+                    }
+                }
+            }
+            .padding(.vertical, 8)
+            .padding(.horizontal, 12)
+            .background(
+                RoundedRectangle(cornerRadius: 6)
+                    .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
+            )
+            
+            // Error Display
+            if let errorMessage = midiService.errorMessage {
+                HStack {
+                    Image(systemName: "exclamationmark.triangle.fill")
+                        .font(.system(size: 12))
+                        .foregroundColor(.red)
+                    Text(errorMessage)
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(.red)
+                }
+                .padding(.horizontal, 12)
+                .padding(.vertical, 8)
+                .background(
+                    RoundedRectangle(cornerRadius: 6)
+                        .fill(Color.red.opacity(0.1))
+                )
+            }
+            
+            // Loop, External MIDI, and Autosave Checkboxes
+            VStack(alignment: .leading, spacing: 8) {
+                Toggle("Loop Playback", isOn: Binding(
+                    get: { midiService.isLooping },
+                    set: { _ in midiService.toggleLooping() }
+                ))
+                .toggleStyle(CheckboxToggleStyle())
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
+                .disabled(midiService.currentPattern == nil)
+                
+                Toggle("Send to External MIDI", isOn: $sendToExternalMIDI)
+                .toggleStyle(CheckboxToggleStyle())
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
+                .disabled(midiService.currentPattern == nil || midiService.getAvailableDestinations().isEmpty)
+                
+                Toggle("Autosave Sequences", isOn: Binding(
+                    get: { midiService.autosaveEnabled },
+                    set: { _ in midiService.toggleAutosave() }
+                ))
+                .toggleStyle(CheckboxToggleStyle())
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
+                .help("Automatically save new sequences to ~/Documents/Slonimsky/Sequences/")
+            }
+            
+            // MIDI Destination
             if !midiService.getAvailableDestinations().isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("MIDI Destination:")
-                        .font(.caption)
-                        .foregroundColor(.secondary)
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("MIDI Destination")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
                     
                     Picker("MIDI Destination", selection: Binding(
                         get: { midiService.getAvailableDestinations().first { $0.id == midiService.getAvailableDestinations().first?.id } },
@@ -148,41 +210,128 @@ struct MIDIPlaybackControllerView: View {
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .font(.system(size: 12))
+                    .opacity(midiService.currentPattern == nil ? 0.5 : 1.0)
                 }
             }
             
-           // Spacer()
+            // Spacer to push everything to the top
+            Spacer()
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 12)
-        .frame(height: 240.0)
-       
-        .background(Color(NSColor.controlBackgroundColor))
-        .cornerRadius(12)
+        .padding(16)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+        .background(Color(red: 0.2, green: 0.2, blue: 0.2))
+        .cornerRadius(8)
         .onAppear {
-            startUpdateTimer()
+            startAllTimers()
         }
         .onDisappear {
-            stopUpdateTimer()
+            stopAllTimers()
         }
     }
     
     // MARK: - Actions
     
     private func togglePlayback() {
-        if playbackStatus.isPlaying {
-            midiService.pausePlayback()
+        if sendToExternalMIDI {
+            // External MIDI playback
+            if externalMIDIPlaybackStatus.isPlaying {
+                stopExternalMIDIPlayback()
+            } else {
+                startExternalMIDIPlayback()
+            }
         } else {
-            midiService.playCurrentPattern()
+            // Internal playback
+            if playbackStatus.isPlaying {
+                midiService.pausePlayback()
+            } else {
+                midiService.playCurrentPattern()
+            }
         }
     }
     
     private func stopPlayback() {
-        midiService.stopPlayback()
+        if sendToExternalMIDI {
+            stopExternalMIDIPlayback()
+        } else {
+            midiService.stopPlayback()
+        }
     }
     
-    private func toggleLooping() {
-        midiService.toggleLooping()
+    
+    private func startExternalMIDIPlayback() {
+        guard let pattern = midiService.currentPattern else { return }
+        
+        // Calculate total duration based on pattern
+        let bpm = 120.0
+        let beatDuration = 60.0 / bpm
+        let totalDuration = pattern.notes.reduce(0.0) { total, note in
+            total + note.beatLength * beatDuration
+        }
+        
+        // Set up external MIDI playback status
+        externalMIDIPlaybackStatus = PlaybackStatus(
+            isPlaying: true,
+            currentTime: 0.0,
+            totalDuration: totalDuration
+        )
+        
+        // Start the external MIDI playback
+        midiService.sendToExternalMIDI(bpm: bpm)
+        
+        // Start timer for external MIDI playback
+        startExternalMIDITimer()
+        
+        print("🎵 Started external MIDI playback")
+    }
+    
+    private func stopExternalMIDIPlayback() {
+        externalMIDIPlaybackStatus = PlaybackStatus(
+            isPlaying: false,
+            currentTime: 0.0,
+            totalDuration: externalMIDIPlaybackStatus.totalDuration
+        )
+        
+        stopExternalMIDITimer()
+        
+        print("⏹️ Stopped external MIDI playback")
+    }
+    
+    private func startExternalMIDITimer() {
+        externalMIDITimer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { _ in
+            if self.externalMIDIPlaybackStatus.isPlaying {
+                let newCurrentTime = self.externalMIDIPlaybackStatus.currentTime + 0.1
+                
+                // Update the playback status with new time
+                self.externalMIDIPlaybackStatus = PlaybackStatus(
+                    isPlaying: self.externalMIDIPlaybackStatus.isPlaying,
+                    currentTime: newCurrentTime,
+                    totalDuration: self.externalMIDIPlaybackStatus.totalDuration
+                )
+                
+                // Check if we've reached the end
+                if newCurrentTime >= self.externalMIDIPlaybackStatus.totalDuration {
+                    if self.midiService.isLooping {
+                        // Restart for looping
+                        self.externalMIDIPlaybackStatus = PlaybackStatus(
+                            isPlaying: self.externalMIDIPlaybackStatus.isPlaying,
+                            currentTime: 0.0,
+                            totalDuration: self.externalMIDIPlaybackStatus.totalDuration
+                        )
+                        self.midiService.sendToExternalMIDI(bpm: 120.0)
+                        print("🔄 External MIDI looping - restarted")
+                    } else {
+                        // Stop playback
+                        self.stopExternalMIDIPlayback()
+                    }
+                }
+            }
+        }
+    }
+    
+    private func stopExternalMIDITimer() {
+        externalMIDITimer?.invalidate()
+        externalMIDITimer = nil
     }
     
     private func exportMIDI() {
@@ -202,9 +351,6 @@ struct MIDIPlaybackControllerView: View {
         }
     }
     
-    private func sendToExternalMIDI() {
-        midiService.sendToExternalMIDI(bpm: 120.0)
-    }
     
     // MARK: - Helper Methods
     
@@ -217,6 +363,18 @@ struct MIDIPlaybackControllerView: View {
     private func stopUpdateTimer() {
         updateTimer?.invalidate()
         updateTimer = nil
+    }
+    
+    private func startAllTimers() {
+        startUpdateTimer()
+        if sendToExternalMIDI && externalMIDIPlaybackStatus.isPlaying {
+            startExternalMIDITimer()
+        }
+    }
+    
+    private func stopAllTimers() {
+        stopUpdateTimer()
+        stopExternalMIDITimer()
     }
     
     private func formatTime(_ time: TimeInterval) -> String {

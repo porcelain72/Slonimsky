@@ -50,68 +50,6 @@
             endingLineNumber = "45"
             landmarkName = "generateSheet(from:chords:noteDuration:bpm:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F - 2bd557f4c68334da"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "39"
-                  endingLineNumber = "39"
-                  offsetFromSymbolStart = "256">
-               </Location>
-               <Location
-                  uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F - da434e4d9af1ccd6"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(3) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "39"
-                  endingLineNumber = "39"
-                  offsetFromSymbolStart = "460">
-               </Location>
-               <Location
-                  uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F - a2ba4a6e301708d0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(4) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "39"
-                  endingLineNumber = "39"
-                  offsetFromSymbolStart = "100">
-               </Location>
-               <Location
-                  uuid = "9FA3FF9D-86FB-4960-ACAF-D31BF3AD6B9F - 2bd557f4c68333e0"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "45"
-                  endingLineNumber = "45"
-                  offsetFromSymbolStart = "342">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -160,38 +98,6 @@
             endingLineNumber = "53"
             landmarkName = "generateSheet(from:chords:noteDuration:bpm:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "566394D2-3009-46E1-AE76-854FA561BCC8 - 2bd557f4c68332e8"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "53"
-                  endingLineNumber = "53"
-                  offsetFromSymbolStart = "939">
-               </Location>
-               <Location
-                  uuid = "566394D2-3009-46E1-AE76-854FA561BCC8 - 2bd557f4c68332e8"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "(1) suspend resume partial function for Slonimsky.SheetMusicViewModel.generateSheet(from: Swift.Array&lt;Slonimsky.MIDIInfo&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) async -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/SheetMusicViewModel.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "53"
-                  endingLineNumber = "53"
-                  offsetFromSymbolStart = "1110">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -240,38 +146,6 @@
             endingLineNumber = "99"
             landmarkName = "play(melody:chords:noteDuration:bpm:)"
             landmarkType = "7">
-            <Locations>
-               <Location
-                  uuid = "EDEFF144-D4C8-4B33-A057-F362684F495D - 9538b13a43764d3f"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Slonimsky.MIDISequenceOutputPlayer.play(melody: Swift.Array&lt;Swift.Array&lt;Slonimsky.MIDIInfo&gt;&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/MidiSequenceOutputPlayer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "100"
-                  endingLineNumber = "100"
-                  offsetFromSymbolStart = "2861">
-               </Location>
-               <Location
-                  uuid = "EDEFF144-D4C8-4B33-A057-F362684F495D - 9538b13a43764d3f"
-                  shouldBeEnabled = "Yes"
-                  ignoreCount = "0"
-                  continueAfterRunningActions = "No"
-                  symbolName = "Slonimsky.MIDISequenceOutputPlayer.play(melody: Swift.Array&lt;Swift.Array&lt;Slonimsky.MIDIInfo&gt;&gt;, chords: Swift.Array&lt;Slonimsky.ChordEvent&gt;, noteDuration: Swift.Double, bpm: Swift.Double) -&gt; ()"
-                  moduleName = "Slonimsky"
-                  usesParentBreakpointCondition = "Yes"
-                  urlString = "file:///Users/petermacdonald/LocalDev/Slonimsky/Slonimsky/MidiSequenceOutputPlayer.swift"
-                  startingColumnNumber = "9223372036854775807"
-                  endingColumnNumber = "9223372036854775807"
-                  startingLineNumber = "100"
-                  endingLineNumber = "100"
-                  offsetFromSymbolStart = "3195">
-               </Location>
-            </Locations>
          </BreakpointContent>
       </BreakpointProxy>
       <BreakpointProxy
@@ -350,7 +224,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "451"
             endingLineNumber = "451"
-            landmarkName = "generateRhythmicAccompaniment(from:)"
+            landmarkName = "generateHarmonicAccompaniment(from:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -366,7 +240,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "447"
             endingLineNumber = "447"
-            landmarkName = "generateRhythmicAccompaniment(from:)"
+            landmarkName = "generateHarmonicAccompaniment(from:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -382,7 +256,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "129"
             endingLineNumber = "129"
-            landmarkName = "pause()"
+            landmarkName = "stop()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>
@@ -398,7 +272,7 @@
             endingColumnNumber = "9223372036854775807"
             startingLineNumber = "172"
             endingLineNumber = "172"
-            landmarkName = "generateCombinedPatternAndMIDI(using:parameters:combinationMode:completion:)"
+            landmarkName = "handleAutoGeneration()"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

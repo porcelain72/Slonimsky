@@ -64,8 +64,16 @@ class BasePatternGenerator: PatternGenerator {
         // Set the current cycle
         cyclicalManager.currentCycle = cycleIndex
         
+        print("🔄 Applying cyclical changes for cycle \(cycleIndex)")
+        print("   Original root note: \(parameters.rootNote)")
+        
         // Get the modified parameters
-        return cyclicalManager.getModifiedParameters(from: parameters)
+        let modifiedParameters = cyclicalManager.getModifiedParameters(from: parameters)
+        
+        print("   Modified root note: \(modifiedParameters.rootNote)")
+        print("   Cyclical settings enabled parameters: \(parameters.cyclicalSettings.enabledParameters.keys.map { $0.rawValue })")
+        
+        return modifiedParameters
     }
     
     func estimateNoteCount(parameters: PatternParameters) -> Int {
@@ -194,7 +202,9 @@ class BasePatternGenerator: PatternGenerator {
     ) -> Double {
         guard settings.isEnabled else { return baseValue }
         
-        let adjustedCycle = cycleIndex % settings.maxCycles
+        // Calculate max cycles dynamically based on parameter range
+        let maxCycles = Int(ceil((settings.maxValue - settings.minValue) / settings.stepSize)) + 1
+        let adjustedCycle = cycleIndex % maxCycles
         let cyclicalValue = settings.minValue + (Double(adjustedCycle) * settings.stepSize)
         
         // Clamp to max value
@@ -209,7 +219,7 @@ class BasePatternGenerator: PatternGenerator {
         case .multiply:
             return baseValue * clampedValue
         case .modulate:
-            let modulation = sin(Double(adjustedCycle) * .pi / Double(settings.maxCycles))
+            let modulation = sin(Double(adjustedCycle) * .pi / Double(maxCycles))
             return baseValue + (modulation * settings.maxValue)
         }
     }

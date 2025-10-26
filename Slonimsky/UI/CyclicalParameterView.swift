@@ -11,9 +11,10 @@ struct CyclicalParameterView: View {
             // Header
             HStack {
                 Image(systemName: "arrow.clockwise.circle.fill")
-                    .foregroundColor(.blue)
+                    .foregroundColor(Color.garageBandAccent)
                 Text("Cyclical Parameters")
                     .font(.headline)
+                    .foregroundColor(Color.garageBandText)
                 Spacer()
                 Button("Reset All") {
                     parameterManager.cyclicalSettings.resetAllCycles()
@@ -29,6 +30,7 @@ struct CyclicalParameterView: View {
                 }
             }
             .pickerStyle(.menu)
+            .foregroundColor(Color.garageBandText)
             
             // Current Parameter Settings
             if let settings = getCurrentParameterSettings() {
@@ -46,31 +48,33 @@ struct CyclicalParameterView: View {
                 Text("Enabled Parameters")
                     .font(.subheadline)
                     .fontWeight(.medium)
+                    .foregroundColor(Color.garageBandText)
                 
                 let enabledParams = parameterManager.cyclicalSettings.enabledParameters
                 if enabledParams.isEmpty {
                     Text("No cyclical parameters enabled")
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandSecondary)
                         .italic()
                 } else {
                     ForEach(Array(enabledParams.keys.sorted(by: { $0.rawValue < $1.rawValue })), id: \.self) { paramType in
                         HStack {
                             Text(paramType.rawValue)
+                                .foregroundColor(Color.garageBandText)
                             Spacer()
                             Text("Cycle \(enabledParams[paramType]?.currentCycle ?? 0)")
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color.garageBandSecondary)
                                 .font(.caption)
                         }
                         .padding(.horizontal, 8)
                         .padding(.vertical, 4)
-                        .background(Color.blue.opacity(0.1))
+                        .background(Color.garageBandAccent.opacity(0.1))
                         .cornerRadius(6)
                     }
                 }
             }
         }
         .padding()
-        .background(Color(.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .cornerRadius(12)
     }
     
@@ -163,6 +167,7 @@ struct CyclicalParameterDetailView: View {
                     onSettingsChanged(settings)
                 }
             ))
+            .foregroundColor(Color.garageBandText)
             
             if settings.isEnabled {
                 // Min/Max Values
@@ -170,6 +175,7 @@ struct CyclicalParameterDetailView: View {
                     VStack(alignment: .leading) {
                         Text("Min Value")
                             .font(.caption)
+                            .foregroundColor(Color.garageBandText)
                         TextField("Min", value: Binding(
                             get: { settings.minValue },
                             set: { newValue in
@@ -183,6 +189,7 @@ struct CyclicalParameterDetailView: View {
                     VStack(alignment: .leading) {
                         Text("Max Value")
                             .font(.caption)
+                            .foregroundColor(Color.garageBandText)
                         TextField("Max", value: Binding(
                             get: { settings.maxValue },
                             set: { newValue in
@@ -198,6 +205,7 @@ struct CyclicalParameterDetailView: View {
                 VStack(alignment: .leading) {
                     Text("Step Size")
                         .font(.caption)
+                        .foregroundColor(Color.garageBandText)
                     TextField("Step", value: Binding(
                         get: { settings.stepSize },
                         set: { newValue in
@@ -208,24 +216,12 @@ struct CyclicalParameterDetailView: View {
                     .textFieldStyle(.roundedBorder)
                 }
                 
-                // Max Cycles
-                VStack(alignment: .leading) {
-                    Text("Max Cycles")
-                        .font(.caption)
-                    TextField("Cycles", value: Binding(
-                        get: { settings.maxCycles },
-                        set: { newValue in
-                            settings.maxCycles = newValue
-                            onSettingsChanged(settings)
-                        }
-                    ), format: .number)
-                    .textFieldStyle(.roundedBorder)
-                }
                 
                 // Operation Type
                 VStack(alignment: .leading) {
                     Text("Operation Type")
                         .font(.caption)
+                        .foregroundColor(Color.garageBandText)
                     Picker("Operation", selection: Binding(
                         get: { settings.operationType },
                         set: { newValue in
@@ -238,6 +234,7 @@ struct CyclicalParameterDetailView: View {
                         }
                     }
                     .pickerStyle(.menu)
+                    .foregroundColor(Color.garageBandText)
                 }
                 
                 // Reset After Max
@@ -248,12 +245,13 @@ struct CyclicalParameterDetailView: View {
                         onSettingsChanged(settings)
                     }
                 ))
+                .foregroundColor(Color.garageBandText)
                 
                 // Current Cycle Display
                 HStack {
                     Text("Current Cycle: \(settings.currentCycle)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundColor(Color.garageBandText)
                     Spacer()
                     Button("Reset") {
                         settings.currentCycle = 0
@@ -265,7 +263,7 @@ struct CyclicalParameterDetailView: View {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .cornerRadius(8)
     }
 }

@@ -13,6 +13,9 @@
 		98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */; };
 		98692B492E2FBE0F00223430 /* SlonimskyUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */; };
 		98692B4B2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */; };
+		98AF6E152EACDC1200DD60AC /* GarageBandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */; };
+		98AF6E192EAD05C000DD60AC /* SimpleCyclicalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */; };
+		98AF6E1B2EAD487C00DD60AC /* DirectionalParametersTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */; };
 		98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
 		98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309502E3932FE000D9EC7 /* ModulationSettings.swift */; };
@@ -84,6 +87,9 @@
 		98692B442E2FBE0F00223430 /* SlonimskyUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SlonimskyUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		98692B482E2FBE0F00223430 /* SlonimskyUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITests.swift; sourceTree = "<group>"; };
 		98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITestsLaunchTests.swift; sourceTree = "<group>"; };
+		98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageBandColors.swift; sourceTree = "<group>"; };
+		98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCyclicalTest.swift; sourceTree = "<group>"; };
+		98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectionalParametersTest.swift; sourceTree = "<group>"; };
 		98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternParameters.swift; sourceTree = "<group>"; };
 		98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VelocitySettings.swift; sourceTree = "<group>"; };
 		98C309502E3932FE000D9EC7 /* ModulationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModulationSettings.swift; sourceTree = "<group>"; };
@@ -202,10 +208,12 @@
 		98692B3D2E2FBE0F00223430 /* SlonimskyTests */ = {
 			isa = PBXGroup;
 			children = (
+				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
 				98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */,
 				98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */,
 				98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */,
 				98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */,
+				98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */,
 				98C309822E393378000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift */,
 			);
 			path = SlonimskyTests;
@@ -263,6 +271,7 @@
 		98C3096E2E39333C000D9EC7 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */,
 				98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */,
 				98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */,
 				98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */,
@@ -472,6 +481,7 @@
 				98C3099F2E3B8E64000D9EC7 /* CyclicalParameterManager.swift in Sources */,
 				98C3099D2E3B893D000D9EC7 /* CyclicalParameterSettings.swift in Sources */,
 				98C309972E3940B8000D9EC7 /* UInt8+Clamping.swift in Sources */,
+				98AF6E152EACDC1200DD60AC /* GarageBandColors.swift in Sources */,
 				98C309982E3940B9000D9EC7 /* ParameterApplicationManager.swift in Sources */,
 				98C309942E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift in Sources */,
 				98C309972E3940B7000D9EC7 /* ParameterDescriptionHelper.swift in Sources */,
@@ -484,8 +494,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
+				98AF6E192EAD05C000DD60AC /* SimpleCyclicalTest.swift in Sources */,
 				98C309882E3933F0000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift in Sources */,
 				98C309892E3933F0000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift in Sources */,
+				98AF6E1B2EAD487C00DD60AC /* DirectionalParametersTest.swift in Sources */,
 				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
 				98C3098A2E3933F0000D9EC7 /* SlonimskyTests/MIDIIntegrationTests.swift in Sources */,
 				98C3098B2E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift in Sources */,

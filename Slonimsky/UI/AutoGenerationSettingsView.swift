@@ -21,12 +21,13 @@ struct AutoGenerationSettingsView: View {
             HStack {
                 Toggle("Enable Auto-generation", isOn: $parameterManager.autoGenerateEnabled)
                     .toggleStyle(SwitchToggleStyle())
+                    .foregroundColor(Color.garageBandText)
                 
                 Spacer()
                 
                 if parameterManager.autoGenerateEnabled {
                     Image(systemName: "arrow.clockwise")
-                        .foregroundColor(.green)
+                        .foregroundColor(Color.garageBandAccent)
                         .font(.title2)
                 }
             }
@@ -37,12 +38,13 @@ struct AutoGenerationSettingsView: View {
                     HStack {
                         Toggle("Automatic Generator Selection", isOn: $parameterManager.automaticGeneratorSelectionEnabled)
                             .toggleStyle(SwitchToggleStyle())
+                            .foregroundColor(Color.garageBandText)
                         
                         Spacer()
                         
                         if parameterManager.automaticGeneratorSelectionEnabled {
                             Image(systemName: "brain.head.profile")
-                                .foregroundColor(.blue)
+                                .foregroundColor(Color.garageBandAccent)
                                 .font(.title2)
                         }
                     }
@@ -52,27 +54,27 @@ struct AutoGenerationSettingsView: View {
                         VStack(alignment: .leading, spacing: 4) {
                             Text("Active Generators:")
                                 .font(.subheadline)
-                                .foregroundColor(.secondary)
+                                .foregroundColor(Color.garageBandText)
                             
                             ForEach(parameterManager.activeGenerators, id: \.self) { generator in
                                 HStack {
                                     Image(systemName: "checkmark.circle.fill")
-                                        .foregroundColor(.green)
+                                        .foregroundColor(Color.garageBandAccent)
                                         .font(.caption)
                                     Text(generator)
                                         .font(.caption)
-                                        .foregroundColor(.primary)
+                                        .foregroundColor(Color.garageBandText)
                                 }
                             }
                             
                             if parameterManager.activeGenerators.count > 1 {
                                 HStack {
                                     Image(systemName: "arrow.triangle.merge")
-                                        .foregroundColor(.orange)
+                                        .foregroundColor(Color.garageBandAccent)
                                         .font(.caption)
                                     Text("Combination Mode: \(parameterManager.combinationMode.rawValue)")
                                         .font(.caption)
-                                        .foregroundColor(.secondary)
+                                        .foregroundColor(Color.garageBandSecondary)
                                 }
                             }
                         }
@@ -82,7 +84,7 @@ struct AutoGenerationSettingsView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("Generator")
                                 .font(.headline)
-                                .foregroundColor(.primary)
+                                .foregroundColor(Color.garageBandText)
                             
                             Picker("Generator", selection: $parameterManager.selectedGeneratorForAutoGeneration) {
                                 Text("Scale Pattern Generator").tag("Scale Pattern Generator")
@@ -94,6 +96,7 @@ struct AutoGenerationSettingsView: View {
                                 Text("Modulation Pattern Generator").tag("Modulation Pattern Generator")
                             }
                             .pickerStyle(MenuPickerStyle())
+                            .foregroundColor(Color.garageBandText)
                         }
                     }
                 }
@@ -103,13 +106,13 @@ struct AutoGenerationSettingsView: View {
                     HStack {
                         Text("Generation Delay")
                             .font(.headline)
-                            .foregroundColor(.primary)
+                            .foregroundColor(Color.garageBandText)
                         
                         Spacer()
                         
                         Text("\(parameterManager.autoGenerationDelay, specifier: "%.1f")s")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                     }
                     
                     Slider(
@@ -132,17 +135,17 @@ struct AutoGenerationSettingsView: View {
                     VStack(alignment: .leading, spacing: 8) {
                         HStack {
                             Image(systemName: "exclamationmark.triangle")
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color.garageBandAccent)
                             Text("Auto-generation Issue Detected")
                                 .font(.subheadline)
                                 .fontWeight(.medium)
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color.garageBandAccent)
                         }
                         
                         if let errorMessage = midiService.errorMessage {
                             Text("Error: \(errorMessage)")
                                 .font(.caption)
-                                .foregroundColor(.red)
+                                .foregroundColor(Color.garageBandAccent)
                         }
                         
                         Button(action: {
@@ -156,7 +159,7 @@ struct AutoGenerationSettingsView: View {
                             .foregroundColor(.white)
                             .padding(.horizontal, 12)
                             .padding(.vertical, 6)
-                            .background(Color.blue)
+                            .background(Color.garageBandAccent)
                             .cornerRadius(6)
                         }
                         .buttonStyle(PlainButtonStyle())
@@ -168,21 +171,22 @@ struct AutoGenerationSettingsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     HStack {
                         Image(systemName: "info.circle")
-                            .foregroundColor(.blue)
+                            .foregroundColor(Color.garageBandAccent)
                         Text("Auto-generation Info")
                             .font(.subheadline)
                             .fontWeight(.medium)
+                            .foregroundColor(Color.garageBandText)
                     }
                     
                     if parameterManager.automaticGeneratorSelectionEnabled {
                         Text("Automatic generator selection analyzes your active parameters and selects the most appropriate generators. Multiple generators can be combined automatically for complex patterns.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     } else {
                         Text("When enabled, new sequences will be automatically generated when parameters change. If looping is active, the new sequence will be used on the next iteration.")
                             .font(.caption)
-                            .foregroundColor(.secondary)
+                            .foregroundColor(Color.garageBandSecondary)
                             .fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -190,7 +194,7 @@ struct AutoGenerationSettingsView: View {
             }
         }
         .padding()
-        .background(Color(NSColor.controlBackgroundColor))
+        .background(Color.garageBandPanel)
         .cornerRadius(8)
     }
 }

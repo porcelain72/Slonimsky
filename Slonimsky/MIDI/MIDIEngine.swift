@@ -62,18 +62,29 @@ class MIDIEngine: ObservableObject {
     }
     
     /// Generate a MusicSequence from pattern generation result
-    /// - Parameter result: The pattern generation result
+    /// - Parameters:
+    ///   - result: The pattern generation result
+    ///   - parameters: The pattern generation parameters
     /// - Returns: Generated MusicSequence or nil if failed
-    func generateMusicSequence(from result: PatternGenerationResult) -> MusicSequence? {
+    func generateMusicSequence(from result: PatternGenerationResult, parameters: PatternParameters) -> MusicSequence? {
         guard let sequence = createNewSequence() else { return nil }
         
         // Set tempo
         setTempo(sequence: sequence, bpm: 120.0)
         
-        // Create tracks for different voices
+        // Create melody track (always needed)
         let melodyTrack = createMelodyTrack(sequence: sequence, notes: result.notes)
-        let harmonyTrack = createHarmonyTrack(sequence: sequence, notes: result.notes)
-        let rhythmTrack = createRhythmTrack(sequence: sequence, notes: result.notes)
+        print("🎵 Created melody track with \(result.notes.count) notes")
+        
+        // Check parameter settings to determine which tracks to create
+        let shouldCreateHarmony = parameters.chordGeneration.enabled
+        let shouldCreateRhythm = shouldCreateRhythmTrack(for: result.notes)
+        
+        let harmonyTrack = shouldCreateHarmony ? createHarmonyTrack(sequence: sequence, notes: result.notes) : nil
+        let rhythmTrack = shouldCreateRhythm ? createRhythmTrack(sequence: sequence, notes: result.notes) : nil
+        
+        print("🎵 Track creation: Melody=✅, Harmony=\(shouldCreateHarmony ? "✅" : "❌"), Rhythm=\(shouldCreateRhythm ? "✅" : "❌")")
+        print("🎵 Chord generation enabled: \(parameters.chordGeneration.enabled)")
         
         // Calculate total duration from the notes
         var currentTime: TimeInterval = 0.0
@@ -153,10 +164,12 @@ class MIDIEngine: ObservableObject {
     }
     
     /// Update the current sequence with a new one
-    /// - Parameter result: The new pattern generation result
+    /// - Parameters:
+    ///   - result: The new pattern generation result
+    ///   - parameters: The pattern generation parameters
     /// - Returns: True if successful
-    func updateSequence(with result: PatternGenerationResult) -> Bool {
-        guard let newSequence = generateMusicSequence(from: result) else {
+    func updateSequence(with result: PatternGenerationResult, parameters: PatternParameters) -> Bool {
+        guard let newSequence = generateMusicSequence(from: result, parameters: parameters) else {
             print("❌ Failed to generate new sequence")
             return false
         }
@@ -339,7 +352,10 @@ class MIDIEngine: ObservableObject {
         
         var currentTime: MusicTimeStamp = 0.0
         
-        for note in notes {
+        print("🎵 Creating melody track with \(notes.count) notes:")
+        for (index, note) in notes.enumerated() {
+            print("   \(index + 1): Note \(note.note) at time \(currentTime)")
+            
             var midiMessage = MIDINoteMessage(
                 channel: 0,
                 note: UInt8(clamping: note.note),
@@ -407,6 +423,12 @@ class MIDIEngine: ObservableObject {
         }
         
         return track
+    }
+    
+    private func shouldCreateRhythmTrack(for notes: [MIDIInfo]) -> Bool {
+        // Only create rhythm for complex patterns with many notes
+        // This could also be controlled by a parameter setting in the future
+        return notes.count > 20
     }
     
     private func generateHarmonicAccompaniment(from notes: [MIDIInfo]) -> [[MIDIInfo]] {
