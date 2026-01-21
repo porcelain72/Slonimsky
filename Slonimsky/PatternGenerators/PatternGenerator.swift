@@ -9,6 +9,15 @@ import Foundation
 
 /// Core protocol for all pattern generators in the Slonimsky system
 protocol PatternGenerator {
+    /// Generate a pure mathematical note pattern (before MIDI conversion)
+    /// This method generates note numbers only, allowing for testing and inspection
+    /// before any MIDI attributes (velocity, duration) are applied.
+    /// - Parameters:
+    ///   - parameters: The pattern generation parameters
+    ///   - cycleIndex: The current cycle index for cyclical parameters
+    /// - Returns: Array of MIDI note numbers (0-127)
+    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int]
+    
     /// Generate a musical pattern based on the given parameters
     /// - Parameter parameters: The pattern generation parameters
     /// - Returns: Array of MIDI note information
@@ -48,12 +57,37 @@ class BasePatternGenerator: PatternGenerator {
         self.description = description
     }
     
+    // MARK: - New Pattern Generation Methods (Pure Mathematical)
+    
+    /// Generate a pure mathematical note pattern
+    /// Subclasses MUST override this method. For generators that still override generatePattern()
+    /// directly (legacy code), they should implement this to extract notes from their generatePattern()
+    /// result, e.g.: `return generatePattern(parameters: parameters, cycleIndex: cycleIndex).map { $0.note }`
+    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int] {
+        fatalError("Subclasses must implement generateNotePattern(). For legacy generators, extract notes from generatePattern() result.")
+    }
+    
+    // MARK: - Legacy Pattern Generation Methods (with MIDI conversion)
+    
+    /// Generate pattern and convert to MIDI (backward compatibility)
+    /// Default implementation uses generateNotePattern() then converts to MIDI
     func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
         return generatePattern(parameters: parameters, cycleIndex: 0)
     }
     
+    /// Generate pattern with cycle index and convert to MIDI (backward compatibility)
+    /// Default implementation uses generateNotePattern() then converts to MIDI via MIDIPatternConverter.
+    /// Subclasses that override this method completely should also override generateNotePattern()
+    /// to ensure proper separation of mathematical pattern generation from MIDI conversion.
     func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
-        fatalError("Subclasses must implement generatePattern with cycleIndex")
+        // Generate pure note pattern
+        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
+        
+        // Convert to MIDI with modulations applied
+        return MIDIPatternConverter.convertWithModulations(
+            notes: notePattern,
+            parameters: parameters
+        )
     }
     
     /// Apply cyclical changes to parameters for the current cycle

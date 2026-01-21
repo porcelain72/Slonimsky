@@ -30,9 +30,11 @@ struct PatternParameters: Codable, Equatable, Hashable {
     var ultrapolation: ModulationSettings
     
     // MARK: - Directional Patterns
-    let primaryDirection: Direction
-    let mirrorPoints: Int
-    let retrogradeSections: Bool
+    let mirror: Bool  // When true, appends inverted sequence (default: true)
+    // Legacy parameters - kept for backward compatibility, may be restored later
+    let primaryDirection: Direction  // Legacy: kept for compatibility
+    let mirrorPoints: Int  // Legacy: kept for compatibility
+    let retrogradeSections: Bool  // Legacy: kept for compatibility
     let registerShifts: RegisterShiftPattern
     let contourPattern: ContourPattern
     
@@ -71,9 +73,10 @@ struct PatternParameters: Codable, Equatable, Hashable {
         interpolation: ModulationSettings = .default,
         infrapolation: ModulationSettings = .default,
         ultrapolation: ModulationSettings = .default,
-        primaryDirection: Direction = .ascending,
-        mirrorPoints: Int = 0,
-        retrogradeSections: Bool = false,
+        mirror: Bool = true,
+        primaryDirection: Direction = .ascending,  // Legacy: kept for compatibility
+        mirrorPoints: Int = 0,  // Legacy: kept for compatibility
+        retrogradeSections: Bool = false,  // Legacy: kept for compatibility
         registerShifts: RegisterShiftPattern = .none,
         contourPattern: ContourPattern = .linear,
         noteDurationPattern: DurationPattern = .uniform,
@@ -102,6 +105,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.interpolation = interpolation
         self.infrapolation = infrapolation
         self.ultrapolation = ultrapolation
+        self.mirror = mirror
         self.primaryDirection = primaryDirection
         self.mirrorPoints = mirrorPoints
         self.retrogradeSections = retrogradeSections
@@ -296,6 +300,7 @@ extension PatternParameters {
         interpolation: .default,
         infrapolation: .default,
         ultrapolation: .default,
+        mirror: true,
         primaryDirection: .ascending,
         mirrorPoints: 0,
         retrogradeSections: false,

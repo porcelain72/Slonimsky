@@ -13,7 +13,7 @@ class ParameterApplicationManager {
     /// Defines the priority order for parameter application
     enum ParameterPriority: Int, CaseIterable {
         case baseGeneration = 0      // Root note, scale type, intervals
-        case directionalPatterns = 1 // Primary direction, interval patterns
+        case mirrorPattern = 1       // Mirror/invert sequence
         case registerShifts = 2      // Tone shifting, register shifts
         case contourPatterns = 3     // Contour patterns (with reduced intensity)
         case velocitySettings = 4    // Velocity calculations
@@ -22,11 +22,12 @@ class ParameterApplicationManager {
     }
     
     /// Applies parameters in the correct order to prevent conflicts
+    /// Returns pure note numbers (no MIDI conversion - use MIDIPatternConverter for that)
     static func applyParameters(
         baseNotes: [Int],
         parameters: PatternParameters,
         generatorType: String
-    ) -> [MIDIInfo] {
+    ) -> [Int] {
         var currentNotes = baseNotes
         
         // Apply parameters in priority order
@@ -39,11 +40,8 @@ class ParameterApplicationManager {
             )
         }
         
-        // Convert to MIDIInfo with final velocity and duration
-        return convertToMIDIInfo(
-            notes: currentNotes,
-            parameters: parameters
-        )
+        // Return pure note numbers - MIDI conversion happens separately
+        return currentNotes
     }
     
     private static func applyParameterGroup(
@@ -57,8 +55,8 @@ class ParameterApplicationManager {
             // Base generation is already done, just return notes
             return notes
             
-        case .directionalPatterns:
-            return applyDirectionalPatterns(notes: notes, parameters: parameters, generatorType: generatorType)
+        case .mirrorPattern:
+            return applyMirrorPattern(notes: notes, parameters: parameters)
             
         case .registerShifts:
             return applyRegisterShifts(notes: notes, parameters: parameters)
@@ -67,81 +65,29 @@ class ParameterApplicationManager {
             return applyContourPatterns(notes: notes, parameters: parameters, generatorType: generatorType)
             
         case .velocitySettings, .durationPatterns, .modulations:
-            // These are applied during MIDIInfo conversion
+            // These are applied during MIDI conversion (via MIDIPatternConverter)
+            // Not applied during pattern generation phase
             return notes
         }
     }
     
-    private static func applyDirectionalPatterns(notes: [Int], parameters: PatternParameters, generatorType: String) -> [Int] {
-        var modifiedNotes = notes
+    /// Apply mirror pattern: when enabled, appends reversed sequence (arpeggio effect)
+    /// Creates a pattern that ascends and then descends back to start
+    /// Example: [60, 62, 64] becomes [60, 62, 64, 62, 60]
+    private static func applyMirrorPattern(notes: [Int], parameters: PatternParameters) -> [Int] {
+        guard parameters.mirror else { return notes }
         
-        // Apply primary direction
-        switch parameters.primaryDirection {
-        case .ascending:
-            // Notes are already in ascending order, no change needed
-            break
-        case .descending:
-            modifiedNotes = notes.reversed()
-        case .alternating:
-            modifiedNotes = applyAlternatingDirection(notes: notes)
-        }
+        var result = notes
         
-        // Apply interval patterns if applicable (but not for scale generators)
-        if !notes.isEmpty && !generatorType.contains("Scale") {
-            modifiedNotes = applyIntervalPatterns(notes: modifiedNotes, parameters: parameters)
-        }
+        // Create descending sequence by reversing and skipping the last note to avoid repetition
+        guard notes.count > 1 else { return notes }
         
-        return modifiedNotes
-    }
-    
-    private static func applyAlternatingDirection(notes: [Int]) -> [Int] {
-        var result: [Int] = []
-        let midPoint = notes.count / 2
+        // Reverse the sequence and drop the first element to avoid repeating the top note
+        let descendingNotes = Array(notes.reversed().dropFirst())
+            .filter { $0 >= 0 && $0 <= 127 }
         
-        // First half ascending
-        result.append(contentsOf: notes.prefix(midPoint))
-        
-        // Second half descending
-        result.append(contentsOf: notes.suffix(notes.count - midPoint).reversed())
-        
-        return result
-    }
-    
-    private static func applyIntervalPatterns(notes: [Int], parameters: PatternParameters) -> [Int] {
-        // Only apply if we have interval-specific parameters
-        guard parameters.primaryInterval > 0 else { return notes }
-        
-        var result: [Int] = []
-        let rootNote = parameters.rootNote
-        
-        // For Scale Type "None", use the calculated equal division interval
-        let interval: Int
-        if parameters.scaleType == .none {
-            let totalSemitones = 12 * parameters.numberOfOctaves
-            interval = totalSemitones / parameters.divisionsOfOctave
-        } else {
-            interval = parameters.primaryInterval
-        }
-        
-        for (index, _) in notes.enumerated() {
-            let currentInterval = index % 2 == 0 ? interval : parameters.secondaryInterval
-            
-            switch parameters.intervalPattern {
-            case .ascending:
-                result.append(rootNote + (index * currentInterval))
-            case .descending:
-                result.append(rootNote - (index * currentInterval))
-            case .alternating:
-                let direction = index % 2 == 0 ? 1 : -1
-                result.append(rootNote + (direction * index * currentInterval))
-            case .mirror:
-                let mirrorIndex = index % (parameters.mirrorPoints * 2)
-                let direction = mirrorIndex < parameters.mirrorPoints ? 1 : -1
-                result.append(rootNote + (direction * index * currentInterval))
-            case .retrograde:
-                result.append(rootNote + ((notes.count - 1 - index) * currentInterval))
-            }
-        }
+        // Append descending sequence to create arpeggio effect
+        result.append(contentsOf: descendingNotes)
         
         return result
     }
@@ -252,60 +198,6 @@ class ParameterApplicationManager {
         }
     }
     
-    private static func convertToMIDIInfo(notes: [Int], parameters: PatternParameters) -> [MIDIInfo] {
-        return notes.enumerated().map { index, note in
-            let duration = calculateNoteDuration(
-                baseDuration: parameters.baseNoteDuration,
-                pattern: parameters.noteDurationPattern,
-                index: index,
-                density: parameters.rhythmicDensity
-            )
-            
-            let velocity = calculateVelocity(
-                for: index,
-                note: note,
-                settings: parameters.velocitySettings
-            )
-            
-            return MIDIInfo(
-                note: note,
-                velocity: velocity,
-                beatLength: duration,
-                cycleIndex: 0
-            )
-        }
-    }
-    
-    private static func calculateNoteDuration(
-        baseDuration: TimeInterval,
-        pattern: DurationPattern,
-        index: Int,
-        density: Double
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        switch pattern {
-        case .uniform:
-            break
-        case .alternating:
-            duration = index % 2 == 0 ? baseDuration : baseDuration * 0.7
-        case .progressive:
-            duration *= 1.0 + (Double(index) * 0.05)
-        case .random:
-            duration *= Double.random(in: 0.7...1.3)
-        }
-        
-        // Apply rhythmic density
-        duration /= density
-        
-        return max(duration, 0.0625) // Minimum duration
-    }
-    
-    private static func calculateVelocity(
-        for index: Int,
-        note: Int,
-        settings: VelocitySettings
-    ) -> UInt8 {
-        return settings.calculateVelocity(for: index, note: note)
-    }
+    // Note: MIDI conversion methods have been moved to MIDIPatternConverter
+    // This class now only handles mathematical pattern transformations
 } 

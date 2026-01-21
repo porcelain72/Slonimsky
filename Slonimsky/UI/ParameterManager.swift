@@ -82,6 +82,10 @@ class ParameterManager: ObservableObject {
     }
     
     // Directional Parameters
+    @Published var mirror: Bool = true {
+        didSet { validateAndNotify() }
+    }
+    // Legacy parameters - kept for backward compatibility
     @Published var primaryDirection: Direction = .ascending {
         didSet { validateAndNotify() }
     }
@@ -211,6 +215,7 @@ class ParameterManager: ObservableObject {
             interpolation: interpolation,
             infrapolation: infrapolation,
             ultrapolation: ultrapolation,
+            mirror: mirror,
             primaryDirection: primaryDirection,
             mirrorPoints: mirrorPoints,
             retrogradeSections: retrogradeSections,
@@ -246,6 +251,7 @@ class ParameterManager: ObservableObject {
         interpolation = parameters.interpolation
         infrapolation = parameters.infrapolation
         ultrapolation = parameters.ultrapolation
+        mirror = parameters.mirror
         primaryDirection = parameters.primaryDirection
         mirrorPoints = parameters.mirrorPoints
         retrogradeSections = parameters.retrogradeSections

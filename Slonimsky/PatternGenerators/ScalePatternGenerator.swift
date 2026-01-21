@@ -17,65 +17,86 @@ class ScalePatternGenerator: BasePatternGenerator {
         )
     }
     
-    override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
-        return generatePattern(parameters: parameters, cycleIndex: 0)
-    }
+    // MARK: - New Pattern Generation (Pure Mathematical)
     
-    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+    /// Generate a pure mathematical note pattern (note numbers only)
+    override func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
-        print("🎵 ScalePatternGenerator: Starting pattern generation")
+        print("🎵 ScalePatternGenerator: Starting note pattern generation")
         print("   Root Note: \(parameters.rootNote)")
         print("   Scale Type: \(parameters.scaleType.rawValue)")
         print("   Number of Octaves: \(parameters.numberOfOctaves)")
         print("   Divisions of Octave: \(parameters.divisionsOfOctave)")
-        print("   Primary Direction: \(parameters.primaryDirection.rawValue)")
-        print("   Interval Pattern: \(parameters.intervalPattern.rawValue)")
-        print("   Interpolation Enabled: \(parameters.interpolation.enabled) (\(parameters.interpolation.numberOfNotes) notes)")
-        print("   Infrapolation Enabled: \(parameters.infrapolation.enabled) (\(parameters.infrapolation.numberOfNotes) notes)")
-        print("   Ultrapolation Enabled: \(parameters.ultrapolation.enabled) (\(parameters.ultrapolation.numberOfNotes) notes)")
-        print("   Metric Modulation Enabled: \(parameters.metricModulation.enabled)")
+        print("   Mirror: \(parameters.mirror)")
         
         // Apply cyclical changes to parameters for the current cycle
         let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
         
         // Generate base scale notes
-        let baseNotes = generateBaseScale(parameters: modifiedParameters)
+        var baseNotes = generateBaseScale(parameters: modifiedParameters)
+        
+        // Ensure the sequence ends at the octave above the starting note
+        // For multiple octaves, this should be the target octave (firstNote + numberOfOctaves * 12)
+        // This creates a proper arpeggio that reaches the target octave before descending
+        if let firstNote = baseNotes.first, let lastNote = baseNotes.last {
+            let targetOctave = firstNote + (modifiedParameters.numberOfOctaves * 12)
+            // Only add octave if it's not already the last note
+            if lastNote != targetOctave && targetOctave <= 127 {
+                baseNotes.append(targetOctave)
+                print("   Added octave note: \(targetOctave)")
+            }
+        }
+        
         print("   Generated base scale notes: \(baseNotes)")
         print("   Base scale note count: \(baseNotes.count)")
         
         // Use ParameterApplicationManager to apply parameters in correct order
+        // This returns pure note numbers (no MIDI conversion)
         let finalNotes = ParameterApplicationManager.applyParameters(
             baseNotes: baseNotes,
             parameters: modifiedParameters,
             generatorType: "Scale"
         )
         print("   After parameter application: \(finalNotes.count) notes")
-        
-        // Apply Slonimsky modulations (final step)
-        let modulatedNotes = applySlonimskyModulations(
-            notes: finalNotes,
-            parameters: modifiedParameters
-        )
-        print("   After modulations: \(modulatedNotes.count) notes")
+        print("   Final note pattern: \(finalNotes)")
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
-        
-        // Log the actual generated notes
-        print("   Generated MIDI notes:")
-        for (index, note) in modulatedNotes.enumerated() {
-            print("     \(index + 1): Note \(note.note), Velocity \(note.velocity), Duration \(note.beatLength)")
-        }
         
         // Log performance metrics
         logPerformanceMetrics(
             generationTime: generationTime,
-            noteCount: modulatedNotes.count,
+            noteCount: finalNotes.count,
             parameters: modifiedParameters
         )
         
-        print("🎵 ScalePatternGenerator: Pattern generation complete")
-        return modulatedNotes
+        print("🎵 ScalePatternGenerator: Note pattern generation complete")
+        return finalNotes
+    }
+    
+    // MARK: - Legacy Pattern Generation (with MIDI conversion)
+    
+    override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
+        return generatePattern(parameters: parameters, cycleIndex: 0)
+    }
+    
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+        // Generate pure note pattern first
+        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
+        
+        // Convert to MIDI with modulations applied
+        let midiNotes = MIDIPatternConverter.convertWithModulations(
+            notes: notePattern,
+            parameters: parameters
+        )
+        
+        // Log the actual generated MIDI notes
+        print("   Generated MIDI notes:")
+        for (index, note) in midiNotes.enumerated() {
+            print("     \(index + 1): Note \(note.note), Velocity \(note.velocity), Duration \(note.beatLength)")
+        }
+        
+        return midiNotes
     }
     
     override func estimateNoteCount(parameters: PatternParameters) -> Int {
@@ -217,187 +238,9 @@ class ScalePatternGenerator: BasePatternGenerator {
     }
     
     
-    private func convertToMIDIInfo(notes: [Int], parameters: PatternParameters) -> [MIDIInfo] {
-        return notes.enumerated().map { index, note in
-            let duration = calculateNoteDuration(
-                baseDuration: parameters.baseNoteDuration,
-                pattern: parameters.noteDurationPattern,
-                index: index,
-                density: parameters.rhythmicDensity
-            )
-            
-            let velocity = calculateVelocity(
-                for: index,
-                note: note,
-                settings: parameters.velocitySettings
-            )
-            
-            return MIDIInfo(
-                note: note,
-                velocity: velocity,
-                beatLength: duration,
-                cycleIndex: 0
-            )
-        }
-    }
-    
-    private func applySlonimskyModulations(notes: [MIDIInfo], parameters: PatternParameters) -> [MIDIInfo] {
-        var result: [MIDIInfo] = []
-        
-        for (index, note) in notes.enumerated() {
-            result.append(note)
-            
-            // Apply interpolation (notes between existing notes)
-            if parameters.interpolation.enabled && index < notes.count - 1 {
-                let interpolatedNotes = generateInterpolatedNotes(
-                    from: note,
-                    to: notes[index + 1],
-                    settings: parameters.interpolation,
-                    velocitySettings: parameters.velocitySettings
-                )
-                result.append(contentsOf: interpolatedNotes)
-            }
-            
-            // Apply infrapolation (notes below existing notes)
-            if parameters.infrapolation.enabled && index < notes.count - 1 {
-                let infrapolatedNotes = generateInfrapolatedNotes(
-                    baseNote: note,
-                    settings: parameters.infrapolation,
-                    velocitySettings: parameters.velocitySettings
-                )
-                result.append(contentsOf: infrapolatedNotes)
-            }
-            
-            // Apply ultrapolation (notes above existing notes)
-            if parameters.ultrapolation.enabled && index < notes.count - 1 {
-                let ultrapolatedNotes = generateUltrapolatedNotes(
-                    baseNote: note,
-                    nextNote: notes[index + 1],
-                    settings: parameters.ultrapolation,
-                    velocitySettings: parameters.velocitySettings
-                )
-                result.append(contentsOf: ultrapolatedNotes)
-            }
-        }
-        
-        return result
-    }
-    
-    private func generateInterpolatedNotes(
-        from startNote: MIDIInfo,
-        to endNote: MIDIInfo,
-        settings: ModulationSettings,
-        velocitySettings: VelocitySettings
-    ) -> [MIDIInfo] {
-        var notes: [MIDIInfo] = []
-        
-        // Guard against numberOfNotes being 0
-        guard settings.numberOfNotes > 0 else { return notes }
-        
-        for i in 1...settings.numberOfNotes {
-            let interval = settings.interval * i
-            let interpolatedNote = startNote.note + interval
-            
-            // Ensure note is within valid MIDI range (0-127)
-            // Allow notes beyond the target note for extended interpolation
-            if interpolatedNote >= 0 && interpolatedNote <= 127 {
-                let velocity = calculateVelocity(
-                    for: i,
-                    note: interpolatedNote,
-                    settings: velocitySettings
-                )
-                
-                notes.append(MIDIInfo(
-                    note: interpolatedNote,
-                    velocity: velocity,
-                    beatLength: startNote.beatLength,
-                    cycleIndex: 0
-                ))
-            }
-        }
-        
-        return notes
-    }
-    
-    private func generateInfrapolatedNotes(
-        baseNote: MIDIInfo,
-        settings: ModulationSettings,
-        velocitySettings: VelocitySettings
-    ) -> [MIDIInfo] {
-        var notes: [MIDIInfo] = []
-        
-        // Guard against numberOfNotes being 0
-        guard settings.numberOfNotes > 0 else { return notes }
-        
-        for i in 1...settings.numberOfNotes {
-            let interval = settings.interval * i
-            let infrapolatedNote = baseNote.note - interval
-            
-            if infrapolatedNote >= 0 && infrapolatedNote <= 127 {
-                let velocity = calculateVelocity(
-                    for: i,
-                    note: infrapolatedNote,
-                    settings: velocitySettings
-                )
-                
-                notes.append(MIDIInfo(
-                    note: infrapolatedNote,
-                    velocity: velocity,
-                    beatLength: baseNote.beatLength,
-                    cycleIndex: 0
-                ))
-            }
-        }
-        
-        return notes
-    }
-    
-    private func generateUltrapolatedNotes(
-        baseNote: MIDIInfo,
-        nextNote: MIDIInfo,
-        settings: ModulationSettings,
-        velocitySettings: VelocitySettings
-    ) -> [MIDIInfo] {
-        var notes: [MIDIInfo] = []
-        
-        // Guard against numberOfNotes being 0
-        guard settings.numberOfNotes > 0 else { return notes }
-        
-        for i in 1...settings.numberOfNotes {
-            let interval = settings.interval * i
-            let ultrapolatedNote = nextNote.note - interval
-            
-            // Allow notes beyond the base note for extended ultrapolation
-            if ultrapolatedNote >= 0 && ultrapolatedNote <= 127 {
-                let velocity = calculateVelocity(
-                    for: i,
-                    note: ultrapolatedNote,
-                    settings: velocitySettings
-                )
-                
-                notes.append(MIDIInfo(
-                    note: ultrapolatedNote,
-                    velocity: velocity,
-                    beatLength: baseNote.beatLength,
-                    cycleIndex: 0
-                ))
-            }
-        }
-        
-        return notes
-    }
-    
     private func calculateDirectionalMultiplier(parameters: PatternParameters) -> Double {
-        switch parameters.intervalPattern {
-        case .ascending, .descending:
-            return 1.0
-        case .alternating:
-            return 1.0
-        case .mirror:
-            return Double(parameters.mirrorPoints + 1)
-        case .retrograde:
-            return 1.0
-        }
+        // Mirror doubles the note count when enabled
+        return parameters.mirror ? 2.0 : 1.0
     }
     
     private func logPerformanceMetrics(
