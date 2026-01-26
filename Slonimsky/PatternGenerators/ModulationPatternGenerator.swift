@@ -17,7 +17,7 @@ class ModulationPatternGenerator: BasePatternGenerator {
         )
     }
     
-    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         // Apply cyclical parameter modifications

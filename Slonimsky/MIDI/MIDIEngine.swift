@@ -69,8 +69,8 @@ class MIDIEngine: ObservableObject {
     func generateMusicSequence(from result: PatternGenerationResult, parameters: PatternParameters) -> MusicSequence? {
         guard let sequence = createNewSequence() else { return nil }
         
-        // Set tempo
-        setTempo(sequence: sequence, bpm: 120.0)
+        // Set tempo from parameters
+        setTempo(sequence: sequence, bpm: parameters.tempo)
         
         // Create melody track (always needed)
         let melodyTrack = createMelodyTrack(sequence: sequence, notes: result.notes)

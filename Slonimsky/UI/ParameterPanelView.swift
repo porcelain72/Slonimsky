@@ -636,23 +636,101 @@ struct RhythmicParametersDetailView: View {
             }
             
             // Base Note Duration with cycling
-            CyclicalParameterControl(
-                title: "Base Duration (seconds)",
-                value: $parameterManager.baseNoteDuration,
-                range: 0.0625...4.0,
-                cyclicalSettings: Binding(
-                    get: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled ? parameterManager.cyclicalSettings.baseNoteDuration : nil },
-                    set: { newSettings in
-                        if let settings = newSettings {
-                            parameterManager.cyclicalSettings.baseNoteDuration = settings
-                        } else {
-                            parameterManager.cyclicalSettings.baseNoteDuration.isEnabled = false
+            VStack(alignment: .leading, spacing: 8) {
+                HStack {
+                    Text("Base Note Duration:")
+                        .foregroundColor(Color.garageBandText)
+                    Spacer()
+                    Picker("Base Note Duration", selection: Binding(
+                        get: { parameterManager.baseNoteDurationEnum },
+                        set: { parameterManager.baseNoteDurationEnum = $0 }
+                    )) {
+                        ForEach(BaseNoteDuration.allCases, id: \.self) { duration in
+                            Text(duration.shortName).tag(duration)
                         }
                     }
-                ),
-                defaultValue: 0.25,
-                formatter: { String(format: "%.3f", $0) }
-            )
+                    .pickerStyle(MenuPickerStyle())
+                    .foregroundColor(Color.garageBandText)
+                    .background(Color.garageBandPanel)
+                    .cornerRadius(4)
+                }
+                
+                // Show current beat value
+                Text("\(String(format: "%.3f", parameterManager.baseNoteDuration)) beats")
+                    .font(.caption)
+                    .foregroundColor(Color.garageBandText.opacity(0.7))
+                
+                // Cyclical settings toggle
+                Toggle("Cyclical", isOn: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled = $0 }
+                ))
+                .toggleStyle(CheckboxToggleStyle())
+                .font(.system(size: 12, weight: .medium))
+                .foregroundColor(Color.garageBandText)
+                
+                // Cyclical settings detail (shown when enabled)
+                if parameterManager.cyclicalSettings.baseNoteDuration.isEnabled {
+                    Divider().padding(.vertical, 4)
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Cyclical Settings").font(.subheadline).fontWeight(.medium).foregroundColor(Color.garageBandText)
+                        HStack {
+                            Text("Cycle Type:").foregroundColor(Color.garageBandText)
+                            Spacer()
+                            Picker("Cycle Type", selection: Binding(
+                                get: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType },
+                                set: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType = $0 }
+                            )) {
+                                ForEach(CycleType.allCases, id: \.self) { type in
+                                    Text(type.rawValue).tag(type)
+                                }
+                            }
+                        }
+                        HStack {
+                            Text("Min Value:").foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Min", value: Binding(
+                                get: { parameterManager.cyclicalSettings.baseNoteDuration.minValue },
+                                set: { parameterManager.cyclicalSettings.baseNoteDuration.minValue = $0 }
+                            ), formatter: NumberFormatter())
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(width: 80)
+                        }
+                        HStack {
+                            Text("Max Value:").foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Max", value: Binding(
+                                get: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue },
+                                set: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue = $0 }
+                            ), formatter: NumberFormatter())
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(width: 80)
+                        }
+                        HStack {
+                            Text("Step Size:").foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Step", value: Binding(
+                                get: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize },
+                                set: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize = $0 }
+                            ), formatter: NumberFormatter())
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .frame(width: 80)
+                        }
+                        HStack {
+                            Text("Operation:").foregroundColor(Color.garageBandText)
+                            Spacer()
+                            Picker("Operation", selection: Binding(
+                                get: { parameterManager.cyclicalSettings.baseNoteDuration.operationType },
+                                set: { parameterManager.cyclicalSettings.baseNoteDuration.operationType = $0 }
+                            )) {
+                                ForEach(CyclicalOperationType.allCases, id: \.self) { op in
+                                    Text(op.rawValue).tag(op)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
             
             // Rhythmic Density with cycling
             CyclicalParameterControl(

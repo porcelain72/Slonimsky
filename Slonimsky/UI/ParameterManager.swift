@@ -109,6 +109,16 @@ class ParameterManager: ObservableObject {
     @Published var baseNoteDuration: Double = 0.25 {
         didSet { validateAndNotify() }
     }
+    
+    /// Base note duration as an enum for UI selection (computed property)
+    var baseNoteDurationEnum: BaseNoteDuration {
+        get {
+            return BaseNoteDuration.from(beatValue: baseNoteDuration)
+        }
+        set {
+            baseNoteDuration = newValue.beatValue
+        }
+    }
     @Published var rhythmicDensity: Double = 1.0 {
         didSet { validateAndNotify() }
     }

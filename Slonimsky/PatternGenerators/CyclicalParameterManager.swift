@@ -68,27 +68,52 @@ class CyclicalParameterManager: ObservableObject {
     }
     
     /// Get modified parameters for the current cycle
-    func getModifiedParameters(from baseParameters: PatternParameters) -> PatternParameters {
+    /// - Parameters:
+    ///   - baseParameters: The base parameters to modify
+    ///   - parameterCycles: Optional mapping of parameter types to their individual cycle indices (for sequential cycling)
+    /// - Returns: Modified parameters with cyclical changes applied
+    func getModifiedParameters(from baseParameters: PatternParameters, parameterCycles: [CyclicalParameterType: Int]? = nil) -> PatternParameters {
         guard isCyclingEnabled else { return baseParameters }
         
         var modifiedSettings = cyclicalSettings
         
-        // Update all parameter settings with the current cycle
-        modifiedSettings.interpolationNotes.currentCycle = currentCycle
-        modifiedSettings.infrapolationNotes.currentCycle = currentCycle
-        modifiedSettings.ultrapolationNotes.currentCycle = currentCycle
-        modifiedSettings.modulationInterval.currentCycle = currentCycle
-        modifiedSettings.baseNoteDuration.currentCycle = currentCycle
-        modifiedSettings.rhythmicDensity.currentCycle = currentCycle
-        modifiedSettings.primaryInterval.currentCycle = currentCycle
-        modifiedSettings.secondaryInterval.currentCycle = currentCycle
-        modifiedSettings.baseVelocity.currentCycle = currentCycle
-        modifiedSettings.velocityRange.currentCycle = currentCycle
-        modifiedSettings.tempo.currentCycle = currentCycle
-        modifiedSettings.rootNote.currentCycle = currentCycle
-        modifiedSettings.numberOfOctaves.currentCycle = currentCycle
-        modifiedSettings.divisionsOfOctave.currentCycle = currentCycle
-        modifiedSettings.mirrorPoints.currentCycle = currentCycle
+        // If parameterCycles is provided, use individual cycle indices for sequential cycling
+        // Otherwise, use the global currentCycle for parallel cycling (backward compatibility)
+        if let parameterCycles = parameterCycles {
+            // Sequential cycling: each parameter uses its own cycle index
+            modifiedSettings.interpolationNotes.currentCycle = parameterCycles[.interpolationNotes] ?? 0
+            modifiedSettings.infrapolationNotes.currentCycle = parameterCycles[.infrapolationNotes] ?? 0
+            modifiedSettings.ultrapolationNotes.currentCycle = parameterCycles[.ultrapolationNotes] ?? 0
+            modifiedSettings.modulationInterval.currentCycle = parameterCycles[.modulationInterval] ?? 0
+            modifiedSettings.baseNoteDuration.currentCycle = parameterCycles[.baseNoteDuration] ?? 0
+            modifiedSettings.rhythmicDensity.currentCycle = parameterCycles[.rhythmicDensity] ?? 0
+            modifiedSettings.primaryInterval.currentCycle = parameterCycles[.primaryInterval] ?? 0
+            modifiedSettings.secondaryInterval.currentCycle = parameterCycles[.secondaryInterval] ?? 0
+            modifiedSettings.baseVelocity.currentCycle = parameterCycles[.baseVelocity] ?? 0
+            modifiedSettings.velocityRange.currentCycle = parameterCycles[.velocityRange] ?? 0
+            modifiedSettings.tempo.currentCycle = parameterCycles[.tempo] ?? 0
+            modifiedSettings.rootNote.currentCycle = parameterCycles[.rootNote] ?? 0
+            modifiedSettings.numberOfOctaves.currentCycle = parameterCycles[.numberOfOctaves] ?? 0
+            modifiedSettings.divisionsOfOctave.currentCycle = parameterCycles[.divisionsOfOctave] ?? 0
+            modifiedSettings.mirrorPoints.currentCycle = parameterCycles[.mirrorPoints] ?? 0
+        } else {
+            // Parallel cycling: all parameters use the same cycle index
+            modifiedSettings.interpolationNotes.currentCycle = currentCycle
+            modifiedSettings.infrapolationNotes.currentCycle = currentCycle
+            modifiedSettings.ultrapolationNotes.currentCycle = currentCycle
+            modifiedSettings.modulationInterval.currentCycle = currentCycle
+            modifiedSettings.baseNoteDuration.currentCycle = currentCycle
+            modifiedSettings.rhythmicDensity.currentCycle = currentCycle
+            modifiedSettings.primaryInterval.currentCycle = currentCycle
+            modifiedSettings.secondaryInterval.currentCycle = currentCycle
+            modifiedSettings.baseVelocity.currentCycle = currentCycle
+            modifiedSettings.velocityRange.currentCycle = currentCycle
+            modifiedSettings.tempo.currentCycle = currentCycle
+            modifiedSettings.rootNote.currentCycle = currentCycle
+            modifiedSettings.numberOfOctaves.currentCycle = currentCycle
+            modifiedSettings.divisionsOfOctave.currentCycle = currentCycle
+            modifiedSettings.mirrorPoints.currentCycle = currentCycle
+        }
         
         // Create modified modulation settings
         let modifiedInterpolation = ModulationSettings(

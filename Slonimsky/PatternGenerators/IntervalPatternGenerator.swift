@@ -20,11 +20,11 @@ class IntervalPatternGenerator: BasePatternGenerator {
     // MARK: - New Pattern Generation (Pure Mathematical)
     
     /// Generate a pure mathematical note pattern (note numbers only)
-    override func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int] {
+    override func generateNotePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [Int] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         // Apply cyclical changes to parameters for the current cycle
-        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
         // Generate base interval sequence
         let intervalSequence = generateIntervalSequence(parameters: modifiedParameters)
@@ -67,12 +67,12 @@ class IntervalPatternGenerator: BasePatternGenerator {
     // MARK: - Legacy Pattern Generation (with MIDI conversion)
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
-        return generatePattern(parameters: parameters, cycleIndex: 0)
+        return generatePattern(parameters: parameters, cycleIndex: 0, parameterCycles: nil)
     }
     
-    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [MIDIInfo] {
         // Generate pure note pattern first
-        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
+        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
         // Convert to MIDI with modulations applied
         return MIDIPatternConverter.convertWithModulations(

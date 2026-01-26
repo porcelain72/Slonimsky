@@ -20,7 +20,7 @@ class ScalePatternGenerator: BasePatternGenerator {
     // MARK: - New Pattern Generation (Pure Mathematical)
     
     /// Generate a pure mathematical note pattern (note numbers only)
-    override func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int] {
+    override func generateNotePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [Int] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         print("🎵 ScalePatternGenerator: Starting note pattern generation")
@@ -31,7 +31,7 @@ class ScalePatternGenerator: BasePatternGenerator {
         print("   Mirror: \(parameters.mirror)")
         
         // Apply cyclical changes to parameters for the current cycle
-        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
         // Generate base scale notes
         var baseNotes = generateBaseScale(parameters: modifiedParameters)
@@ -77,16 +77,16 @@ class ScalePatternGenerator: BasePatternGenerator {
     // MARK: - Legacy Pattern Generation (with MIDI conversion)
     
     override func generatePattern(parameters: PatternParameters) -> [MIDIInfo] {
-        return generatePattern(parameters: parameters, cycleIndex: 0)
+        return generatePattern(parameters: parameters, cycleIndex: 0, parameterCycles: nil)
     }
     
-    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [MIDIInfo] {
         // Generate pure note pattern first (this applies cyclical changes internally)
-        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
+        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
         // Apply cyclical changes to get modified parameters for MIDI conversion
         // (Note: generateNotePattern also applies these, but we need them here for convertWithModulations)
-        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
         // Convert to MIDI with modulations applied using modified parameters
         // This ensures cyclical changes to interpolation/infrapolation/ultrapolation are applied
