@@ -81,13 +81,18 @@ class ScalePatternGenerator: BasePatternGenerator {
     }
     
     override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
-        // Generate pure note pattern first
+        // Generate pure note pattern first (this applies cyclical changes internally)
         let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
         
-        // Convert to MIDI with modulations applied
+        // Apply cyclical changes to get modified parameters for MIDI conversion
+        // (Note: generateNotePattern also applies these, but we need them here for convertWithModulations)
+        let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex)
+        
+        // Convert to MIDI with modulations applied using modified parameters
+        // This ensures cyclical changes to interpolation/infrapolation/ultrapolation are applied
         let midiNotes = MIDIPatternConverter.convertWithModulations(
             notes: notePattern,
-            parameters: parameters
+            parameters: modifiedParameters
         )
         
         // Log the actual generated MIDI notes

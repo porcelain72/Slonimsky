@@ -55,7 +55,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
     var toneShifting: ToneShiftSettings
     
     // MARK: - Cyclical Parameters
-    let cyclicalSettings: CyclicalSettings
+    var cyclicalSettings: CyclicalSettings
     
     // MARK: - Initialization
     init(

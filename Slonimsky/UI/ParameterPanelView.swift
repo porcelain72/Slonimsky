@@ -1485,6 +1485,118 @@ struct CyclicalModulationSection: View {
                         .background(Color.garageBandPanel)
                         .cornerRadius(4)
                 }
+                
+                // Cyclical parameter configuration
+                if cyclicalSettings?.isEnabled == true {
+                    Divider()
+                        .padding(.vertical, 4)
+                    
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Cyclical Settings")
+                            .font(.subheadline)
+                            .fontWeight(.medium)
+                            .foregroundColor(Color.garageBandText)
+                        
+                        // Cycle Type
+                        HStack {
+                            Text("Cycle Type:")
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            Picker("Cycle Type", selection: Binding(
+                                get: { cyclicalSettings?.cycleType ?? .increment },
+                                set: { newValue in
+                                    if var current = cyclicalSettings {
+                                        current.cycleType = newValue
+                                        cyclicalSettings = current
+                                    }
+                                }
+                            )) {
+                                ForEach(CycleType.allCases, id: \.self) { cycleType in
+                                    Text(cycleType.rawValue).tag(cycleType)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .foregroundColor(Color.garageBandText)
+                        }
+                        
+                        // Min Value
+                        HStack {
+                            Text("Min Value:")
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Min", value: Binding(
+                                get: { cyclicalSettings?.minValue ?? 0.0 },
+                                set: { newValue in
+                                    if var current = cyclicalSettings {
+                                        current.minValue = newValue
+                                        cyclicalSettings = current
+                                    }
+                                }
+                            ), format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                        }
+                        
+                        // Max Value
+                        HStack {
+                            Text("Max Value:")
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Max", value: Binding(
+                                get: { cyclicalSettings?.maxValue ?? 10.0 },
+                                set: { newValue in
+                                    if var current = cyclicalSettings {
+                                        current.maxValue = newValue
+                                        cyclicalSettings = current
+                                    }
+                                }
+                            ), format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                        }
+                        
+                        // Step Size
+                        HStack {
+                            Text("Step Size:")
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            TextField("Step", value: Binding(
+                                get: { cyclicalSettings?.stepSize ?? 1.0 },
+                                set: { newValue in
+                                    if var current = cyclicalSettings {
+                                        current.stepSize = newValue
+                                        cyclicalSettings = current
+                                    }
+                                }
+                            ), format: .number)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                        }
+                        
+                        // Operation Type
+                        HStack {
+                            Text("Operation:")
+                                .foregroundColor(Color.garageBandText)
+                            Spacer()
+                            Picker("Operation", selection: Binding(
+                                get: { cyclicalSettings?.operationType ?? .replace },
+                                set: { newValue in
+                                    if var current = cyclicalSettings {
+                                        current.operationType = newValue
+                                        cyclicalSettings = current
+                                    }
+                                }
+                            )) {
+                                ForEach(CyclicalOperationType.allCases, id: \.self) { operation in
+                                    Text(operation.rawValue).tag(operation)
+                                }
+                            }
+                            .pickerStyle(.menu)
+                            .foregroundColor(Color.garageBandText)
+                        }
+                    }
+                    .padding(.top, 4)
+                }
             }
         }
         .padding()

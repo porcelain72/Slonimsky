@@ -51,6 +51,7 @@
 		987A91EB2F2121D4002A6706 /* AutoGenerationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */; };
 		987A91EC2F2121D4002A6706 /* PresetPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309702E39333C000D9EC7 /* PresetPickerView.swift */; };
 		987A91ED2F2121D4002A6706 /* ParameterDescriptionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */; };
+		987A91EF2F2127D5002A6706 /* CyclicalModulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */; };
 		98AF6E152EACDC1200DD60AC /* GarageBandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */; };
 		98AF6E192EAD05C000DD60AC /* SimpleCyclicalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */; };
 		98AF6E1B2EAD487C00DD60AC /* DirectionalParametersTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */; };
@@ -127,6 +128,7 @@
 		98692B4A2E2FBE0F00223430 /* SlonimskyUITestsLaunchTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SlonimskyUITestsLaunchTests.swift; sourceTree = "<group>"; };
 		987A91C62F2113A2002A6706 /* MIDIPatternConverter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MIDIPatternConverter.swift; sourceTree = "<group>"; };
 		987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirrorArpeggioTests.swift; sourceTree = "<group>"; };
+		987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicalModulationTests.swift; sourceTree = "<group>"; };
 		98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageBandColors.swift; sourceTree = "<group>"; };
 		98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCyclicalTest.swift; sourceTree = "<group>"; };
 		98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectionalParametersTest.swift; sourceTree = "<group>"; };
@@ -248,6 +250,7 @@
 		98692B3D2E2FBE0F00223430 /* SlonimskyTests */ = {
 			isa = PBXGroup;
 			children = (
+				987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
 				98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */,
@@ -551,6 +554,7 @@
 				987A91E22F21218F002A6706 /* ParameterPanelView.swift in Sources */,
 				98AF6E1B2EAD487C00DD60AC /* DirectionalParametersTest.swift in Sources */,
 				987A91E42F2121D4002A6706 /* SheetMusicPopupView.swift in Sources */,
+				987A91EF2F2127D5002A6706 /* CyclicalModulationTests.swift in Sources */,
 				987A91E52F2121D4002A6706 /* PianoRollPanelView.swift in Sources */,
 				987A91E62F2121D4002A6706 /* SheetMusicPanelView.swift in Sources */,
 				987A91E72F2121D4002A6706 /* CycleControlView.swift in Sources */,
