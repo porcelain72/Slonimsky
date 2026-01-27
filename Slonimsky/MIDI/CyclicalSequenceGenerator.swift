@@ -70,12 +70,29 @@ class CyclicalSequenceGenerator {
                 return modifiedNote
             }
             
-            allNotes.append(contentsOf: cycleNotes)
+            // Drop the last note of each appended cycle sequence to avoid repetition
+            // (only the last cycle should retain its final note)
+            let notesToAppend: [MIDIInfo]
+            let isLastCycle = (globalCycleIndex == totalCycles - 1)
+            
+            if isLastCycle {
+                // Last cycle: append all notes (retain final note)
+                notesToAppend = cycleNotes
+            } else if cycleNotes.count > 1 {
+                // Not the last cycle: drop the last note to avoid repetition
+                notesToAppend = Array(cycleNotes.dropLast())
+            } else {
+                // If only one note, keep it (can't drop it)
+                notesToAppend = cycleNotes
+            }
+            
+            allNotes.append(contentsOf: notesToAppend)
             totalGenerationTime += cycleResult.metadata.generationTime
-            totalNoteCount += cycleResult.metadata.noteCount
+            totalNoteCount += notesToAppend.count
             actualCycles += 1
             
-            print("✅ Cycle \(globalCycleIndex + 1): \(cycleResult.notes.count) notes")
+            let dropStatus = isLastCycle ? "retained (last cycle)" : "dropped"
+            print("✅ Cycle \(globalCycleIndex + 1): \(cycleResult.notes.count) notes generated, \(notesToAppend.count) notes appended (last note \(dropStatus))")
         }
         
         // Create combined metadata
@@ -178,12 +195,29 @@ class CyclicalSequenceGenerator {
                 return modifiedNote
             }
             
-            allNotes.append(contentsOf: cycleNotes)
+            // Drop the last note of each appended cycle sequence to avoid repetition
+            // (only the last cycle should retain its final note)
+            let notesToAppend: [MIDIInfo]
+            let isLastCycle = (globalCycleIndex == totalCycles - 1)
+            
+            if isLastCycle {
+                // Last cycle: append all notes (retain final note)
+                notesToAppend = cycleNotes
+            } else if cycleNotes.count > 1 {
+                // Not the last cycle: drop the last note to avoid repetition
+                notesToAppend = Array(cycleNotes.dropLast())
+            } else {
+                // If only one note, keep it (can't drop it)
+                notesToAppend = cycleNotes
+            }
+            
+            allNotes.append(contentsOf: notesToAppend)
             totalGenerationTime += cycleResult.metadata.generationTime
-            totalNoteCount += cycleResult.metadata.noteCount
+            totalNoteCount += notesToAppend.count
             actualCycles += 1
             
-            print("✅ Combined cycle \(globalCycleIndex + 1): \(cycleResult.notes.count) notes")
+            let dropStatus = isLastCycle ? "retained (last cycle)" : "dropped"
+            print("✅ Combined cycle \(globalCycleIndex + 1): \(cycleResult.notes.count) notes generated, \(notesToAppend.count) notes appended (last note \(dropStatus))")
         }
         
         // Create combined metadata
