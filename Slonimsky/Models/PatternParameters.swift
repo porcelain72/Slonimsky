@@ -129,7 +129,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard rootNote >= 0 && rootNote <= 127 else { return false }
         guard numberOfOctaves >= 1 && numberOfOctaves <= 8 else { return false }
         guard divisionsOfOctave >= 1 && divisionsOfOctave <= 12 else { return false }
-        guard tempo >= 60.0 && tempo <= 240.0 else { return false }
+        guard tempo >= 20.0 && tempo <= 300.0 else { return false }
         guard primaryInterval >= 1 && primaryInterval <= 12 else { return false }
         guard secondaryInterval >= 1 && secondaryInterval <= 12 else { return false }
         guard mirrorPoints >= 0 && mirrorPoints <= 10 else { return false }
