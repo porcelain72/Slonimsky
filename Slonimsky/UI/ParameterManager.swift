@@ -55,6 +55,15 @@ class ParameterManager: ObservableObject {
     @Published var iterations: Int = 1 {
         didSet { validateAndNotify() }
     }
+    @Published var randomiseOrder: Bool = false {
+        didSet { validateAndNotify() }
+    }
+    
+    /// Force a new random order by invalidating the parameter hash and re-triggering generation
+    func reseedRandomOrder() {
+        lastParameterHash = 0
+        validateAndNotify()
+    }
     
     // Interval Parameters
     @Published var primaryInterval: Int = 1 {
@@ -221,6 +230,7 @@ class ParameterManager: ObservableObject {
             tempo: tempo,
             timeSignature: timeSignature,
             iterations: iterations,
+            randomiseOrder: randomiseOrder,
             primaryInterval: primaryInterval,
             secondaryInterval: secondaryInterval,
             intervalPattern: intervalPattern,
@@ -258,6 +268,7 @@ class ParameterManager: ObservableObject {
         tempo = parameters.tempo
         timeSignature = parameters.timeSignature
         iterations = parameters.iterations
+        randomiseOrder = parameters.randomiseOrder
         primaryInterval = parameters.primaryInterval
         secondaryInterval = parameters.secondaryInterval
         intervalPattern = parameters.intervalPattern

@@ -369,6 +369,11 @@ class MIDIIntegrationService: ObservableObject {
         midiEngine.stop()
     }
     
+    /// Stop external MIDI playback thread
+    func stopExternalMIDI() {
+        midiEngine.stopExternalMIDI()
+    }
+    
     /// Pause playback
     func pausePlayback() {
         midiEngine.pause()
@@ -401,15 +406,21 @@ class MIDIIntegrationService: ObservableObject {
         return success
     }
     
+    /// Current tempo from the parameter manager, or 120 BPM as fallback
+    var currentTempo: Double {
+        return parameterManager?.tempo ?? 120.0
+    }
+    
     /// Send current pattern to external MIDI destination
-    /// - Parameter bpm: Tempo in beats per minute
-    func sendToExternalMIDI(bpm: Double = 120.0) {
+    /// - Parameter bpm: Tempo in beats per minute (defaults to current parameter tempo)
+    func sendToExternalMIDI(bpm: Double? = nil) {
         guard let pattern = currentPattern else {
             errorMessage = "No pattern available to send"
             return
         }
         
-        midiEngine.sendToExternalMIDI(notes: pattern.notes, bpm: bpm)
+        let tempo = bpm ?? currentTempo
+        midiEngine.sendToExternalMIDI(notes: pattern.notes, bpm: tempo)
     }
     
     /// Get available pattern generators
@@ -558,6 +569,7 @@ class MIDIIntegrationService: ObservableObject {
             tempo: Double.random(in: 80...160),
             timeSignature: .common,
             iterations: Int.random(in: 1...3),
+            randomiseOrder: Bool.random(),
             primaryInterval: Int.random(in: 1...7),
             secondaryInterval: Int.random(in: 1...7),
             intervalPattern: intervalPatterns.randomElement() ?? .ascending,

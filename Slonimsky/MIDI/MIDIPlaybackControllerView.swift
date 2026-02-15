@@ -263,7 +263,7 @@ struct MIDIPlaybackControllerView: View {
         guard let pattern = midiService.currentPattern else { return }
         
         // Calculate total duration based on pattern
-        let bpm = 120.0
+        let bpm = midiService.currentTempo
         let beatDuration = 60.0 / bpm
         let totalDuration = pattern.notes.reduce(0.0) { total, note in
             total + note.beatLength * beatDuration
@@ -286,6 +286,8 @@ struct MIDIPlaybackControllerView: View {
     }
     
     private func stopExternalMIDIPlayback() {
+        midiService.stopExternalMIDI()
+        
         externalMIDIPlaybackStatus = PlaybackStatus(
             isPlaying: false,
             currentTime: 0.0,
@@ -318,7 +320,7 @@ struct MIDIPlaybackControllerView: View {
                             currentTime: 0.0,
                             totalDuration: self.externalMIDIPlaybackStatus.totalDuration
                         )
-                        self.midiService.sendToExternalMIDI(bpm: 120.0)
+                        self.midiService.sendToExternalMIDI()
                         print("🔄 External MIDI looping - restarted")
                     } else {
                         // Stop playback

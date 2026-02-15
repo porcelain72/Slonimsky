@@ -428,4 +428,184 @@ final class MirrorArpeggioTests: XCTestCase {
         
         print("✅ Octave already in sequence test passed")
     }
+    
+    // MARK: - All Scale Types Mirror Tests
+    
+    /// Helper: verify a mirrored scale has correct arpeggio structure
+    private func assertMirrorStructure(
+        scaleType: ScaleType,
+        rootNote: Int = 60,
+        numberOfOctaves: Int = 1,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let parameters = PatternParameters(
+            rootNote: rootNote,
+            scaleType: scaleType,
+            numberOfOctaves: numberOfOctaves,
+            mirror: true
+        )
+        
+        let generator = ScalePatternGenerator()
+        let notes = generator.generateNotePattern(parameters: parameters, cycleIndex: 0)
+        
+        let expectedPeak = rootNote + (numberOfOctaves * 12)
+        let maxNote = notes.max() ?? 0
+        
+        // 1. Must start at root
+        XCTAssertEqual(notes.first, rootNote,
+            "\(scaleType.rawValue): should start at root \(rootNote)",
+            file: file, line: line)
+        
+        // 2. Must end at root
+        XCTAssertEqual(notes.last, rootNote,
+            "\(scaleType.rawValue): should end at root \(rootNote)",
+            file: file, line: line)
+        
+        // 3. Peak must be at the expected octave
+        XCTAssertEqual(maxNote, expectedPeak,
+            "\(scaleType.rawValue): peak should be \(expectedPeak), got \(maxNote)",
+            file: file, line: line)
+        
+        // 4. Must have enough notes (at least root, one middle, peak, one middle, root)
+        XCTAssertGreaterThanOrEqual(notes.count, 3,
+            "\(scaleType.rawValue): should have at least 3 notes",
+            file: file, line: line)
+        
+        // 5. Ascending portion: non-decreasing up to peak
+        guard let peakIndex = notes.firstIndex(of: maxNote) else {
+            XCTFail("\(scaleType.rawValue): could not find peak index", file: file, line: line)
+            return
+        }
+        for i in 1...peakIndex {
+            XCTAssertGreaterThanOrEqual(notes[i], notes[i - 1],
+                "\(scaleType.rawValue): ascending should be non-decreasing at index \(i) (\(notes[i-1]) -> \(notes[i]))",
+                file: file, line: line)
+        }
+        
+        // 6. Descending portion: non-increasing from peak to end
+        for i in (peakIndex + 1)..<notes.count {
+            XCTAssertLessThanOrEqual(notes[i], notes[i - 1],
+                "\(scaleType.rawValue): descending should be non-increasing at index \(i) (\(notes[i-1]) -> \(notes[i]))",
+                file: file, line: line)
+        }
+        
+        // 7. Mirror symmetry: ascending notes (excluding peak) should equal reversed descending notes
+        let ascending = Array(notes[0..<peakIndex])
+        let descending = Array(notes[(peakIndex + 1)...])
+        XCTAssertEqual(ascending, descending.reversed(),
+            "\(scaleType.rawValue): ascending portion should mirror descending portion",
+            file: file, line: line)
+        
+        print("✅ \(scaleType.rawValue) mirror: \(notes.count) notes, peak \(maxNote) at index \(peakIndex)")
+        print("   Pattern: \(notes)")
+    }
+    
+    // --- Minor scales ---
+    
+    func testNaturalMinorMirror() throws {
+        assertMirrorStructure(scaleType: .naturalMinor)
+    }
+    
+    func testHarmonicMinorMirror() throws {
+        assertMirrorStructure(scaleType: .harmonicMinor)
+    }
+    
+    func testMelodicMinorMirror() throws {
+        assertMirrorStructure(scaleType: .melodicMinor)
+    }
+    
+    func testMinorPentatonicMirror() throws {
+        assertMirrorStructure(scaleType: .minorPentatonic)
+    }
+    
+    func testBluesMirror() throws {
+        assertMirrorStructure(scaleType: .blues)
+    }
+    
+    // --- Modes ---
+    
+    func testDorianMirror() throws {
+        assertMirrorStructure(scaleType: .dorian)
+    }
+    
+    func testPhrygianMirror() throws {
+        assertMirrorStructure(scaleType: .phrygian)
+    }
+    
+    func testLydianMirror() throws {
+        assertMirrorStructure(scaleType: .lydian)
+    }
+    
+    func testMixolydianMirror() throws {
+        assertMirrorStructure(scaleType: .mixolydian)
+    }
+    
+    func testLocrianMirror() throws {
+        assertMirrorStructure(scaleType: .locrian)
+    }
+    
+    // --- Symmetric ---
+    
+    func testTritoneMirror() throws {
+        assertMirrorStructure(scaleType: .tritone)
+    }
+    
+    // --- Exotic / World ---
+    
+    func testHungarianMinorMirror() throws {
+        assertMirrorStructure(scaleType: .hungarianMinor)
+    }
+    
+    func testDoubleHarmonicMajorMirror() throws {
+        assertMirrorStructure(scaleType: .doubleHarmonicMajor)
+    }
+    
+    func testPhrygianDominantMirror() throws {
+        assertMirrorStructure(scaleType: .phrygianDominant)
+    }
+    
+    func testHirajoshiMirror() throws {
+        assertMirrorStructure(scaleType: .hirajoshi)
+    }
+    
+    // --- Synthetic ---
+    
+    func testPrometheusMirror() throws {
+        assertMirrorStructure(scaleType: .prometheus)
+    }
+    
+    func testEnigmaticMirror() throws {
+        assertMirrorStructure(scaleType: .enigmatic)
+    }
+    
+    // --- Multi-octave coverage for new scales ---
+    
+    func testNewScalesMultipleOctavesMirror() throws {
+        let newScales: [ScaleType] = [
+            .naturalMinor, .harmonicMinor, .melodicMinor,
+            .minorPentatonic, .blues,
+            .dorian, .phrygian, .lydian, .mixolydian, .locrian,
+            .tritone,
+            .hungarianMinor, .doubleHarmonicMajor, .phrygianDominant, .hirajoshi,
+            .prometheus, .enigmatic
+        ]
+        
+        for scaleType in newScales {
+            assertMirrorStructure(scaleType: scaleType, numberOfOctaves: 2)
+        }
+    }
+    
+    // --- Verify all existing scales still pass with the helper ---
+    
+    func testAllOriginalScalesMirrorWithHelper() throws {
+        let originalScales: [ScaleType] = [
+            .chromatic, .diatonic, .pentatonic,
+            .wholeTone, .octatonic, .diminished, .augmented
+        ]
+        
+        for scaleType in originalScales {
+            assertMirrorStructure(scaleType: scaleType)
+        }
+    }
 }

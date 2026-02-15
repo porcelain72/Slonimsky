@@ -34,6 +34,7 @@ class MIDIEngine: ObservableObject {
     
     private var playbackTimer: Timer?
     private var stopRequested = false
+    private var externalMIDIThread: Thread?
     
     // MARK: - Initialization
     init() {
@@ -222,6 +223,8 @@ class MIDIEngine: ObservableObject {
     }
     
     /// Send MIDI data to external destination
+    /// Uses a dedicated high-priority thread with precise sleep-based timing
+    /// to avoid main-thread jitter from DispatchQueue.main.asyncAfter.
     /// - Parameter notes: Array of MIDI notes to send
     /// - Parameter bpm: Tempo in beats per minute
     func sendToExternalMIDI(notes: [MIDIInfo], bpm: Double = 120.0) {
@@ -230,40 +233,54 @@ class MIDIEngine: ObservableObject {
             return
         }
         
-        let beatDuration = 60.0 / bpm
-        let queue = DispatchQueue(label: "MIDIOutputQueue", qos: .userInitiated)
+        // Cancel any in-progress external playback
+        externalMIDIThread?.cancel()
         
-        queue.async { [weak self] in
+        let beatDuration = 60.0 / bpm
+        
+        let thread = Thread { [weak self] in
             guard let self = self else { return }
             
-            var currentTime: TimeInterval = 0.0
+            // Raise thread priority for tighter timing
+            Thread.current.qualityOfService = .userInteractive
             
             for note in notes {
-                let delay = currentTime
+                if Thread.current.isCancelled { break }
                 
-                // Schedule note on
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-                    self.sendMIDIMessage(
-                        status: 0x90,
-                        data1: UInt8(clamping: note.note),
-                        data2: note.velocity,
-                        destination: destination
-                    )
+                let noteDuration = note.beatLength * beatDuration
+                
+                // Send note on
+                self.sendMIDIMessage(
+                    status: 0x90,
+                    data1: UInt8(clamping: note.note),
+                    data2: note.velocity,
+                    destination: destination
+                )
+                
+                // Hold for the note's duration, then send note off
+                if noteDuration > 0 {
+                    Thread.sleep(forTimeInterval: noteDuration)
                 }
                 
-                // Schedule note off
-                DispatchQueue.main.asyncAfter(deadline: .now() + delay + note.beatLength * beatDuration) {
-                    self.sendMIDIMessage(
-                        status: 0x80,
-                        data1: UInt8(clamping: note.note),
-                        data2: 0,
-                        destination: destination
-                    )
-                }
-                
-                currentTime += note.beatLength * beatDuration
+                self.sendMIDIMessage(
+                    status: 0x80,
+                    data1: UInt8(clamping: note.note),
+                    data2: 0,
+                    destination: destination
+                )
             }
         }
+        
+        thread.qualityOfService = .userInteractive
+        thread.name = "SlonimskyMIDIOutput"
+        externalMIDIThread = thread
+        thread.start()
+    }
+    
+    /// Cancel any in-progress external MIDI playback
+    func stopExternalMIDI() {
+        externalMIDIThread?.cancel()
+        externalMIDIThread = nil
     }
     
     // MARK: - Private Methods

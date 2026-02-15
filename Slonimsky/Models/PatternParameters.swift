@@ -17,6 +17,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let tempo: Double
     let timeSignature: TimeSignature
     let iterations: Int
+    let randomiseOrder: Bool
     
     // MARK: - Interval Patterns
     let primaryInterval: Int
@@ -67,6 +68,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         tempo: Double = 120.0,
         timeSignature: TimeSignature = .common,
         iterations: Int = 1,
+        randomiseOrder: Bool = false,
         primaryInterval: Int = 1,
         secondaryInterval: Int = 1,
         intervalPattern: IntervalPattern = .ascending,
@@ -100,6 +102,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.tempo = tempo
         self.timeSignature = timeSignature
         self.iterations = iterations
+        self.randomiseOrder = randomiseOrder
         self.primaryInterval = primaryInterval
         self.secondaryInterval = secondaryInterval
         self.intervalPattern = intervalPattern
@@ -171,36 +174,113 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
 /// Scale types based on Slonimsky's Thesaurus
 enum ScaleType: String, CaseIterable, Codable {
+    // Basic
     case none = "None"
     case chromatic = "Chromatic"
+    case custom = "Custom"
+    
+    // Major / Minor
     case diatonic = "Diatonic"
+    case naturalMinor = "Natural Minor"
+    case harmonicMinor = "Harmonic Minor"
+    case melodicMinor = "Melodic Minor"
+    
+    // Pentatonic / Blues
     case pentatonic = "Pentatonic"
+    case minorPentatonic = "Minor Pentatonic"
+    case blues = "Blues"
+    
+    // Modes
+    case dorian = "Dorian"
+    case phrygian = "Phrygian"
+    case lydian = "Lydian"
+    case mixolydian = "Mixolydian"
+    case locrian = "Locrian"
+    
+    // Symmetric
     case wholeTone = "Whole-tone"
     case octatonic = "Octatonic"
     case diminished = "Diminished"
     case augmented = "Augmented"
-    case custom = "Custom"
+    case tritone = "Tritone"
+    
+    // Exotic / World
+    case hungarianMinor = "Hungarian Minor"
+    case doubleHarmonicMajor = "Double Harmonic Major"
+    case phrygianDominant = "Phrygian Dominant"
+    case hirajoshi = "Hirajoshi"
+    
+    // Synthetic
+    case prometheus = "Prometheus"
+    case enigmatic = "Enigmatic"
     
     var intervals: [Int] {
         switch self {
+        // Basic
         case .none:
             return [] // No predefined intervals - will use equal divisions
         case .chromatic:
             return Array(1...12)
+        case .custom:
+            return [1] // Default to chromatic for custom
+            
+        // Major / Minor
         case .diatonic:
-            return [2, 2, 1, 2, 2, 2, 1] // Major scale intervals
+            return [2, 2, 1, 2, 2, 2, 1] // Major scale
+        case .naturalMinor:
+            return [2, 1, 2, 2, 1, 2, 2] // Aeolian mode
+        case .harmonicMinor:
+            return [2, 1, 2, 2, 1, 3, 1] // Augmented 2nd between 6th and 7th
+        case .melodicMinor:
+            return [2, 1, 2, 2, 2, 2, 1] // Jazz minor (ascending form)
+            
+        // Pentatonic / Blues
         case .pentatonic:
             return [2, 2, 3, 2, 3] // Major pentatonic
+        case .minorPentatonic:
+            return [3, 2, 2, 3, 2] // Minor pentatonic
+        case .blues:
+            return [3, 2, 1, 1, 3, 2] // Minor pentatonic + flat 5
+            
+        // Modes
+        case .dorian:
+            return [2, 1, 2, 2, 2, 1, 2] // Minor with raised 6th
+        case .phrygian:
+            return [1, 2, 2, 2, 1, 2, 2] // Flamenco character
+        case .lydian:
+            return [2, 2, 2, 1, 2, 2, 1] // Raised 4th
+        case .mixolydian:
+            return [2, 2, 1, 2, 2, 1, 2] // Dominant 7th character
+        case .locrian:
+            return [1, 2, 2, 1, 2, 2, 2] // Diminished tonic
+            
+        // Symmetric
         case .wholeTone:
             return [2, 2, 2, 2, 2, 2]
         case .octatonic:
-            return [1, 2, 1, 2, 1, 2, 1, 2]
+            return [1, 2, 1, 2, 1, 2, 1, 2] // Half-whole diminished
         case .diminished:
-            return [1, 2, 1, 2, 1, 2, 1, 2] // Diminished scale
+            return [2, 1, 2, 1, 2, 1, 2, 1] // Whole-half diminished
         case .augmented:
             return [3, 1, 3, 1, 3, 1] // Augmented scale
-        case .custom:
-            return [1] // Default to chromatic for custom
+        case .tritone:
+            return [1, 3, 2, 1, 3, 2] // Two tritone-related triads
+            
+        // Exotic / World
+        case .hungarianMinor:
+            return [2, 1, 3, 1, 1, 3, 1] // "Gypsy" minor
+        case .doubleHarmonicMajor:
+            return [1, 3, 1, 2, 1, 3, 1] // Arabic / Byzantine
+        case .phrygianDominant:
+            return [1, 3, 1, 2, 1, 2, 2] // Hijaz, Middle Eastern
+        case .hirajoshi:
+            return [2, 1, 4, 1, 4] // Japanese pentatonic
+            
+        // Synthetic
+        case .prometheus:
+            return [2, 2, 2, 3, 1, 2] // Scriabin's "mystic" scale
+        case .enigmatic:
+            return [1, 3, 2, 2, 2, 1, 1] // Verdi's enigmatic scale
         }
     }
 }
@@ -297,6 +377,7 @@ extension PatternParameters {
         tempo: 120.0,
         timeSignature: .common,
         iterations: 1,
+        randomiseOrder: false,
         primaryInterval: 1,
         secondaryInterval: 1,
         intervalPattern: .ascending,

@@ -153,6 +153,7 @@ class CyclicalParameterManager: ObservableObject {
             tempo: modifiedSettings.tempo.currentValue(baseValue: baseParameters.tempo),
             timeSignature: baseParameters.timeSignature,
             iterations: baseParameters.iterations,
+            randomiseOrder: baseParameters.randomiseOrder,
             primaryInterval: Int(modifiedSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
             secondaryInterval: Int(modifiedSettings.secondaryInterval.currentValue(baseValue: Double(baseParameters.secondaryInterval))),
             intervalPattern: baseParameters.intervalPattern,

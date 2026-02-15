@@ -114,6 +114,11 @@ class MIDIPatternConverter {
     ) -> [MIDIInfo] {
         var currentNotes = notes
         
+        // Randomise note order if enabled (before iterations and modulations)
+        if parameters.randomiseOrder {
+            currentNotes.shuffle()
+        }
+        
         // Iteration 1: apply modulations (notes already have ParameterApplicationManager from generator)
         currentNotes = applySlonimskyModulations(
             notes: currentNotes,

@@ -378,6 +378,18 @@ struct BasicParametersDetailView: View {
                     .frame(width: 20, alignment: .trailing)
             }
             
+            // Randomise Order
+            HStack {
+                Toggle("Randomise Note Order", isOn: $parameterManager.randomiseOrder)
+                    .foregroundColor(Color.garageBandText)
+                
+                Button("Reseed") {
+                    parameterManager.reseedRandomOrder()
+                }
+                .buttonStyle(.bordered)
+                .disabled(!parameterManager.randomiseOrder)
+            }
+            
             // Time Signature
             HStack {
                 Text("Time Signature:")
