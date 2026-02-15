@@ -52,6 +52,9 @@ class ParameterManager: ObservableObject {
     @Published var timeSignature: TimeSignature = .common {
         didSet { validateAndNotify() }
     }
+    @Published var iterations: Int = 1 {
+        didSet { validateAndNotify() }
+    }
     
     // Interval Parameters
     @Published var primaryInterval: Int = 1 {
@@ -217,6 +220,7 @@ class ParameterManager: ObservableObject {
             divisionsOfOctave: divisionsOfOctave,
             tempo: tempo,
             timeSignature: timeSignature,
+            iterations: iterations,
             primaryInterval: primaryInterval,
             secondaryInterval: secondaryInterval,
             intervalPattern: intervalPattern,
@@ -253,6 +257,7 @@ class ParameterManager: ObservableObject {
         divisionsOfOctave = parameters.divisionsOfOctave
         tempo = parameters.tempo
         timeSignature = parameters.timeSignature
+        iterations = parameters.iterations
         primaryInterval = parameters.primaryInterval
         secondaryInterval = parameters.secondaryInterval
         intervalPattern = parameters.intervalPattern
@@ -360,6 +365,10 @@ class ParameterManager: ObservableObject {
         
         if tempo < 20 || tempo > 300 {
             errors.append("Tempo must be between 20 and 300 BPM")
+        }
+        
+        if iterations < 1 || iterations > 10 {
+            errors.append("Iterations must be between 1 and 10")
         }
         
         if baseNoteDuration < 0.0625 || baseNoteDuration > 4.0 {

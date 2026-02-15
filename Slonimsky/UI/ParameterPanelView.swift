@@ -363,6 +363,21 @@ struct BasicParametersDetailView: View {
                 formatter: { "\(Int($0))" }
             )
             
+            // Iterations
+            HStack {
+                Text("Iterations:")
+                    .foregroundColor(Color.garageBandText)
+                Spacer()
+                Slider(value: Binding(
+                    get: { Double(parameterManager.iterations) },
+                    set: { parameterManager.iterations = Int($0.rounded()) }
+                ), in: 1...10, step: 1)
+                .frame(width: 150)
+                Text("\(parameterManager.iterations)")
+                    .foregroundColor(Color.garageBandSecondary)
+                    .frame(width: 20, alignment: .trailing)
+            }
+            
             // Time Signature
             HStack {
                 Text("Time Signature:")

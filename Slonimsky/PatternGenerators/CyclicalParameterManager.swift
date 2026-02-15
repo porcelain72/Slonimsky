@@ -152,6 +152,7 @@ class CyclicalParameterManager: ObservableObject {
             divisionsOfOctave: Int(modifiedSettings.divisionsOfOctave.currentValue(baseValue: Double(baseParameters.divisionsOfOctave))),
             tempo: modifiedSettings.tempo.currentValue(baseValue: baseParameters.tempo),
             timeSignature: baseParameters.timeSignature,
+            iterations: baseParameters.iterations,
             primaryInterval: Int(modifiedSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
             secondaryInterval: Int(modifiedSettings.secondaryInterval.currentValue(baseValue: Double(baseParameters.secondaryInterval))),
             intervalPattern: baseParameters.intervalPattern,

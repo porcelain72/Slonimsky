@@ -97,26 +97,47 @@ class MIDIPatternConverter {
         return result
     }
     
-    /// Complete conversion: Apply modulations then convert to MIDI
+    /// Complete conversion: Apply iterations (optional), modulations, then convert to MIDI
+    /// When iterations > 1, the pattern is re-processed: ParameterApplicationManager + modulations
+    /// are applied repeatedly before MIDI conversion.
     /// - Parameters:
-    ///   - notes: Base note pattern
+    ///   - notes: Base note pattern (already has ParameterApplicationManager applied from generator)
     ///   - parameters: Pattern parameters
     ///   - indexOffset: Starting index offset
+    ///   - generatorType: Generator type for ParameterApplicationManager (e.g. "Scale", "Interval")
     /// - Returns: Final MIDIInfo array
     static func convertWithModulations(
         notes: [Int],
         parameters: PatternParameters,
-        indexOffset: Int = 0
+        indexOffset: Int = 0,
+        generatorType: String = "Scale"
     ) -> [MIDIInfo] {
-        // First apply mathematical modulations
-        let modulatedNotes = applySlonimskyModulations(
-            notes: notes,
+        var currentNotes = notes
+        
+        // Iteration 1: apply modulations (notes already have ParameterApplicationManager from generator)
+        currentNotes = applySlonimskyModulations(
+            notes: currentNotes,
             parameters: parameters
         )
         
-        // Then convert to MIDI
+        // Iterations 2..<N: re-apply ParameterApplicationManager then modulations
+        // Mirror is skipped in iterations—it runs only in the initial generator
+        for _ in 1..<parameters.iterations {
+            currentNotes = ParameterApplicationManager.applyParameters(
+                baseNotes: currentNotes,
+                parameters: parameters,
+                generatorType: generatorType,
+                skipMirror: true
+            )
+            currentNotes = applySlonimskyModulations(
+                notes: currentNotes,
+                parameters: parameters
+            )
+        }
+        
+        // Convert to MIDI (velocity, duration)
         return convertToMIDIInfo(
-            notes: modulatedNotes,
+            notes: currentNotes,
             parameters: parameters,
             indexOffset: indexOffset
         )

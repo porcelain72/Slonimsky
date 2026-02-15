@@ -16,6 +16,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let divisionsOfOctave: Int
     let tempo: Double
     let timeSignature: TimeSignature
+    let iterations: Int
     
     // MARK: - Interval Patterns
     let primaryInterval: Int
@@ -65,6 +66,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         divisionsOfOctave: Int = 12,
         tempo: Double = 120.0,
         timeSignature: TimeSignature = .common,
+        iterations: Int = 1,
         primaryInterval: Int = 1,
         secondaryInterval: Int = 1,
         intervalPattern: IntervalPattern = .ascending,
@@ -97,6 +99,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.divisionsOfOctave = divisionsOfOctave
         self.tempo = tempo
         self.timeSignature = timeSignature
+        self.iterations = iterations
         self.primaryInterval = primaryInterval
         self.secondaryInterval = secondaryInterval
         self.intervalPattern = intervalPattern
@@ -130,6 +133,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard numberOfOctaves >= 1 && numberOfOctaves <= 8 else { return false }
         guard divisionsOfOctave >= 1 && divisionsOfOctave <= 12 else { return false }
         guard tempo >= 20.0 && tempo <= 300.0 else { return false }
+        guard iterations >= 1 && iterations <= 10 else { return false }
         guard primaryInterval >= 1 && primaryInterval <= 12 else { return false }
         guard secondaryInterval >= 1 && secondaryInterval <= 12 else { return false }
         guard mirrorPoints >= 0 && mirrorPoints <= 10 else { return false }
@@ -292,6 +296,7 @@ extension PatternParameters {
         divisionsOfOctave: 12,
         tempo: 120.0,
         timeSignature: .common,
+        iterations: 1,
         primaryInterval: 1,
         secondaryInterval: 1,
         intervalPattern: .ascending,

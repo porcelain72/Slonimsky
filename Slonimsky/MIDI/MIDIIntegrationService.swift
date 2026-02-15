@@ -557,6 +557,7 @@ class MIDIIntegrationService: ObservableObject {
             divisionsOfOctave: Int.random(in: 6...12),
             tempo: Double.random(in: 80...160),
             timeSignature: .common,
+            iterations: Int.random(in: 1...3),
             primaryInterval: Int.random(in: 1...7),
             secondaryInterval: Int.random(in: 1...7),
             intervalPattern: intervalPatterns.randomElement() ?? .ascending,

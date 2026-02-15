@@ -23,15 +23,18 @@ class ParameterApplicationManager {
     
     /// Applies parameters in the correct order to prevent conflicts
     /// Returns pure note numbers (no MIDI conversion - use MIDIPatternConverter for that)
+    /// - Parameter skipMirror: When true, mirror is skipped (e.g. for iteration passes where mirror runs only in the initial generator)
     static func applyParameters(
         baseNotes: [Int],
         parameters: PatternParameters,
-        generatorType: String
+        generatorType: String,
+        skipMirror: Bool = false
     ) -> [Int] {
         var currentNotes = baseNotes
         
         // Apply parameters in priority order
         for priority in ParameterPriority.allCases {
+            if skipMirror && priority == .mirrorPattern { continue }
             currentNotes = applyParameterGroup(
                 notes: currentNotes,
                 priority: priority,

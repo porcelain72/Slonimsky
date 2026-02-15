@@ -74,10 +74,11 @@ class IntervalPatternGenerator: BasePatternGenerator {
         // Generate pure note pattern first
         let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
-        // Convert to MIDI with modulations applied
+        // Convert to MIDI with modulations and iterations applied
         return MIDIPatternConverter.convertWithModulations(
             notes: notePattern,
-            parameters: parameters
+            parameters: parameters,
+            generatorType: "Interval"
         )
     }
     

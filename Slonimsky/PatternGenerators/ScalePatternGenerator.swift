@@ -88,11 +88,12 @@ class ScalePatternGenerator: BasePatternGenerator {
         // (Note: generateNotePattern also applies these, but we need them here for convertWithModulations)
         let modifiedParameters = applyCyclicalChanges(to: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
         
-        // Convert to MIDI with modulations applied using modified parameters
+        // Convert to MIDI with modulations and iterations applied using modified parameters
         // This ensures cyclical changes to interpolation/infrapolation/ultrapolation are applied
         let midiNotes = MIDIPatternConverter.convertWithModulations(
             notes: notePattern,
-            parameters: modifiedParameters
+            parameters: modifiedParameters,
+            generatorType: "Scale"
         )
         
         // Log the actual generated MIDI notes
