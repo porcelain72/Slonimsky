@@ -11,42 +11,194 @@ import Foundation
 /// Separates pure mathematical pattern generation from MIDI-specific attributes (velocity, duration)
 class MIDIPatternConverter {
     
-    // MARK: - Main Conversion Methods
-    
-    /// Convert a mathematical note pattern to MIDI information
+    // MARK: - Rhythm Engine
+
+    /// Maximum number of events an isorhythm realignment may emit before capping.
+    static let isorhythmEventCap = 1024
+
+    /// Schedule a pitch stream (the "color") in time according to the rhythm settings.
+    ///
+    /// - uniform: every pitch gets `baseNoteDuration`, back to back.
+    /// - isorhythm: a repeating duration cycle (the "talea") runs independently of the
+    ///   pitch cycle. Rest entries advance time without consuming pitches. The sequence
+    ///   runs until pitch and talea cycles realign (capped at `isorhythmEventCap` events).
+    /// - euclidean: pitches fall on the hits of a Bjorklund E(k, n) grid; silent steps
+    ///   emit rests. Whole grid cycles are emitted so the result loops seamlessly.
+    ///
+    /// A final accent pass boosts the velocity of sounding notes that fall on a meter
+    /// grouping start (e.g. beats 1, 3, 5 of 7/8 grouped 2+2+3).
+    ///
     /// - Parameters:
-    ///   - notes: Array of MIDI note numbers (0-127)
-    ///   - parameters: Pattern parameters for velocity and duration calculation
-    ///   - indexOffset: Starting index offset for velocity/duration calculations
-    /// - Returns: Array of MIDIInfo with velocity and duration applied
-    static func convertToMIDIInfo(
-        notes: [Int],
+    ///   - pitches: MIDI note numbers to schedule, in order
+    ///   - parameters: pattern parameters (rhythmSettings, meter, baseNoteDuration, velocity)
+    ///   - indexOffset: starting index offset for velocity calculations
+    ///   - startOnset: onset in beats of the first event
+    ///   - velocityProvider: optional custom velocity source (pitch index, pitch) -> velocity;
+    ///     defaults to `parameters.velocitySettings`
+    /// - Returns: scheduled events with onsets, durations, and explicit rests
+    static func scheduleRhythm(
+        pitches: [Int],
         parameters: PatternParameters,
-        indexOffset: Int = 0
+        indexOffset: Int = 0,
+        startOnset: Double = 0,
+        velocityProvider: ((Int, Int) -> UInt8)? = nil
     ) -> [MIDIInfo] {
-        return notes.enumerated().map { index, note in
-            let globalIndex = indexOffset + index
-            
-            let duration = calculateNoteDuration(
-                baseDuration: parameters.baseNoteDuration,
-                pattern: parameters.noteDurationPattern,
-                index: globalIndex,
-                density: parameters.rhythmicDensity
-            )
-            
-            let velocity = calculateVelocity(
-                for: globalIndex,
-                note: note,
-                settings: parameters.velocitySettings
-            )
-            
-            return MIDIInfo(
-                note: note,
-                velocity: velocity,
-                beatLength: duration,
+        guard !pitches.isEmpty else { return [] }
+
+        // Generators occasionally produce out-of-range pitches (register shifts,
+        // wide octave counts); the engine guarantees valid MIDI notes.
+        let pitches = pitches.map { min(127, max(0, $0)) }
+
+        // Floor at 1: a MIDI note-on with velocity 0 means note-off
+        let rawVelocity: (Int, Int) -> UInt8 = velocityProvider ?? { index, pitch in
+            parameters.velocitySettings.calculateVelocity(for: index, note: pitch)
+        }
+        let velocity: (Int, Int) -> UInt8 = { index, pitch in
+            max(1, rawVelocity(index, pitch))
+        }
+
+        var events: [MIDIInfo]
+        switch parameters.rhythmSettings.mode {
+        case .uniform:
+            events = scheduleUniform(pitches: pitches, parameters: parameters,
+                                     indexOffset: indexOffset, startOnset: startOnset, velocity: velocity)
+        case .isorhythm:
+            events = scheduleIsorhythm(pitches: pitches, parameters: parameters,
+                                       indexOffset: indexOffset, startOnset: startOnset, velocity: velocity)
+        case .euclidean:
+            events = scheduleEuclidean(pitches: pitches, parameters: parameters,
+                                       indexOffset: indexOffset, startOnset: startOnset, velocity: velocity)
+        }
+
+        return applyMeterAccents(to: events, parameters: parameters)
+    }
+
+    private static func scheduleUniform(
+        pitches: [Int],
+        parameters: PatternParameters,
+        indexOffset: Int,
+        startOnset: Double,
+        velocity: (Int, Int) -> UInt8
+    ) -> [MIDIInfo] {
+        var onset = startOnset
+        return pitches.enumerated().map { index, pitch in
+            let info = MIDIInfo(
+                note: pitch,
+                velocity: velocity(indexOffset + index, pitch),
+                onset: onset,
+                duration: parameters.baseNoteDuration,
                 cycleIndex: 0
             )
+            onset += parameters.baseNoteDuration
+            return info
         }
+    }
+
+    private static func scheduleIsorhythm(
+        pitches: [Int],
+        parameters: PatternParameters,
+        indexOffset: Int,
+        startOnset: Double,
+        velocity: (Int, Int) -> UInt8
+    ) -> [MIDIInfo] {
+        let talea = parameters.rhythmSettings.talea
+        let noteEntriesPerCycle = talea.filter { !$0.isRest }.count
+
+        // A talea with no sounding entries cannot consume pitches; fall back to uniform
+        guard noteEntriesPerCycle > 0 else {
+            return scheduleUniform(pitches: pitches, parameters: parameters,
+                                   indexOffset: indexOffset, startOnset: startOnset, velocity: velocity)
+        }
+
+        // Run until the pitch cycle (color) and talea realign: the number of talea
+        // cycles needed is colorLength / gcd(notesPerTalea, colorLength).
+        let taleaCycles = pitches.count / gcd(noteEntriesPerCycle, pitches.count)
+        var totalEvents = taleaCycles * talea.count
+        if totalEvents > isorhythmEventCap {
+            print("⚠️ Isorhythm realignment (\(totalEvents) events) exceeds cap; truncating to \(isorhythmEventCap)")
+            totalEvents = isorhythmEventCap
+        }
+
+        var events: [MIDIInfo] = []
+        var onset = startOnset
+        var pitchIndex = 0
+
+        for eventIndex in 0..<totalEvents {
+            let entry = talea[eventIndex % talea.count]
+            if entry.isRest {
+                // Rests advance time but never consume pitches
+                events.append(MIDIInfo(note: 0, velocity: 0, onset: onset,
+                                       duration: entry.value.beats, isRest: true, cycleIndex: 0))
+            } else {
+                let pitch = pitches[pitchIndex % pitches.count]
+                events.append(MIDIInfo(note: pitch,
+                                       velocity: velocity(indexOffset + pitchIndex, pitch),
+                                       onset: onset, duration: entry.value.beats, cycleIndex: 0))
+                pitchIndex += 1
+            }
+            onset += entry.value.beats
+        }
+
+        return events
+    }
+
+    private static func scheduleEuclidean(
+        pitches: [Int],
+        parameters: PatternParameters,
+        indexOffset: Int,
+        startOnset: Double,
+        velocity: (Int, Int) -> UInt8
+    ) -> [MIDIInfo] {
+        let settings = parameters.rhythmSettings
+        let hits = min(max(1, settings.euclideanHits), max(1, settings.euclideanSteps))
+        let steps = max(1, settings.euclideanSteps)
+        let grid = EuclideanRhythm.pattern(hits: hits, steps: steps, rotation: settings.euclideanRotation)
+        let stepBeats = settings.euclideanStepDuration.beats
+
+        // Emit whole grid cycles so the result loops seamlessly; enough cycles
+        // to state every pitch at least once (surplus hits wrap the color).
+        let cycles = max(1, Int(ceil(Double(pitches.count) / Double(hits))))
+
+        var events: [MIDIInfo] = []
+        var onset = startOnset
+        var pitchIndex = 0
+
+        for _ in 0..<cycles {
+            for step in 0..<steps {
+                if grid[step] {
+                    let pitch = pitches[pitchIndex % pitches.count]
+                    events.append(MIDIInfo(note: pitch,
+                                           velocity: velocity(indexOffset + pitchIndex, pitch),
+                                           onset: onset, duration: stepBeats, cycleIndex: 0))
+                    pitchIndex += 1
+                } else {
+                    events.append(MIDIInfo(note: 0, velocity: 0, onset: onset,
+                                           duration: stepBeats, isRest: true, cycleIndex: 0))
+                }
+                onset += stepBeats
+            }
+        }
+
+        return events
+    }
+
+    /// Boost the velocity of sounding notes that fall on a meter grouping start.
+    static func applyMeterAccents(to events: [MIDIInfo], parameters: PatternParameters) -> [MIDIInfo] {
+        let boost = parameters.rhythmSettings.accentBoost
+        guard boost > 0 else { return events }
+
+        return events.map { event in
+            guard !event.isRest, parameters.meter.isGroupingStart(event.onset) else { return event }
+            var accented = event
+            accented.velocity = UInt8(clamping: Int(event.velocity) + boost)
+            return accented
+        }
+    }
+
+    private static func gcd(_ a: Int, _ b: Int) -> Int {
+        var (a, b) = (abs(a), abs(b))
+        while b != 0 { (a, b) = (b, a % b) }
+        return max(a, 1)
     }
     
     /// Apply Slonimsky modulations to note patterns (mathematical operation before MIDI conversion)
@@ -140,9 +292,9 @@ class MIDIPatternConverter {
             )
         }
         
-        // Convert to MIDI (velocity, duration)
-        return convertToMIDIInfo(
-            notes: currentNotes,
+        // Schedule in time (velocity, duration, onsets, rests)
+        return scheduleRhythm(
+            pitches: currentNotes,
             parameters: parameters,
             indexOffset: indexOffset
         )
@@ -215,36 +367,4 @@ class MIDIPatternConverter {
         return notes
     }
     
-    private static func calculateNoteDuration(
-        baseDuration: TimeInterval,
-        pattern: DurationPattern,
-        index: Int,
-        density: Double
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        switch pattern {
-        case .uniform:
-            break
-        case .alternating:
-            duration = index % 2 == 0 ? baseDuration : baseDuration * 0.7
-        case .progressive:
-            duration *= 1.0 + (Double(index) * 0.05)
-        case .random:
-            duration *= Double.random(in: 0.7...1.3)
-        }
-        
-        // Apply rhythmic density
-        duration /= density
-        
-        return max(duration, 0.0625) // Minimum duration
-    }
-    
-    private static func calculateVelocity(
-        for index: Int,
-        note: Int,
-        settings: VelocitySettings
-    ) -> UInt8 {
-        return settings.calculateVelocity(for: index, note: note)
-    }
 }

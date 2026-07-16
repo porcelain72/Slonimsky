@@ -99,7 +99,7 @@ class ScalePatternGenerator: BasePatternGenerator {
         // Log the actual generated MIDI notes
         print("   Generated MIDI notes:")
         for (index, note) in midiNotes.enumerated() {
-            print("     \(index + 1): Note \(note.note), Velocity \(note.velocity), Duration \(note.beatLength)")
+            print("     \(index + 1): Note \(note.note), Velocity \(note.velocity), Duration \(note.duration)")
         }
         
         return midiNotes

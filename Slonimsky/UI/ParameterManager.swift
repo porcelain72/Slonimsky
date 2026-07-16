@@ -49,7 +49,10 @@ class ParameterManager: ObservableObject {
     @Published var tempo: Double = 120.0 {
         didSet { validateAndNotify() }
     }
-    @Published var timeSignature: TimeSignature = .common {
+    @Published var meter: Meter = .fourFour {
+        didSet { validateAndNotify() }
+    }
+    @Published var rhythmSettings: RhythmSettings = .default {
         didSet { validateAndNotify() }
     }
     @Published var iterations: Int = 1 {
@@ -115,10 +118,7 @@ class ParameterManager: ObservableObject {
     }
     
     // Rhythmic Parameters
-    @Published var noteDurationPattern: DurationPattern = .uniform {
-        didSet { validateAndNotify() }
-    }
-    @Published var baseNoteDuration: Double = 0.25 {
+    @Published var baseNoteDuration: Double = 1.0 {
         didSet { validateAndNotify() }
     }
     
@@ -131,16 +131,6 @@ class ParameterManager: ObservableObject {
             baseNoteDuration = newValue.beatValue
         }
     }
-    @Published var rhythmicDensity: Double = 1.0 {
-        didSet { validateAndNotify() }
-    }
-    @Published var syncopationLevel: Double = 0.0 {
-        didSet { validateAndNotify() }
-    }
-    @Published var metricModulation: MetricModulationSettings = .default {
-        didSet { validateAndNotify() }
-    }
-    
     // Harmonic Parameters
     @Published var harmonicMode: HarmonicMode = .tonal {
         didSet { validateAndNotify() }
@@ -228,7 +218,7 @@ class ParameterManager: ObservableObject {
             numberOfOctaves: numberOfOctaves,
             divisionsOfOctave: divisionsOfOctave,
             tempo: tempo,
-            timeSignature: timeSignature,
+            meter: meter,
             iterations: iterations,
             randomiseOrder: randomiseOrder,
             primaryInterval: primaryInterval,
@@ -245,17 +235,14 @@ class ParameterManager: ObservableObject {
             retrogradeSections: retrogradeSections,
             registerShifts: registerShifts,
             contourPattern: contourPattern,
-            noteDurationPattern: noteDurationPattern,
             baseNoteDuration: baseNoteDuration,
-            rhythmicDensity: rhythmicDensity,
-            syncopationLevel: syncopationLevel,
-            metricModulation: metricModulation,
             harmonicMode: harmonicMode,
             chordGeneration: chordGeneration,
             harmonicRhythm: harmonicRhythm,
             velocitySettings: velocitySettings,
             toneShifting: toneShifting,
-            cyclicalSettings: cyclicalSettings
+            cyclicalSettings: cyclicalSettings,
+            rhythmSettings: rhythmSettings
         )
     }
     
@@ -266,7 +253,8 @@ class ParameterManager: ObservableObject {
         numberOfOctaves = parameters.numberOfOctaves
         divisionsOfOctave = parameters.divisionsOfOctave
         tempo = parameters.tempo
-        timeSignature = parameters.timeSignature
+        meter = parameters.meter
+        rhythmSettings = parameters.rhythmSettings
         iterations = parameters.iterations
         randomiseOrder = parameters.randomiseOrder
         primaryInterval = parameters.primaryInterval
@@ -283,11 +271,7 @@ class ParameterManager: ObservableObject {
         retrogradeSections = parameters.retrogradeSections
         registerShifts = parameters.registerShifts
         contourPattern = parameters.contourPattern
-        noteDurationPattern = parameters.noteDurationPattern
         baseNoteDuration = parameters.baseNoteDuration
-        rhythmicDensity = parameters.rhythmicDensity
-        syncopationLevel = parameters.syncopationLevel
-        metricModulation = parameters.metricModulation
         harmonicMode = parameters.harmonicMode
         chordGeneration = parameters.chordGeneration
         harmonicRhythm = parameters.harmonicRhythm
@@ -382,8 +366,8 @@ class ParameterManager: ObservableObject {
             errors.append("Iterations must be between 1 and 10")
         }
         
-        if baseNoteDuration < 0.0625 || baseNoteDuration > 4.0 {
-            errors.append("Base note duration must be between 0.0625 and 4.0")
+        if baseNoteDuration < 0.125 || baseNoteDuration > 4.0 {
+            errors.append("Base note duration must be between 0.125 and 4.0")
         }
         
         return errors
@@ -536,12 +520,6 @@ class ParameterManager: ObservableObject {
         }
         
         // Check rhythmic parameters
-        if noteDurationPattern != .uniform || rhythmicDensity != 1.0 || 
-           syncopationLevel > 0 || metricModulation.enabled {
-            generators.insert("Rhythmic Pattern Generator")
-            print("   Added Rhythmic Pattern Generator (rhythmic parameters active)")
-        }
-        
         // Check harmonic parameters
         if harmonicMode != .tonal || chordGeneration.enabled || 
            harmonicRhythm.chordChangeFrequency != 4 {
@@ -597,13 +575,6 @@ class ParameterManager: ObservableObject {
            (activeGenerators.contains("Scale Pattern Generator") || activeGenerators.contains("Interval Pattern Generator")) {
             print("   Using layered mode (modulation + melodic combination)")
             return .layered
-        }
-        
-        // Use interleaved mode for rhythmic + melodic combinations
-        if activeGenerators.contains("Rhythmic Pattern Generator") && 
-           (activeGenerators.contains("Scale Pattern Generator") || activeGenerators.contains("Interval Pattern Generator")) {
-            print("   Using interleaved mode (rhythmic + melodic combination)")
-            return .interleaved
         }
         
         // Default to sequential for other combinations
@@ -674,7 +645,7 @@ class ParameterManager: ObservableObject {
         print("   Number of Octaves: \(PatternParameters.default.numberOfOctaves)")
         print("   Divisions of Octave: \(PatternParameters.default.divisionsOfOctave)")
         print("   Tempo: \(PatternParameters.default.tempo)")
-        print("   Time Signature: \(PatternParameters.default.timeSignature.rawValue)")
+        print("   Meter: \(PatternParameters.default.meter.displayName)")
         print("   Primary Direction: \(PatternParameters.default.primaryDirection.rawValue)")
         print("   Interval Pattern: \(PatternParameters.default.intervalPattern.rawValue)")
         print("   Harmonic Mode: \(PatternParameters.default.harmonicMode.rawValue)")
@@ -684,7 +655,6 @@ class ParameterManager: ObservableObject {
         print("   Interpolation Enabled: \(PatternParameters.default.interpolation.enabled)")
         print("   Infrapolation Enabled: \(PatternParameters.default.infrapolation.enabled)")
         print("   Ultrapolation Enabled: \(PatternParameters.default.ultrapolation.enabled)")
-        print("   Metric Modulation Enabled: \(PatternParameters.default.metricModulation.enabled)")
         
         loadPreset(defaultPreset)
         print("🎵 ParameterManager: Default preset loaded")
@@ -703,7 +673,7 @@ class ParameterManager: ObservableObject {
         numberOfOctaves = Int.random(in: 1...3)
         divisionsOfOctave = Int.random(in: 6...12)
         tempo = Double.random(in: 80...160)
-        timeSignature = TimeSignature.allCases.randomElement() ?? .common
+        meter = Meter.presets.randomElement() ?? .fourFour
     }
     
     private func randomizeIntervalParameters() {
@@ -741,16 +711,35 @@ class ParameterManager: ObservableObject {
     }
     
     private func randomizeRhythmicParameters() {
-        noteDurationPattern = DurationPattern.allCases.randomElement() ?? .uniform
-        baseNoteDuration = Double.random(in: 0.125...0.5)
-        rhythmicDensity = Double.random(in: 0.5...1.5)
-        syncopationLevel = Double.random(in: 0...0.8)
-        metricModulation = MetricModulationSettings(
-            enabled: Bool.random(),
-            modulationType: MetricModulationType.allCases.randomElement() ?? .accelerando,
-            intensity: Double.random(in: 0.3...0.8),
-            frequency: Int.random(in: 2...8)
-        )
+        baseNoteDuration = Double.random(in: 0.5...2.0)
+        rhythmSettings = ParameterManager.randomRhythmSettings()
+        meter = Meter.presets.randomElement() ?? .fourFour
+    }
+    
+    /// Random rhythm-engine settings: random mode, a small random talea
+    /// (~20% rests), and random Euclidean k/n/rotation.
+    static func randomRhythmSettings() -> RhythmSettings {
+        var settings = RhythmSettings()
+        settings.mode = RhythmMode.allCases.randomElement() ?? .uniform
+        
+        let entryCount = Int.random(in: 2...6)
+        settings.talea = (0..<entryCount).map { _ in
+            TaleaEntry(
+                value: DurationValue.allCases.randomElement() ?? .quarter,
+                isRest: Double.random(in: 0...1) < 0.2
+            )
+        }
+        // Guarantee at least one sounding entry
+        if settings.taleaNoteCount == 0 {
+            settings.talea[0].isRest = false
+        }
+        
+        settings.euclideanSteps = Int.random(in: 4...16)
+        settings.euclideanHits = Int.random(in: 1...settings.euclideanSteps)
+        settings.euclideanRotation = Int.random(in: 0..<settings.euclideanSteps)
+        settings.euclideanStepDuration = [DurationValue.sixteenth, .eighth, .quarter].randomElement() ?? .eighth
+        settings.accentBoost = Int.random(in: 8...24)
+        return settings
     }
     
     private func randomizeHarmonicParameters() {

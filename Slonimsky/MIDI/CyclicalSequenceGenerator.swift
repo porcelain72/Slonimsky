@@ -63,26 +63,27 @@ class CyclicalSequenceGenerator {
                 return nil
             }
             
-            // Add cycle information to notes
+            // Add cycle information and shift onsets to follow the running sequence
+            let cycleOffset = allNotes.totalLength
             let cycleNotes = cycleResult.notes.map { note in
-                var modifiedNote = note
+                var modifiedNote = note.offset(by: cycleOffset)
                 modifiedNote.cycleIndex = globalCycleIndex
                 return modifiedNote
             }
             
             // Drop the last note of each appended cycle sequence to avoid repetition
-            // (only the last cycle should retain its final note)
+            // (only the last cycle should retain its final note; rests are never dropped)
             let notesToAppend: [MIDIInfo]
             let isLastCycle = (globalCycleIndex == totalCycles - 1)
             
             if isLastCycle {
                 // Last cycle: append all notes (retain final note)
                 notesToAppend = cycleNotes
-            } else if cycleNotes.count > 1 {
-                // Not the last cycle: drop the last note to avoid repetition
+            } else if cycleNotes.count > 1, let last = cycleNotes.last, !last.isRest {
+                // Not the last cycle: drop the last sounding note to avoid repetition
                 notesToAppend = Array(cycleNotes.dropLast())
             } else {
-                // If only one note, keep it (can't drop it)
+                // If only one note or the cycle ends in a rest, keep everything
                 notesToAppend = cycleNotes
             }
             
@@ -188,26 +189,27 @@ class CyclicalSequenceGenerator {
                 return nil
             }
             
-            // Add cycle information to notes
+            // Add cycle information and shift onsets to follow the running sequence
+            let cycleOffset = allNotes.totalLength
             let cycleNotes = cycleResult.notes.map { note in
-                var modifiedNote = note
+                var modifiedNote = note.offset(by: cycleOffset)
                 modifiedNote.cycleIndex = globalCycleIndex
                 return modifiedNote
             }
             
             // Drop the last note of each appended cycle sequence to avoid repetition
-            // (only the last cycle should retain its final note)
+            // (only the last cycle should retain its final note; rests are never dropped)
             let notesToAppend: [MIDIInfo]
             let isLastCycle = (globalCycleIndex == totalCycles - 1)
             
             if isLastCycle {
                 // Last cycle: append all notes (retain final note)
                 notesToAppend = cycleNotes
-            } else if cycleNotes.count > 1 {
-                // Not the last cycle: drop the last note to avoid repetition
+            } else if cycleNotes.count > 1, let last = cycleNotes.last, !last.isRest {
+                // Not the last cycle: drop the last sounding note to avoid repetition
                 notesToAppend = Array(cycleNotes.dropLast())
             } else {
-                // If only one note, keep it (can't drop it)
+                // If only one note or the cycle ends in a rest, keep everything
                 notesToAppend = cycleNotes
             }
             
@@ -264,7 +266,7 @@ class CyclicalSequenceGenerator {
     }
     
     private func calculateTotalDuration(notes: [MIDIInfo]) -> TimeInterval {
-        return notes.reduce(0.0) { $0 + $1.beatLength }
+        return notes.totalLength
     }
     
     /// Information about nested parameter cycling

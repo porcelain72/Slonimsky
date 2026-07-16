@@ -19,6 +19,16 @@
 		987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095A2E393311000D9EC7 /* PatternGeneratorRegistry.swift */; };
 		987A91CC2F212016002A6706 /* ScalePatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */; };
 		987A91CD2F21202E002A6706 /* MidiInfo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3097B2E39334F000D9EC7 /* MidiInfo.swift */; };
+		FAB1E5020000000000000001 /* Meter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000001 /* Meter.swift */; };
+		FAB1E5020000000000000002 /* RhythmSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000002 /* RhythmSettings.swift */; };
+		FAB1E5020000000000000003 /* EuclideanRhythm.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000003 /* EuclideanRhythm.swift */; };
+		FAB1E5030000000000000001 /* Meter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000001 /* Meter.swift */; };
+		FAB1E5030000000000000002 /* RhythmSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000002 /* RhythmSettings.swift */; };
+		FAB1E5030000000000000003 /* EuclideanRhythm.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000003 /* EuclideanRhythm.swift */; };
+		FAB1E5030000000000000004 /* MeterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000004 /* MeterTests.swift */; };
+		FAB1E5030000000000000005 /* EuclideanRhythmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */; };
+		FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000006 /* IsorhythmTests.swift */; };
+		FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
@@ -31,7 +41,6 @@
 		987A91D72F2120A3002A6706 /* ModulationPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */; };
 		987A91D82F2120A3002A6706 /* ContourPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */; };
 		987A91D92F2120A3002A6706 /* ParameterApplicationManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B9000D9EC7 /* ParameterApplicationManager.swift */; };
-		987A91DA2F2120A3002A6706 /* RhythmicPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */; };
 		987A91DB2F2120FA002A6706 /* UInt8+Clamping.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B8000D9EC7 /* UInt8+Clamping.swift */; };
 		987A91DC2F2120FA002A6706 /* String+Localization.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309922E3940B7000D9EC7 /* String+Localization.swift */; };
 		987A91DD2F212105002A6706 /* CyclicalSequenceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */; };
@@ -53,7 +62,6 @@
 		987A91ED2F2121D4002A6706 /* ParameterDescriptionHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3940B7000D9EC7 /* ParameterDescriptionHelper.swift */; };
 		987A91EF2F2127D5002A6706 /* CyclicalModulationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */; };
 		882D788B016F4E598CF5A6B9 /* ScaleGeneratorParameterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */; };
-		126893A2475549D6A9E4A799 /* RhythmicDensityTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9E5A60866444418F9A127149 /* RhythmicDensityTests.swift */; };
 		98AF6E152EACDC1200DD60AC /* GarageBandColors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */; };
 		98AF6E192EAD05C000DD60AC /* SimpleCyclicalTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */; };
 		98AF6E1B2EAD487C00DD60AC /* DirectionalParametersTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */; };
@@ -61,7 +69,6 @@
 		98C309522E3932FE000D9EC7 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
 		98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309502E3932FE000D9EC7 /* ModulationSettings.swift */; };
 		98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */; };
-		98C3095F2E393311000D9EC7 /* RhythmicPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */; };
 		98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */; };
 		98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */; };
 		98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */; };
@@ -132,7 +139,6 @@
 		987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MirrorArpeggioTests.swift; sourceTree = "<group>"; };
 		987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CyclicalModulationTests.swift; sourceTree = "<group>"; };
 		01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScaleGeneratorParameterTests.swift; sourceTree = "<group>"; };
-		9E5A60866444418F9A127149 /* RhythmicDensityTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RhythmicDensityTests.swift; sourceTree = "<group>"; };
 		98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GarageBandColors.swift; sourceTree = "<group>"; };
 		98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCyclicalTest.swift; sourceTree = "<group>"; };
 		98AF6E1A2EAD487C00DD60AC /* DirectionalParametersTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DirectionalParametersTest.swift; sourceTree = "<group>"; };
@@ -140,7 +146,6 @@
 		98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VelocitySettings.swift; sourceTree = "<group>"; };
 		98C309502E3932FE000D9EC7 /* ModulationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModulationSettings.swift; sourceTree = "<group>"; };
 		98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = HarmonicPatternGenerator.swift; sourceTree = "<group>"; };
-		98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmicPatternGenerator.swift; sourceTree = "<group>"; };
 		98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ScalePatternGenerator.swift; sourceTree = "<group>"; };
 		98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SymmetricalPatternGenerator.swift; sourceTree = "<group>"; };
 		98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ContourPatternGenerator.swift; sourceTree = "<group>"; };
@@ -158,6 +163,13 @@
 		98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPanelView.swift; sourceTree = "<group>"; };
 		98C309742E39333C000D9EC7 /* MainContentView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MainContentView.swift; sourceTree = "<group>"; };
 		98C3097B2E39334F000D9EC7 /* MidiInfo.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MidiInfo.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000001 /* Meter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Meter.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000002 /* RhythmSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmSettings.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000003 /* EuclideanRhythm.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EuclideanRhythm.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000004 /* MeterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EuclideanRhythmTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000006 /* IsorhythmTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IsorhythmTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnsetSchedulingTests.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -255,9 +267,12 @@
 			isa = PBXGroup;
 			children = (
 				987A91EE2F2127D5002A6706 /* CyclicalModulationTests.swift */,
+				FAB1E5010000000000000004 /* MeterTests.swift */,
+				FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */,
+				FAB1E5010000000000000006 /* IsorhythmTests.swift */,
+				FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
-				9E5A60866444418F9A127149 /* RhythmicDensityTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
 				98692B3E2E2FBE0F00223430 /* SlonimskyTests.swift */,
 				98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */,
@@ -283,6 +298,8 @@
 			children = (
 				98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */,
 				98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */,
+				FAB1E5010000000000000001 /* Meter.swift */,
+				FAB1E5010000000000000002 /* RhythmSettings.swift */,
 				98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */,
 				98C309502E3932FE000D9EC7 /* ModulationSettings.swift */,
 			);
@@ -293,9 +310,9 @@
 			isa = PBXGroup;
 			children = (
 				987A91C62F2113A2002A6706 /* MIDIPatternConverter.swift */,
+				FAB1E5010000000000000003 /* EuclideanRhythm.swift */,
 				98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */,
 				98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */,
-				98C309562E393311000D9EC7 /* RhythmicPatternGenerator.swift */,
 				98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */,
 				98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */,
 				98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */,
@@ -525,7 +542,9 @@
 				98C309632E393312000D9EC7 /* PatternGeneratorRegistry.swift in Sources */,
 				98C309782E39333C000D9EC7 /* ParameterPanelView.swift in Sources */,
 				98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */,
-				98C3095F2E393311000D9EC7 /* RhythmicPatternGenerator.swift in Sources */,
+				FAB1E5020000000000000001 /* Meter.swift in Sources */,
+				FAB1E5020000000000000002 /* RhythmSettings.swift in Sources */,
+				FAB1E5020000000000000003 /* EuclideanRhythm.swift in Sources */,
 				98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */,
 				98C309652E393312000D9EC7 /* PatternGenerator.swift in Sources */,
 				98C3096B2E39332A000D9EC7 /* MIDIPlaybackControllerView.swift in Sources */,
@@ -548,6 +567,13 @@
 				987A91C72F2113A2002A6706 /* MIDIPatternConverter.swift in Sources */,
 				987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */,
 				987A91CD2F21202E002A6706 /* MidiInfo.swift in Sources */,
+				FAB1E5030000000000000001 /* Meter.swift in Sources */,
+				FAB1E5030000000000000002 /* RhythmSettings.swift in Sources */,
+				FAB1E5030000000000000003 /* EuclideanRhythm.swift in Sources */,
+				FAB1E5030000000000000004 /* MeterTests.swift in Sources */,
+				FAB1E5030000000000000005 /* EuclideanRhythmTests.swift in Sources */,
+				FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */,
+				FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,
@@ -562,7 +588,6 @@
 				987A91E42F2121D4002A6706 /* SheetMusicPopupView.swift in Sources */,
 				987A91EF2F2127D5002A6706 /* CyclicalModulationTests.swift in Sources */,
 				882D788B016F4E598CF5A6B9 /* ScaleGeneratorParameterTests.swift in Sources */,
-				126893A2475549D6A9E4A799 /* RhythmicDensityTests.swift in Sources */,
 				987A91E52F2121D4002A6706 /* PianoRollPanelView.swift in Sources */,
 				987A91E62F2121D4002A6706 /* SheetMusicPanelView.swift in Sources */,
 				987A91E72F2121D4002A6706 /* CycleControlView.swift in Sources */,
@@ -590,7 +615,6 @@
 				987A91D72F2120A3002A6706 /* ModulationPatternGenerator.swift in Sources */,
 				987A91D82F2120A3002A6706 /* ContourPatternGenerator.swift in Sources */,
 				987A91D92F2120A3002A6706 /* ParameterApplicationManager.swift in Sources */,
-				987A91DA2F2120A3002A6706 /* RhythmicPatternGenerator.swift in Sources */,
 				987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */,
 				98C3098B2E3940BA000D9EC7 /* SlonimskyTests/ParameterApplicationTests.swift in Sources */,
 			);

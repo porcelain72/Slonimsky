@@ -122,30 +122,6 @@ class BasePatternGenerator: PatternGenerator {
     
     // MARK: - Helper Methods
     
-    /// Calculate note duration based on pattern parameters
-    func calculateNoteDuration(
-        baseDuration: TimeInterval,
-        pattern: DurationPattern,
-        index: Int,
-        density: Double
-    ) -> TimeInterval {
-        switch pattern {
-        case .uniform:
-            return baseDuration
-            
-        case .alternating:
-            return index % 2 == 0 ? baseDuration : baseDuration * 0.5
-            
-        case .progressive:
-            let progression = 1.0 + (Double(index) * 0.1)
-            return baseDuration * progression
-            
-        case .random:
-            let randomFactor = Double.random(in: 0.5...1.5)
-            return baseDuration * randomFactor
-        }
-    }
-    
     /// Apply register shifts to notes
     func applyRegisterShifts(
         notes: [Int],
@@ -279,8 +255,6 @@ class BasePatternGenerator: PatternGenerator {
             parameterSettings = settings.modulationInterval
         case .baseNoteDuration:
             parameterSettings = settings.baseNoteDuration
-        case .rhythmicDensity:
-            parameterSettings = settings.rhythmicDensity
         case .primaryInterval:
             parameterSettings = settings.primaryInterval
         case .secondaryInterval:
@@ -299,6 +273,8 @@ class BasePatternGenerator: PatternGenerator {
             parameterSettings = settings.divisionsOfOctave
         case .mirrorPoints:
             parameterSettings = settings.mirrorPoints
+        case .euclideanRotation:
+            parameterSettings = settings.euclideanRotation
         }
         
         guard let settings = parameterSettings, settings.isEnabled else { return nil }

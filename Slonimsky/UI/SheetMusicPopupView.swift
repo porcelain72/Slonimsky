@@ -182,7 +182,7 @@ struct SheetMusicPopupView: View {
                                         Text("v\(note.velocity)")
                                             .font(.caption2)
                                             .foregroundColor(Color.garageBandSecondary)
-                                        Text("\(String(format: "%.2f", note.beatLength))")
+                                        Text("\(String(format: "%.2f", note.duration))")
                                             .font(.caption2)
                                             .foregroundColor(Color.garageBandSecondary)
                                     }

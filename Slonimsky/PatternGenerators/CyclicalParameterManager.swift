@@ -42,8 +42,6 @@ class CyclicalParameterManager: ObservableObject {
             return cyclicalSettings.modulationInterval.currentValue(baseValue: baseValue)
         case "baseNoteDuration":
             return cyclicalSettings.baseNoteDuration.currentValue(baseValue: baseValue)
-        case "rhythmicDensity":
-            return cyclicalSettings.rhythmicDensity.currentValue(baseValue: baseValue)
         case "primaryInterval":
             return cyclicalSettings.primaryInterval.currentValue(baseValue: Double(baseValue))
         case "secondaryInterval":
@@ -62,6 +60,8 @@ class CyclicalParameterManager: ObservableObject {
             return cyclicalSettings.divisionsOfOctave.currentValue(baseValue: baseValue)
         case "mirrorPoints":
             return cyclicalSettings.mirrorPoints.currentValue(baseValue: baseValue)
+        case "euclideanRotation":
+            return cyclicalSettings.euclideanRotation.currentValue(baseValue: baseValue)
         default:
             return baseValue
         }
@@ -86,7 +86,6 @@ class CyclicalParameterManager: ObservableObject {
             modifiedSettings.ultrapolationNotes.currentCycle = parameterCycles[.ultrapolationNotes] ?? 0
             modifiedSettings.modulationInterval.currentCycle = parameterCycles[.modulationInterval] ?? 0
             modifiedSettings.baseNoteDuration.currentCycle = parameterCycles[.baseNoteDuration] ?? 0
-            modifiedSettings.rhythmicDensity.currentCycle = parameterCycles[.rhythmicDensity] ?? 0
             modifiedSettings.primaryInterval.currentCycle = parameterCycles[.primaryInterval] ?? 0
             modifiedSettings.secondaryInterval.currentCycle = parameterCycles[.secondaryInterval] ?? 0
             modifiedSettings.baseVelocity.currentCycle = parameterCycles[.baseVelocity] ?? 0
@@ -96,6 +95,7 @@ class CyclicalParameterManager: ObservableObject {
             modifiedSettings.numberOfOctaves.currentCycle = parameterCycles[.numberOfOctaves] ?? 0
             modifiedSettings.divisionsOfOctave.currentCycle = parameterCycles[.divisionsOfOctave] ?? 0
             modifiedSettings.mirrorPoints.currentCycle = parameterCycles[.mirrorPoints] ?? 0
+            modifiedSettings.euclideanRotation.currentCycle = parameterCycles[.euclideanRotation] ?? 0
         } else {
             // Parallel cycling: all parameters use the same cycle index
             modifiedSettings.interpolationNotes.currentCycle = currentCycle
@@ -103,7 +103,6 @@ class CyclicalParameterManager: ObservableObject {
             modifiedSettings.ultrapolationNotes.currentCycle = currentCycle
             modifiedSettings.modulationInterval.currentCycle = currentCycle
             modifiedSettings.baseNoteDuration.currentCycle = currentCycle
-            modifiedSettings.rhythmicDensity.currentCycle = currentCycle
             modifiedSettings.primaryInterval.currentCycle = currentCycle
             modifiedSettings.secondaryInterval.currentCycle = currentCycle
             modifiedSettings.baseVelocity.currentCycle = currentCycle
@@ -113,6 +112,7 @@ class CyclicalParameterManager: ObservableObject {
             modifiedSettings.numberOfOctaves.currentCycle = currentCycle
             modifiedSettings.divisionsOfOctave.currentCycle = currentCycle
             modifiedSettings.mirrorPoints.currentCycle = currentCycle
+            modifiedSettings.euclideanRotation.currentCycle = currentCycle
         }
         
         // Create modified modulation settings
@@ -145,13 +145,21 @@ class CyclicalParameterManager: ObservableObject {
             emphasisAmount: baseParameters.velocitySettings.emphasisAmount
         )
         
+        // Apply cycled Euclidean rotation to the rhythm settings
+        var modifiedRhythmSettings = baseParameters.rhythmSettings
+        modifiedRhythmSettings.euclideanRotation = Int(
+            modifiedSettings.euclideanRotation.currentValue(
+                baseValue: Double(baseParameters.rhythmSettings.euclideanRotation)
+            )
+        )
+        
         return PatternParameters(
             rootNote: Int(modifiedSettings.rootNote.currentValue(baseValue: Double(baseParameters.rootNote))),
             scaleType: baseParameters.scaleType,
             numberOfOctaves: Int(modifiedSettings.numberOfOctaves.currentValue(baseValue: Double(baseParameters.numberOfOctaves))),
             divisionsOfOctave: Int(modifiedSettings.divisionsOfOctave.currentValue(baseValue: Double(baseParameters.divisionsOfOctave))),
             tempo: modifiedSettings.tempo.currentValue(baseValue: baseParameters.tempo),
-            timeSignature: baseParameters.timeSignature,
+            meter: baseParameters.meter,
             iterations: baseParameters.iterations,
             randomiseOrder: baseParameters.randomiseOrder,
             primaryInterval: Int(modifiedSettings.primaryInterval.currentValue(baseValue: Double(baseParameters.primaryInterval))),
@@ -167,17 +175,14 @@ class CyclicalParameterManager: ObservableObject {
             retrogradeSections: baseParameters.retrogradeSections,
             registerShifts: baseParameters.registerShifts,
             contourPattern: baseParameters.contourPattern,
-            noteDurationPattern: baseParameters.noteDurationPattern,
             baseNoteDuration: modifiedSettings.baseNoteDuration.currentValue(baseValue: baseParameters.baseNoteDuration),
-            rhythmicDensity: modifiedSettings.rhythmicDensity.currentValue(baseValue: baseParameters.rhythmicDensity),
-            syncopationLevel: baseParameters.syncopationLevel,
-            metricModulation: baseParameters.metricModulation,
             harmonicMode: baseParameters.harmonicMode,
             chordGeneration: baseParameters.chordGeneration,
             harmonicRhythm: baseParameters.harmonicRhythm,
             velocitySettings: modifiedVelocitySettings,
             toneShifting: baseParameters.toneShifting,
-            cyclicalSettings: modifiedSettings
+            cyclicalSettings: modifiedSettings,
+            rhythmSettings: modifiedRhythmSettings
         )
     }
     

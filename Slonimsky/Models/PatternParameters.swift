@@ -15,7 +15,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let numberOfOctaves: Int
     let divisionsOfOctave: Int
     let tempo: Double
-    let timeSignature: TimeSignature
+    var meter: Meter
     let iterations: Int
     let randomiseOrder: Bool
     
@@ -41,11 +41,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let contourPattern: ContourPattern
     
     // MARK: - Rhythmic Patterns
-    let noteDurationPattern: DurationPattern
     var baseNoteDuration: TimeInterval
-    var rhythmicDensity: Double
-    let syncopationLevel: Double
-    let metricModulation: MetricModulationSettings
     
     // MARK: - Harmonic Context
     let harmonicMode: HarmonicMode
@@ -58,6 +54,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
     
     // MARK: - Cyclical Parameters
     var cyclicalSettings: CyclicalSettings
+
+    // MARK: - Rhythm Engine
+    var rhythmSettings: RhythmSettings
     
     // MARK: - Initialization
     init(
@@ -66,7 +65,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         numberOfOctaves: Int = 1,
         divisionsOfOctave: Int = 12,
         tempo: Double = 120.0,
-        timeSignature: TimeSignature = .common,
+        meter: Meter = .fourFour,
         iterations: Int = 1,
         randomiseOrder: Bool = false,
         primaryInterval: Int = 1,
@@ -83,24 +82,21 @@ struct PatternParameters: Codable, Equatable, Hashable {
         retrogradeSections: Bool = false,  // Legacy: kept for compatibility
         registerShifts: RegisterShiftPattern = .none,
         contourPattern: ContourPattern = .linear,
-        noteDurationPattern: DurationPattern = .uniform,
-        baseNoteDuration: TimeInterval = 0.25,
-        rhythmicDensity: Double = 1.0,
-        syncopationLevel: Double = 0.0,
-        metricModulation: MetricModulationSettings = .default,
+        baseNoteDuration: TimeInterval = 1.0,
         harmonicMode: HarmonicMode = .tonal,
         chordGeneration: ChordSettings = .default,
         harmonicRhythm: HarmonicRhythmSettings = .default,
         velocitySettings: VelocitySettings = .default,
         toneShifting: ToneShiftSettings = .default,
-        cyclicalSettings: CyclicalSettings = CyclicalSettings()
+        cyclicalSettings: CyclicalSettings = CyclicalSettings(),
+        rhythmSettings: RhythmSettings = .default
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
         self.numberOfOctaves = numberOfOctaves
         self.divisionsOfOctave = divisionsOfOctave
         self.tempo = tempo
-        self.timeSignature = timeSignature
+        self.meter = meter
         self.iterations = iterations
         self.randomiseOrder = randomiseOrder
         self.primaryInterval = primaryInterval
@@ -117,17 +113,14 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.retrogradeSections = retrogradeSections
         self.registerShifts = registerShifts
         self.contourPattern = contourPattern
-        self.noteDurationPattern = noteDurationPattern
         self.baseNoteDuration = baseNoteDuration
-        self.rhythmicDensity = rhythmicDensity
-        self.syncopationLevel = syncopationLevel
-        self.metricModulation = metricModulation
         self.harmonicMode = harmonicMode
         self.chordGeneration = chordGeneration
         self.harmonicRhythm = harmonicRhythm
         self.velocitySettings = velocitySettings
         self.toneShifting = toneShifting
         self.cyclicalSettings = cyclicalSettings
+        self.rhythmSettings = rhythmSettings
     }
     
     // MARK: - Validation
@@ -140,9 +133,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard primaryInterval >= 1 && primaryInterval <= 12 else { return false }
         guard secondaryInterval >= 1 && secondaryInterval <= 12 else { return false }
         guard mirrorPoints >= 0 && mirrorPoints <= 10 else { return false }
-        guard baseNoteDuration >= 0.0625 && baseNoteDuration <= 4.0 else { return false }
-        guard rhythmicDensity >= 0.1 && rhythmicDensity <= 2.0 else { return false }
-        guard syncopationLevel >= 0.0 && syncopationLevel <= 1.0 else { return false }
+        guard baseNoteDuration >= 0.125 && baseNoteDuration <= 4.0 else { return false }
+        guard meter.isValid else { return false }
+        guard rhythmSettings.validate() else { return false }
         
         return true
     }
@@ -285,35 +278,6 @@ enum ScaleType: String, CaseIterable, Codable {
     }
 }
 
-/// Time signatures for musical patterns
-enum TimeSignature: String, CaseIterable, Codable {
-    case twoFour = "2/4"
-    case threeFour = "3/4"
-    case fourFour = "4/4"
-    case sixEight = "6/8"
-    case custom = "Custom"
-    
-    var beatsPerMeasure: Int {
-        switch self {
-        case .twoFour: return 2
-        case .threeFour: return 3
-        case .fourFour: return 4
-        case .sixEight: return 6
-        case .custom: return 4
-        }
-    }
-    
-    var beatValue: Double {
-        switch self {
-        case .twoFour, .threeFour, .fourFour: return 1.0
-        case .sixEight: return 1.5
-        case .custom: return 1.0
-        }
-    }
-    
-    static var common: TimeSignature { .fourFour }
-}
-
 /// Interval patterns for melodic generation
 enum IntervalPattern: String, CaseIterable, Codable {
     case ascending = "Ascending"
@@ -328,14 +292,6 @@ enum Direction: String, CaseIterable, Codable {
     case ascending = "Ascending"
     case descending = "Descending"
     case alternating = "Alternating"
-}
-
-/// Duration patterns for rhythmic variation
-enum DurationPattern: String, CaseIterable, Codable {
-    case uniform = "Uniform"
-    case alternating = "Alternating"
-    case progressive = "Progressive"
-    case random = "Random"
 }
 
 /// Rhythmic accompaniment styles
@@ -375,7 +331,7 @@ extension PatternParameters {
         numberOfOctaves: 1,
         divisionsOfOctave: 12,
         tempo: 120.0,
-        timeSignature: .common,
+        meter: .fourFour,
         iterations: 1,
         randomiseOrder: false,
         primaryInterval: 1,
@@ -392,11 +348,7 @@ extension PatternParameters {
         retrogradeSections: false,
         registerShifts: .none,
         contourPattern: .linear,
-        noteDurationPattern: .uniform,
-        baseNoteDuration: 0.25,
-        rhythmicDensity: 1.0,
-        syncopationLevel: 0.0,
-        metricModulation: .default,
+        baseNoteDuration: 1.0,
         harmonicMode: .tonal,
         chordGeneration: .default,
         harmonicRhythm: .default,

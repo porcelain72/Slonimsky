@@ -23,7 +23,7 @@ final class MIDIIntegrationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -37,11 +37,7 @@ final class MIDIIntegrationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -69,10 +65,10 @@ final class MIDIIntegrationTests: XCTestCase {
     func testMIDIEngineMusicSequenceGeneration() throws {
         // Create a simple pattern result
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-            MIDIInfo(note: 65, velocity: 80, beatLength: 0.25, cycleIndex: 0)
+            MIDIInfo(note: 60, velocity: 80, duration: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 62, velocity: 80, duration: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 64, velocity: 80, duration: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 65, velocity: 80, duration: 0.25, cycleIndex: 0)
         ]
         
         let metadata = PatternMetadata(
@@ -104,23 +100,23 @@ final class MIDIIntegrationTests: XCTestCase {
         // Test with various note configurations
         let testCases = [
             // Single note
-            [MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0)],
+            [MIDIInfo(note: 60, velocity: 80, duration: 1.0, cycleIndex: 0)],
             // Multiple notes with different velocities
             [
-                MIDIInfo(note: 60, velocity: 64, beatLength: 0.5, cycleIndex: 0),
-                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5, cycleIndex: 0),
-                MIDIInfo(note: 64, velocity: 96, beatLength: 0.5, cycleIndex: 0)
+                MIDIInfo(note: 60, velocity: 64, duration: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 62, velocity: 80, duration: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 64, velocity: 96, duration: 0.5, cycleIndex: 0)
             ],
             // Notes with different durations
             [
-                MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-                MIDIInfo(note: 62, velocity: 80, beatLength: 0.5, cycleIndex: 0),
-                MIDIInfo(note: 64, velocity: 80, beatLength: 1.0, cycleIndex: 0)
+                MIDIInfo(note: 60, velocity: 80, duration: 0.25, cycleIndex: 0),
+                MIDIInfo(note: 62, velocity: 80, duration: 0.5, cycleIndex: 0),
+                MIDIInfo(note: 64, velocity: 80, duration: 1.0, cycleIndex: 0)
             ],
             // Edge cases
             [
-                MIDIInfo(note: 0, velocity: 1, beatLength: 0.1, cycleIndex: 0),   // Lowest note, lowest velocity
-                MIDIInfo(note: 127, velocity: 127, beatLength: 4.0, cycleIndex: 0) // Highest note, highest velocity
+                MIDIInfo(note: 0, velocity: 1, duration: 0.1, cycleIndex: 0),   // Lowest note, lowest velocity
+                MIDIInfo(note: 127, velocity: 127, duration: 4.0, cycleIndex: 0) // Highest note, highest velocity
             ]
         ]
         
@@ -131,7 +127,7 @@ final class MIDIIntegrationTests: XCTestCase {
                 generationTime: 0.001,
                 noteCount: notes.count,
                 pitchRange: notes.map(\.note).min()!...notes.map(\.note).max()!,
-                duration: notes.reduce(0) { $0 + $1.beatLength }
+                duration: notes.totalLength
             )
             
             let performance = PerformanceMetrics(
@@ -202,9 +198,9 @@ final class MIDIIntegrationTests: XCTestCase {
     func testMIDIEngineExportWithSequence() throws {
         // Create a sequence and test export
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-            MIDIInfo(note: 62, velocity: 80, beatLength: 0.25, cycleIndex: 0),
-            MIDIInfo(note: 64, velocity: 80, beatLength: 0.25, cycleIndex: 0)
+            MIDIInfo(note: 60, velocity: 80, duration: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 62, velocity: 80, duration: 0.25, cycleIndex: 0),
+            MIDIInfo(note: 64, velocity: 80, duration: 0.25, cycleIndex: 0)
         ]
         
         let metadata = PatternMetadata(
@@ -268,13 +264,16 @@ final class MIDIIntegrationTests: XCTestCase {
                 XCTAssertEqual(patternResult.metadata.generatorName, "Scale Pattern Generator")
                 XCTAssertLessThan(patternResult.performance.generationTime, 0.5)
                 
-                // Verify note properties
-                for note in patternResult.notes {
+                // Verify note properties (rests carry velocity 0 by design)
+                for note in patternResult.notes.soundingNotes {
                     XCTAssertGreaterThanOrEqual(note.note, 0)
                     XCTAssertLessThanOrEqual(note.note, 127)
                     XCTAssertGreaterThanOrEqual(note.velocity, 1)
                     XCTAssertLessThanOrEqual(note.velocity, 127)
-                    XCTAssertGreaterThan(note.beatLength, 0)
+                    XCTAssertGreaterThan(note.duration, 0)
+                }
+                for rest in patternResult.notes where rest.isRest {
+                    XCTAssertGreaterThan(rest.duration, 0)
                 }
                 
             case .failure(let error):
@@ -331,13 +330,16 @@ final class MIDIIntegrationTests: XCTestCase {
                 XCTAssertGreaterThan(patternResult.notes.count, 0)
                 XCTAssertLessThan(patternResult.performance.generationTime, 0.5)
                 
-                // Verify note properties
-                for note in patternResult.notes {
+                // Verify note properties (rests carry velocity 0 by design)
+                for note in patternResult.notes.soundingNotes {
                     XCTAssertGreaterThanOrEqual(note.note, 0)
                     XCTAssertLessThanOrEqual(note.note, 127)
                     XCTAssertGreaterThanOrEqual(note.velocity, 1)
                     XCTAssertLessThanOrEqual(note.velocity, 127)
-                    XCTAssertGreaterThan(note.beatLength, 0)
+                    XCTAssertGreaterThan(note.duration, 0)
+                }
+                for rest in patternResult.notes where rest.isRest {
+                    XCTAssertGreaterThan(rest.duration, 0)
                 }
                 
             case .failure(let error):
@@ -472,7 +474,6 @@ final class MIDIIntegrationTests: XCTestCase {
         XCTAssertTrue(generatorNames.contains("Scale Pattern Generator"))
         XCTAssertTrue(generatorNames.contains("Interval Pattern Generator"))
         XCTAssertTrue(generatorNames.contains("Modulation Pattern Generator"))
-        XCTAssertTrue(generatorNames.contains("Rhythmic Pattern Generator"))
         XCTAssertTrue(generatorNames.contains("Harmonic Pattern Generator"))
         XCTAssertTrue(generatorNames.contains("Contour Pattern Generator"))
         XCTAssertTrue(generatorNames.contains("Symmetrical Pattern Generator"))
@@ -749,7 +750,7 @@ final class MIDIIntegrationTests: XCTestCase {
             numberOfOctaves: 3,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 2,
             secondaryInterval: 3,
             intervalPattern: .alternating,
@@ -763,11 +764,7 @@ final class MIDIIntegrationTests: XCTestCase {
             retrogradeSections: true,
             registerShifts: .linear,
             contourPattern: .wave,
-            noteDurationPattern: .progressive,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.5,
-            syncopationLevel: 0.5,
-            metricModulation: MetricModulationSettings(enabled: true, modulationType: .accelerando, intensity: 0.7, frequency: 4),
             harmonicMode: .polymodal,
             chordGeneration: ChordSettings(enabled: true, chordSize: 4, voicingPreference: .open, velocityScale: 0.8),
             harmonicRhythm: HarmonicRhythmSettings(chordChangeFrequency: 3, syncopationLevel: 0.4, harmonicTension: 0.6),
@@ -872,10 +869,10 @@ final class MIDIIntegrationTests: XCTestCase {
         
         // Create a simple pattern with known duration
         let notes = [
-            MIDIInfo(note: 60, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
-            MIDIInfo(note: 62, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
-            MIDIInfo(note: 64, velocity: 80, beatLength: 1.0, cycleIndex: 0),  // 1 beat
-            MIDIInfo(note: 65, velocity: 80, beatLength: 1.0, cycleIndex: 0)   // 1 beat
+            MIDIInfo(note: 60, velocity: 80, duration: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 62, velocity: 80, duration: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 64, velocity: 80, duration: 1.0, cycleIndex: 0),  // 1 beat
+            MIDIInfo(note: 65, velocity: 80, duration: 1.0, cycleIndex: 0)   // 1 beat
         ]
         
         let metadata = PatternMetadata(

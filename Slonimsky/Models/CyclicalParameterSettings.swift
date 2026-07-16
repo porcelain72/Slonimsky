@@ -7,7 +7,6 @@ public enum CyclicalParameterType: String, CaseIterable, Codable {
     case ultrapolationNotes = "Ultrapolation Notes"
     case modulationInterval = "Modulation Interval"
     case baseNoteDuration = "Base Note Duration"
-    case rhythmicDensity = "Rhythmic Density"
     case primaryInterval = "Primary Interval"
     case secondaryInterval = "Secondary Interval"
     case baseVelocity = "Base Velocity"
@@ -17,6 +16,7 @@ public enum CyclicalParameterType: String, CaseIterable, Codable {
     case numberOfOctaves = "Number of Octaves"
     case divisionsOfOctave = "Divisions of Octave"
     case mirrorPoints = "Mirror Points"
+    case euclideanRotation = "Euclidean Rotation"
 }
 
 /// How cyclical values should be applied to base values
@@ -173,17 +173,10 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         stepSize: 1.0
     )
     
-    // Rhythmic Parameters
+    // Rhythmic Parameters (quarter note = 1.0 beat: cycles 16th note up to half note)
     public var baseNoteDuration: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.25,
-        maxValue: 2.0,
-        stepSize: 0.25
-    )
-    
-    public var rhythmicDensity: CyclicalParameterSettings = CyclicalParameterSettings(
-        isEnabled: false,
-        minValue: 0.5,
         maxValue: 2.0,
         stepSize: 0.25
     )
@@ -255,6 +248,14 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         maxValue: 5.0,
         stepSize: 1.0
     )
+
+    // Rhythm Engine Parameters (rotates the Euclidean grid one step per cycle)
+    public var euclideanRotation: CyclicalParameterSettings = CyclicalParameterSettings(
+        isEnabled: false,
+        minValue: 0.0,
+        maxValue: 8.0,
+        stepSize: 1.0
+    )
     
     public init() {}
     
@@ -267,7 +268,6 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         if ultrapolationNotes.isEnabled { enabled[.ultrapolationNotes] = ultrapolationNotes }
         if modulationInterval.isEnabled { enabled[.modulationInterval] = modulationInterval }
         if baseNoteDuration.isEnabled { enabled[.baseNoteDuration] = baseNoteDuration }
-        if rhythmicDensity.isEnabled { enabled[.rhythmicDensity] = rhythmicDensity }
         if primaryInterval.isEnabled { enabled[.primaryInterval] = primaryInterval }
         if secondaryInterval.isEnabled { enabled[.secondaryInterval] = secondaryInterval }
         if baseVelocity.isEnabled { enabled[.baseVelocity] = baseVelocity }
@@ -277,6 +277,7 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         if numberOfOctaves.isEnabled { enabled[.numberOfOctaves] = numberOfOctaves }
         if divisionsOfOctave.isEnabled { enabled[.divisionsOfOctave] = divisionsOfOctave }
         if mirrorPoints.isEnabled { enabled[.mirrorPoints] = mirrorPoints }
+        if euclideanRotation.isEnabled { enabled[.euclideanRotation] = euclideanRotation }
         
         return enabled
     }
@@ -288,7 +289,6 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         ultrapolationNotes.advanceCycle()
         modulationInterval.advanceCycle()
         baseNoteDuration.advanceCycle()
-        rhythmicDensity.advanceCycle()
         primaryInterval.advanceCycle()
         secondaryInterval.advanceCycle()
         baseVelocity.advanceCycle()
@@ -298,6 +298,7 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         numberOfOctaves.advanceCycle()
         divisionsOfOctave.advanceCycle()
         mirrorPoints.advanceCycle()
+        euclideanRotation.advanceCycle()
     }
     
     /// Reset all cycle counters
@@ -307,7 +308,6 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         ultrapolationNotes.resetCycle()
         modulationInterval.resetCycle()
         baseNoteDuration.resetCycle()
-        rhythmicDensity.resetCycle()
         primaryInterval.resetCycle()
         secondaryInterval.resetCycle()
         baseVelocity.resetCycle()
@@ -317,5 +317,6 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         numberOfOctaves.resetCycle()
         divisionsOfOctave.resetCycle()
         mirrorPoints.resetCycle()
+        euclideanRotation.resetCycle()
     }
 } 

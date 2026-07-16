@@ -422,63 +422,20 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
         structure: [SymmetricalNote],
         parameters: PatternParameters
     ) -> [MIDIInfo] {
-        return structure.enumerated().map { index, symmetricalNote in
-            let duration = calculateSymmetricalDuration(
-                index: index,
-                symmetricalNote: symmetricalNote,
-                baseDuration: parameters.baseNoteDuration,
-                parameters: parameters
-            )
-            
-            let velocity = calculateSymmetricalVelocity(
-                for: index,
-                symmetricalNote: symmetricalNote,
-                settings: parameters.velocitySettings,
-                parameters: parameters
-            )
-            
-            return MIDIInfo(
-                note: symmetricalNote.note,
-                velocity: velocity,
-                beatLength: duration,
-                cycleIndex: 0
-            )
-        }
-    }
-    
-    private func calculateSymmetricalDuration(
-        index: Int,
-        symmetricalNote: SymmetricalNote,
-        baseDuration: TimeInterval,
-        parameters: PatternParameters
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        // Apply symmetry-based duration variations
-        switch symmetricalNote.symmetryType {
-        case .original:
-            duration *= 1.0
-        case .inverted:
-            duration *= 0.9
-        case .mirrored:
-            duration *= 1.1
-        case .retrograde:
-            duration *= 0.8
-        }
-        
-        // Apply pattern-based duration
-        switch parameters.noteDurationPattern {
-        case .uniform:
-            break
-        case .alternating:
-            duration = index % 2 == 0 ? baseDuration : baseDuration * 0.7
-        case .progressive:
-            duration *= 1.0 + (Double(index) * 0.03)
-        case .random:
-            duration *= Double.random(in: 0.8...1.2)
-        }
-        
-        return max(duration, 0.0625) // Minimum duration
+        let pitches = structure.map { $0.note }
+        return MIDIPatternConverter.scheduleRhythm(
+            pitches: pitches,
+            parameters: parameters,
+            velocityProvider: { [weak self] index, note in
+                let symmetricalNote = structure[index % structure.count]
+                return self?.calculateSymmetricalVelocity(
+                    for: index,
+                    symmetricalNote: symmetricalNote,
+                    settings: parameters.velocitySettings,
+                    parameters: parameters
+                ) ?? parameters.velocitySettings.calculateVelocity(for: index, note: note)
+            }
+        )
     }
     
     private func calculateSymmetricalVelocity(

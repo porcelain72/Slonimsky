@@ -92,7 +92,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .intervals: return "Interval Parameters"
         case .modulations: return "Slonimsky Modulations"
         case .directional: return "Directional Parameters"
-        case .rhythmic: return "Rhythmic Parameters"
+        case .rhythmic: return "Rhythm & Meter"
         case .harmonic: return "Harmonic Parameters"
         case .expression: return "Expression Parameters"
         case .accompaniment: return "Rhythmic Accompaniment"
@@ -105,7 +105,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .intervals: return "arrow.up.and.down"
         case .modulations: return "waveform.path.ecg"
         case .directional: return "arrow.triangle.turn.up.right.circle"
-        case .rhythmic: return "clock"
+        case .rhythmic: return "metronome"
         case .harmonic: return "music.note.list"
         case .expression: return "slider.horizontal.3"
         case .accompaniment: return "drumsticks"
@@ -123,7 +123,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .directional:
             return "Direction, mirror points, retrograde, contours"
         case .rhythmic:
-            return "Duration patterns, density, syncopation"
+            return "Time signature, groupings, isorhythm, Euclidean rhythms"
         case .harmonic:
             return "Harmonic mode, chord generation, rhythm"
         case .expression:
@@ -166,7 +166,7 @@ struct ParameterCategoryDetailView: View {
                     case .directional:
                         DirectionalParametersDetailView(parameterManager: parameterManager)
                     case .rhythmic:
-                        RhythmicParametersDetailView(parameterManager: parameterManager)
+                        RhythmMeterDetailView(parameterManager: parameterManager)
                     case .harmonic:
                         HarmonicParametersDetailView(parameterManager: parameterManager)
                     case .expression:
@@ -390,16 +390,16 @@ struct BasicParametersDetailView: View {
                 .disabled(!parameterManager.randomiseOrder)
             }
             
-            // Time Signature
+            // Meter (full editor with groupings lives in Rhythm & Meter)
             HStack {
-                Text("Time Signature:")
+                Text("Meter:")
                     .foregroundColor(Color.garageBandText)
                 .background(Color.garageBandPanel)
                 .cornerRadius(4)
                 Spacer()
-                Picker("Time Signature", selection: $parameterManager.timeSignature) {
-                    ForEach(TimeSignature.allCases, id: \.self) { signature in
-                        Text(signature.rawValue).tag(signature)
+                Picker("Meter", selection: $parameterManager.meter) {
+                    ForEach(Meter.presets, id: \.self) { meter in
+                        Text(meter.displayName).tag(meter)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
@@ -637,227 +637,469 @@ struct DirectionalParametersDetailView: View {
     }
 }
 
-struct RhythmicParametersDetailView: View {
+struct RhythmMeterDetailView: View {
     @ObservedObject var parameterManager: ParameterManager
     
     var body: some View {
-        VStack(spacing: 16) {
-            // Note Duration Pattern
+        VStack(spacing: 20) {
+            meterSection
+            Divider()
+            rhythmModeSection
+            Divider()
+            accentSection
+        }
+    }
+    
+    // MARK: - Meter
+    
+    private var groupingsAreValid: Bool {
+        parameterManager.meter.groupings.reduce(0, +) == parameterManager.meter.numerator
+    }
+    
+    private var meterSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Meter")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
+            
             HStack {
-                Text("Duration Pattern:")
+                Text("Preset:")
                     .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
                 Spacer()
-                Picker("Duration Pattern", selection: $parameterManager.noteDurationPattern) {
-                    ForEach(DurationPattern.allCases, id: \.self) { pattern in
-                        Text(pattern.rawValue.capitalized).tag(pattern)
+                Picker("Meter Preset", selection: $parameterManager.meter) {
+                    ForEach(Meter.presets, id: \.self) { meter in
+                        Text(meter.displayName).tag(meter)
                     }
                 }
                 .pickerStyle(MenuPickerStyle())
-                .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
+                .frame(maxWidth: 180)
             }
             
-            // Base Note Duration with cycling
-            VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    Text("Base Note Duration:")
+            HStack(spacing: 16) {
+                Stepper(value: Binding(
+                    get: { parameterManager.meter.numerator },
+                    set: { newValue in
+                        var meter = parameterManager.meter
+                        meter.numerator = newValue
+                        meter.groupings = Meter.defaultGroupings(numerator: newValue, denominator: meter.denominator)
+                        parameterManager.meter = meter
+                    }
+                ), in: 1...16) {
+                    Text("Beats: \(parameterManager.meter.numerator)")
                         .foregroundColor(Color.garageBandText)
+                }
+                
+                Picker("Unit", selection: Binding(
+                    get: { parameterManager.meter.denominator },
+                    set: { newValue in
+                        var meter = parameterManager.meter
+                        meter.denominator = newValue
+                        meter.groupings = Meter.defaultGroupings(numerator: meter.numerator, denominator: newValue)
+                        parameterManager.meter = meter
+                    }
+                )) {
+                    Text("2").tag(2)
+                    Text("4").tag(4)
+                    Text("8").tag(8)
+                    Text("16").tag(16)
+                }
+                .pickerStyle(SegmentedPickerStyle())
+                .frame(maxWidth: 160)
+            }
+            
+            // Grouping editor
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Groupings (accent grid):")
+                    .font(.caption)
+                    .foregroundColor(Color.garageBandText.opacity(0.8))
+                
+                HStack(spacing: 8) {
+                    ForEach(parameterManager.meter.groupings.indices, id: \.self) { index in
+                        Stepper(value: Binding(
+                            get: {
+                                index < parameterManager.meter.groupings.count
+                                    ? parameterManager.meter.groupings[index] : 1
+                            },
+                            set: { newValue in
+                                var meter = parameterManager.meter
+                                if index < meter.groupings.count {
+                                    meter.groupings[index] = newValue
+                                    parameterManager.meter = meter
+                                }
+                            }
+                        ), in: 1...16) {
+                            Text("\(parameterManager.meter.groupings[index])")
+                                .font(.system(.body, design: .monospaced))
+                                .foregroundColor(Color.garageBandText)
+                        }
+                        .fixedSize()
+                    }
+                    
+                    Button(action: {
+                        var meter = parameterManager.meter
+                        meter.groupings.append(1)
+                        parameterManager.meter = meter
+                    }) {
+                        Image(systemName: "plus.circle")
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(parameterManager.meter.groupings.count >= 8)
+                    
+                    Button(action: {
+                        var meter = parameterManager.meter
+                        if meter.groupings.count > 1 {
+                            meter.groupings.removeLast()
+                            parameterManager.meter = meter
+                        }
+                    }) {
+                        Image(systemName: "minus.circle")
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(parameterManager.meter.groupings.count <= 1)
+                    
                     Spacer()
-                    Picker("Base Note Duration", selection: Binding(
-                        get: { parameterManager.baseNoteDurationEnum },
-                        set: { parameterManager.baseNoteDurationEnum = $0 }
+                }
+                
+                if groupingsAreValid {
+                    Text("\(parameterManager.meter.displayName) — \(String(format: "%.2f", parameterManager.meter.beatsPerBar)) beats per bar")
+                        .font(.caption)
+                        .foregroundColor(Color.garageBandText.opacity(0.7))
+                } else {
+                    Text("Groupings must sum to \(parameterManager.meter.numerator) (currently \(parameterManager.meter.groupings.reduce(0, +)))")
+                        .font(.caption)
+                        .foregroundColor(.red)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Rhythm mode
+    
+    private var rhythmModeSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Rhythm Mode")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
+            
+            Picker("Rhythm Mode", selection: $parameterManager.rhythmSettings.mode) {
+                ForEach(RhythmMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            
+            Text(parameterManager.rhythmSettings.mode.description)
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
+            
+            switch parameterManager.rhythmSettings.mode {
+            case .uniform:
+                uniformSection
+            case .isorhythm:
+                taleaSection
+            case .euclidean:
+                euclideanSection
+            }
+        }
+    }
+    
+    // MARK: - Uniform
+    
+    private var uniformSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            HStack {
+                Text("Base Note Duration:")
+                    .foregroundColor(Color.garageBandText)
+                Spacer()
+                Picker("Base Note Duration", selection: Binding(
+                    get: { parameterManager.baseNoteDurationEnum },
+                    set: { parameterManager.baseNoteDurationEnum = $0 }
+                )) {
+                    ForEach(BaseNoteDuration.allCases, id: \.self) { duration in
+                        Text(duration.shortName).tag(duration)
+                    }
+                }
+                .pickerStyle(MenuPickerStyle())
+                .frame(maxWidth: 180)
+            }
+            
+            Text("\(String(format: "%.3f", parameterManager.baseNoteDuration)) beats")
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
+            
+            Toggle("Cyclical", isOn: Binding(
+                get: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled },
+                set: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled = $0 }
+            ))
+            .toggleStyle(CheckboxToggleStyle())
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(Color.garageBandText)
+            
+            if parameterManager.cyclicalSettings.baseNoteDuration.isEnabled {
+                baseDurationCyclicalDetail
+            }
+        }
+    }
+    
+    private var baseDurationCyclicalDetail: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Divider().padding(.vertical, 4)
+            Text("Cyclical Settings").font(.subheadline).fontWeight(.medium).foregroundColor(Color.garageBandText)
+            HStack {
+                Text("Cycle Type:").foregroundColor(Color.garageBandText)
+                Spacer()
+                Picker("Cycle Type", selection: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType = $0 }
+                )) {
+                    ForEach(CycleType.allCases, id: \.self) { type in
+                        Text(type.rawValue).tag(type)
+                    }
+                }
+            }
+            HStack {
+                Text("Min Value:").foregroundColor(Color.garageBandText)
+                Spacer()
+                TextField("Min", value: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.minValue },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.minValue = $0 }
+                ), formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 80)
+            }
+            HStack {
+                Text("Max Value:").foregroundColor(Color.garageBandText)
+                Spacer()
+                TextField("Max", value: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue = $0 }
+                ), formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 80)
+            }
+            HStack {
+                Text("Step Size:").foregroundColor(Color.garageBandText)
+                Spacer()
+                TextField("Step", value: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize = $0 }
+                ), formatter: NumberFormatter())
+                .textFieldStyle(RoundedBorderTextFieldStyle())
+                .frame(width: 80)
+            }
+            HStack {
+                Text("Operation:").foregroundColor(Color.garageBandText)
+                Spacer()
+                Picker("Operation", selection: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.operationType },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.operationType = $0 }
+                )) {
+                    ForEach(CyclicalOperationType.allCases, id: \.self) { op in
+                        Text(op.rawValue).tag(op)
+                    }
+                }
+            }
+        }
+    }
+    
+    // MARK: - Talea (isorhythm)
+    
+    private var taleaSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Talea (duration cycle):")
+                .foregroundColor(Color.garageBandText)
+            
+            ForEach(parameterManager.rhythmSettings.talea.indices, id: \.self) { index in
+                HStack {
+                    Picker("Duration", selection: Binding(
+                        get: {
+                            index < parameterManager.rhythmSettings.talea.count
+                                ? parameterManager.rhythmSettings.talea[index].value : .quarter
+                        },
+                        set: { newValue in
+                            if index < parameterManager.rhythmSettings.talea.count {
+                                parameterManager.rhythmSettings.talea[index].value = newValue
+                            }
+                        }
                     )) {
-                        ForEach(BaseNoteDuration.allCases, id: \.self) { duration in
-                            Text(duration.shortName).tag(duration)
+                        ForEach(DurationValue.allCases, id: \.self) { value in
+                            Text(value.displayName).tag(value)
                         }
                     }
                     .pickerStyle(MenuPickerStyle())
+                    .frame(maxWidth: 160)
+                    
+                    Toggle("Rest", isOn: Binding(
+                        get: {
+                            index < parameterManager.rhythmSettings.talea.count
+                                ? parameterManager.rhythmSettings.talea[index].isRest : false
+                        },
+                        set: { newValue in
+                            if index < parameterManager.rhythmSettings.talea.count {
+                                parameterManager.rhythmSettings.talea[index].isRest = newValue
+                            }
+                        }
+                    ))
+                    .toggleStyle(CheckboxToggleStyle())
+                    .font(.system(size: 12))
                     .foregroundColor(Color.garageBandText)
-                    .background(Color.garageBandPanel)
-                    .cornerRadius(4)
-                }
-                
-                // Show current beat value
-                Text("\(String(format: "%.3f", parameterManager.baseNoteDuration)) beats")
-                    .font(.caption)
-                    .foregroundColor(Color.garageBandText.opacity(0.7))
-                
-                // Cyclical settings toggle
-                Toggle("Cyclical", isOn: Binding(
-                    get: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled },
-                    set: { parameterManager.cyclicalSettings.baseNoteDuration.isEnabled = $0 }
-                ))
-                .toggleStyle(CheckboxToggleStyle())
-                .font(.system(size: 12, weight: .medium))
-                .foregroundColor(Color.garageBandText)
-                
-                // Cyclical settings detail (shown when enabled)
-                if parameterManager.cyclicalSettings.baseNoteDuration.isEnabled {
-                    Divider().padding(.vertical, 4)
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Cyclical Settings").font(.subheadline).fontWeight(.medium).foregroundColor(Color.garageBandText)
-                        HStack {
-                            Text("Cycle Type:").foregroundColor(Color.garageBandText)
-                            Spacer()
-                            Picker("Cycle Type", selection: Binding(
-                                get: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType },
-                                set: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType = $0 }
-                            )) {
-                                ForEach(CycleType.allCases, id: \.self) { type in
-                                    Text(type.rawValue).tag(type)
-                                }
-                            }
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        if index < parameterManager.rhythmSettings.talea.count,
+                           parameterManager.rhythmSettings.talea.count > 1 {
+                            parameterManager.rhythmSettings.talea.remove(at: index)
                         }
-                        HStack {
-                            Text("Min Value:").foregroundColor(Color.garageBandText)
-                            Spacer()
-                            TextField("Min", value: Binding(
-                                get: { parameterManager.cyclicalSettings.baseNoteDuration.minValue },
-                                set: { parameterManager.cyclicalSettings.baseNoteDuration.minValue = $0 }
-                            ), formatter: NumberFormatter())
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 80)
-                        }
-                        HStack {
-                            Text("Max Value:").foregroundColor(Color.garageBandText)
-                            Spacer()
-                            TextField("Max", value: Binding(
-                                get: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue },
-                                set: { parameterManager.cyclicalSettings.baseNoteDuration.maxValue = $0 }
-                            ), formatter: NumberFormatter())
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 80)
-                        }
-                        HStack {
-                            Text("Step Size:").foregroundColor(Color.garageBandText)
-                            Spacer()
-                            TextField("Step", value: Binding(
-                                get: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize },
-                                set: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize = $0 }
-                            ), formatter: NumberFormatter())
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .frame(width: 80)
-                        }
-                        HStack {
-                            Text("Operation:").foregroundColor(Color.garageBandText)
-                            Spacer()
-                            Picker("Operation", selection: Binding(
-                                get: { parameterManager.cyclicalSettings.baseNoteDuration.operationType },
-                                set: { parameterManager.cyclicalSettings.baseNoteDuration.operationType = $0 }
-                            )) {
-                                ForEach(CyclicalOperationType.allCases, id: \.self) { op in
-                                    Text(op.rawValue).tag(op)
-                                }
-                            }
-                        }
+                    }) {
+                        Image(systemName: "trash")
+                            .foregroundColor(.red.opacity(0.8))
                     }
+                    .buttonStyle(PlainButtonStyle())
+                    .disabled(parameterManager.rhythmSettings.talea.count <= 1)
                 }
             }
             
-            // Rhythmic Density with cycling
-            CyclicalParameterControl(
-                title: "Rhythmic Density",
-                value: $parameterManager.rhythmicDensity,
-                range: 0.1...3.0,
-                cyclicalSettings: Binding(
-                    get: { parameterManager.cyclicalSettings.rhythmicDensity.isEnabled ? parameterManager.cyclicalSettings.rhythmicDensity : nil },
-                    set: { newSettings in
-                        if let settings = newSettings {
-                            parameterManager.cyclicalSettings.rhythmicDensity = settings
-                        } else {
-                            parameterManager.cyclicalSettings.rhythmicDensity.isEnabled = false
-                        }
-                    }
-                ),
-                defaultValue: 1.0,
-                formatter: { String(format: "%.2f", $0) }
-            )
+            Button(action: {
+                parameterManager.rhythmSettings.talea.append(TaleaEntry(value: .quarter))
+            }) {
+                Label("Add Entry", systemImage: "plus.circle")
+            }
+            .buttonStyle(PlainButtonStyle())
+            .foregroundColor(Color.garageBandAccent)
+            .disabled(parameterManager.rhythmSettings.talea.count >= 16)
             
-            // Syncopation Level
+            taleaFooter
+        }
+    }
+    
+    private var taleaFooter: some View {
+        let settings = parameterManager.rhythmSettings
+        let noteCount = settings.taleaNoteCount
+        let beats = settings.taleaBeats
+        let barText = parameterManager.meter.beatsPerBar > 0
+            ? String(format: "%.2f bars of %@", beats / parameterManager.meter.beatsPerBar, parameterManager.meter.displayName)
+            : ""
+        let text: String
+        if noteCount == 0 {
+            text = "Talea has no sounding entries — uniform durations will be used"
+        } else {
+            text = "Talea: \(settings.talea.count) entries (\(noteCount) notes), \(String(format: "%.2f", beats)) beats ≈ \(barText)"
+        }
+        return Text(text)
+            .font(.caption)
+            .foregroundColor(noteCount == 0 ? .orange : Color.garageBandText.opacity(0.7))
+    }
+    
+    // MARK: - Euclidean
+    
+    private var euclideanSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Stepper(value: Binding(
+                get: { parameterManager.rhythmSettings.euclideanSteps },
+                set: { newValue in
+                    parameterManager.rhythmSettings.euclideanSteps = newValue
+                    if parameterManager.rhythmSettings.euclideanHits > newValue {
+                        parameterManager.rhythmSettings.euclideanHits = newValue
+                    }
+                    if parameterManager.rhythmSettings.euclideanRotation >= newValue {
+                        parameterManager.rhythmSettings.euclideanRotation = 0
+                    }
+                }
+            ), in: 1...32) {
+                Text("Steps: \(parameterManager.rhythmSettings.euclideanSteps)")
+                    .foregroundColor(Color.garageBandText)
+            }
+            
+            Stepper(value: $parameterManager.rhythmSettings.euclideanHits,
+                    in: 1...parameterManager.rhythmSettings.euclideanSteps) {
+                Text("Hits: \(parameterManager.rhythmSettings.euclideanHits)")
+                    .foregroundColor(Color.garageBandText)
+            }
+            
+            Stepper(value: $parameterManager.rhythmSettings.euclideanRotation,
+                    in: 0...max(0, parameterManager.rhythmSettings.euclideanSteps - 1)) {
+                Text("Rotation: \(parameterManager.rhythmSettings.euclideanRotation)")
+                    .foregroundColor(Color.garageBandText)
+            }
+            
             HStack {
-                Text("Syncopation:")
+                Text("Step Duration:")
                     .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
                 Spacer()
-                Text("\(String(format: "%.2f", parameterManager.syncopationLevel))")
-                    .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-            }
-            Slider(value: $parameterManager.syncopationLevel, in: 0...1.0)
-            
-            // Metric Modulation
-            Toggle("Metric Modulation", isOn: $parameterManager.metricModulation.enabled)
-                .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-            
-            if parameterManager.metricModulation.enabled {
-                VStack(spacing: 8) {
-                    HStack {
-                        Text("Type:")
-                            .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
-                        Spacer()
-                        Picker("Modulation Type", selection: $parameterManager.metricModulation.modulationType) {
-                            ForEach(MetricModulationType.allCases, id: \.self) { type in
-                                Text(type.rawValue.capitalized).tag(type)
-                            }
-                        }
-                        .pickerStyle(MenuPickerStyle())
-                        .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
-                    }
-                    
-                    HStack {
-                        Text("Intensity:")
-                            .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
-                        Spacer()
-                        Text("\(String(format: "%.2f", parameterManager.metricModulation.intensity))")
-                            .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
-                    }
-                    Slider(value: $parameterManager.metricModulation.intensity, in: 0.1...1.0)
-                    
-                    HStack {
-                        Text("Frequency:")
-                            .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
-                        Spacer()
-                        Stepper("\(parameterManager.metricModulation.frequency)", value: $parameterManager.metricModulation.frequency, in: 1...16)
-                            .foregroundColor(Color.garageBandText)
-                .background(Color.garageBandPanel)
-                .cornerRadius(4)
-                        .background(Color.garageBandPanel)
-                        .cornerRadius(4)
+                Picker("Step Duration", selection: $parameterManager.rhythmSettings.euclideanStepDuration) {
+                    ForEach(DurationValue.allCases, id: \.self) { value in
+                        Text(value.displayName).tag(value)
                     }
                 }
-                .padding()
-                .background(Color.garageBandPanel)
-                .cornerRadius(6)
+                .pickerStyle(MenuPickerStyle())
+                .frame(maxWidth: 160)
             }
+            
+            // Dot-strip preview of the pattern
+            euclideanPreview
+            
+            // Cycle the rotation one step per generated cycle
+            Toggle("Cyclical Rotation (rotate grid each cycle)", isOn: Binding(
+                get: { parameterManager.cyclicalSettings.euclideanRotation.isEnabled },
+                set: { enabled in
+                    parameterManager.cyclicalSettings.euclideanRotation.isEnabled = enabled
+                    if enabled {
+                        // One full turn of the current grid, one step at a time
+                        parameterManager.cyclicalSettings.euclideanRotation.minValue = 0
+                        parameterManager.cyclicalSettings.euclideanRotation.maxValue =
+                            Double(max(1, parameterManager.rhythmSettings.euclideanSteps - 1))
+                        parameterManager.cyclicalSettings.euclideanRotation.stepSize = 1
+                    }
+                }
+            ))
+            .toggleStyle(CheckboxToggleStyle())
+            .font(.system(size: 12, weight: .medium))
+            .foregroundColor(Color.garageBandText)
+        }
+    }
+    
+    private var euclideanPreview: some View {
+        let pattern = EuclideanRhythm.pattern(
+            hits: parameterManager.rhythmSettings.euclideanHits,
+            steps: parameterManager.rhythmSettings.euclideanSteps,
+            rotation: parameterManager.rhythmSettings.euclideanRotation
+        )
+        return HStack(spacing: 4) {
+            ForEach(pattern.indices, id: \.self) { index in
+                Circle()
+                    .fill(pattern[index] ? Color.garageBandAccent : Color.garageBandPanel)
+                    .overlay(Circle().stroke(Color.garageBandText.opacity(0.3), lineWidth: 1))
+                    .frame(width: 12, height: 12)
+            }
+        }
+        .padding(.vertical, 4)
+    }
+    
+    // MARK: - Accents
+    
+    private var accentSection: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("Accents")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
+            
+            HStack {
+                Text("Grouping Accent Boost:")
+                    .foregroundColor(Color.garageBandText)
+                Spacer()
+                Text("+\(parameterManager.rhythmSettings.accentBoost)")
+                    .font(.system(.body, design: .monospaced))
+                    .foregroundColor(Color.garageBandText)
+            }
+            Slider(value: Binding(
+                get: { Double(parameterManager.rhythmSettings.accentBoost) },
+                set: { parameterManager.rhythmSettings.accentBoost = Int($0) }
+            ), in: 0...32, step: 1)
+            
+            Text("Velocity added to notes that fall on a grouping start (e.g. 1, 3, 5 in 7/8 grouped 2+2+3)")
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
         }
     }
 }

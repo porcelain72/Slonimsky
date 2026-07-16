@@ -383,7 +383,7 @@ final class CyclicalParameterTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: TimeSignature(numerator: 4, denominator: 4),
+            meter: .fourFour,
             primaryInterval: 2,
             secondaryInterval: 3,
             intervalPattern: .ascending,
@@ -395,9 +395,7 @@ final class CyclicalParameterTests: XCTestCase {
             primaryDirection: .ascending,
             mirrorPoints: 0,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
             velocitySettings: VelocitySettings(),
-            metricModulation: MetricModulationSettings(enabled: false),
             chordGeneration: ChordSettings(enabled: false),
             cyclicalSettings: CyclicalSettings()
         )

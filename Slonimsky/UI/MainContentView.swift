@@ -30,15 +30,24 @@ struct MainContentView: View {
     
     // MARK: - Body
     var body: some View {
-        HStack(spacing: 0) {
-            // Left: Parameter List
-            parameterListPanel
+        VSplitView {
+            HStack(spacing: 0) {
+                // Left: Parameter List
+                parameterListPanel
+                
+                // Center: Selected Parameter Controls
+                parameterDetailPanel
+                
+                // Right: MIDI Controls Sidebar
+                midiControlsSidebar
+            }
             
-            // Center: Selected Parameter Controls
-            parameterDetailPanel
-            
-            // Right: MIDI Controls Sidebar
-            midiControlsSidebar
+            // Bottom: Piano Roll (resizable)
+            PianoRollPanelView(
+                midiService: midiService,
+                parameterManager: parameterManager
+            )
+            .frame(minHeight: 180, idealHeight: 260)
         }
         .background(Color.garageBandBackground)
         .sheet(isPresented: $showPresetPicker) {
@@ -317,7 +326,7 @@ struct MainContentView: View {
                     DirectionalParametersDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
                 case .rhythmic:
-                    RhythmicParametersDetailView(parameterManager: parameterManager)
+                    RhythmMeterDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
                 case .harmonic:
                     HarmonicParametersDetailView(parameterManager: parameterManager)

@@ -265,9 +265,7 @@ struct MIDIPlaybackControllerView: View {
         // Calculate total duration based on pattern
         let bpm = midiService.currentTempo
         let beatDuration = 60.0 / bpm
-        let totalDuration = pattern.notes.reduce(0.0) { total, note in
-            total + note.beatLength * beatDuration
-        }
+        let totalDuration = pattern.notes.totalLength * beatDuration
         
         // Set up external MIDI playback status
         externalMIDIPlaybackStatus = PlaybackStatus(

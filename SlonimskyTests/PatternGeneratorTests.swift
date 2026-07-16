@@ -96,26 +96,6 @@ final class PatternGeneratorTests: XCTestCase {
         XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
     
-    func testRhythmicPatternGenerator() throws {
-        let generator = RhythmicPatternGenerator()
-        let parameters = PatternParameters(
-            rootNote: 60,
-            numberOfOctaves: 1,
-            noteDurationPattern: .alternating
-        )
-        
-        let result = generator.generatePattern(parameters: parameters)
-        
-        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
-        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
-        
-        // Test that velocities are within valid range
-        for midiInfo in result {
-            XCTAssertGreaterThanOrEqual(midiInfo.velocity, 1, "Velocity should be >= 1")
-            XCTAssertLessThanOrEqual(midiInfo.velocity, 127, "Velocity should be <= 127")
-        }
-    }
-    
     func testModulationPatternGenerator() throws {
         let generator = ModulationPatternGenerator()
         
@@ -288,24 +268,8 @@ final class PatternGeneratorTests: XCTestCase {
         XCTAssertNotEqual(result1, result2, "Contour pattern should affect note sequence")
     }
     
-    func testRhythmicDensityParameterUtilization() throws {
-        let generator = RhythmicPatternGenerator()
-        
-        // Test with different rhythmic densities
-        let params1 = PatternParameters(rootNote: 60, numberOfOctaves: 1, rhythmicDensity: 0.5)
-        let params2 = PatternParameters(rootNote: 60, numberOfOctaves: 1, rhythmicDensity: 1.5)
-        
-        let result1 = generator.generatePattern(parameters: params1)
-        let result2 = generator.generatePattern(parameters: params2)
-        
-        // Check that rhythmic patterns are different
-        let durations1 = result1.map { $0.beatLength }
-        let durations2 = result2.map { $0.beatLength }
-        XCTAssertNotEqual(durations1, durations2, "Rhythmic density should affect note durations")
-    }
-    
     func testVelocitySettingsParameterUtilization() throws {
-        let generator = RhythmicPatternGenerator()
+        let generator = ScalePatternGenerator()
         
         // Test with different velocity settings
         let velocity1 = VelocitySettings(baseVelocity: 64, range: 16)
@@ -366,7 +330,7 @@ final class PatternGeneratorTests: XCTestCase {
             ("scaleType", PatternParameters(rootNote: 60, scaleType: .diatonic, numberOfOctaves: 1, divisionsOfOctave: 7)),
             ("divisionsOfOctave", PatternParameters(rootNote: 60, numberOfOctaves: 1, divisionsOfOctave: 6)),
             ("tempo", PatternParameters(rootNote: 60, numberOfOctaves: 1, tempo: 180.0)),
-            ("timeSignature", PatternParameters(rootNote: 60, numberOfOctaves: 1, timeSignature: .threeFour))
+            ("meter", PatternParameters(rootNote: 60, numberOfOctaves: 1, meter: .threeFour))
         ]
         
         let baseResult = generator.generatePattern(parameters: baseParams)
@@ -408,9 +372,9 @@ final class PatternGeneratorTests: XCTestCase {
         // Note: Tempo might not affect note generation, only playback timing
         
         // Test timeSignature
-        let timeSigParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, timeSignature: .threeFour)
+        let timeSigParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, meter: .threeFour)
         let timeSigResult = generator.generatePattern(parameters: timeSigParams)
-        XCTAssertNotEqual(baseParams.timeSignature, timeSigParams.timeSignature, "timeSignature should be different")
+        XCTAssertNotEqual(baseParams.meter, timeSigParams.meter, "meter should be different")
         // Note: Time signature might not affect note generation, only rhythmic structure
     }
     
@@ -522,39 +486,15 @@ final class PatternGeneratorTests: XCTestCase {
     }
     
     func testAllRhythmicParameters() throws {
-        let generator = RhythmicPatternGenerator()
+        let generator = ScalePatternGenerator()
         let baseParams = PatternParameters.default
-        
-        // Test noteDurationPattern
-        let uniformParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, noteDurationPattern: .uniform)
-        let alternatingParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, noteDurationPattern: .alternating)
-        let uniformResult = generator.generatePattern(parameters: uniformParams)
-        let alternatingResult = generator.generatePattern(parameters: alternatingParams)
-        XCTAssertNotEqual(uniformParams.noteDurationPattern, alternatingParams.noteDurationPattern, "noteDurationPattern should be different")
         
         // Test baseNoteDuration
         let durationParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, baseNoteDuration: 0.5)
         let durationResult = generator.generatePattern(parameters: durationParams)
         XCTAssertNotEqual(baseParams.baseNoteDuration, durationParams.baseNoteDuration, "baseNoteDuration should be different")
-        
-        // Test rhythmicDensity
-        let densityParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, rhythmicDensity: 1.5)
-        let densityResult = generator.generatePattern(parameters: densityParams)
-        XCTAssertNotEqual(baseParams.rhythmicDensity, densityParams.rhythmicDensity, "rhythmicDensity should be different")
-        
-        // Test syncopationLevel
-        let syncopationParams = PatternParameters(rootNote: 60, numberOfOctaves: 1, syncopationLevel: 0.5)
-        let syncopationResult = generator.generatePattern(parameters: syncopationParams)
-        XCTAssertNotEqual(baseParams.syncopationLevel, syncopationParams.syncopationLevel, "syncopationLevel should be different")
-        
-        // Test metricModulation
-        let metricParams = PatternParameters(
-            rootNote: 60, 
-            numberOfOctaves: 1, 
-            metricModulation: MetricModulationSettings(enabled: true, modulationType: .accelerando, intensity: 0.7, frequency: 4)
-        )
-        let metricResult = generator.generatePattern(parameters: metricParams)
-        XCTAssertNotEqual(baseParams.metricModulation.enabled, metricParams.metricModulation.enabled, "metricModulation should be different")
+        XCTAssertFalse(durationResult.isEmpty, "Pattern should generate notes")
+        XCTAssertTrue(durationResult.allSatisfy { $0.duration == 0.5 }, "All notes should use the base duration")
     }
     
     func testAllHarmonicParameters() throws {
@@ -588,7 +528,7 @@ final class PatternGeneratorTests: XCTestCase {
     }
     
     func testAllExpressionParameters() throws {
-        let generator = RhythmicPatternGenerator()
+        let generator = ScalePatternGenerator()
         let baseParams = PatternParameters.default
         
         // Test velocitySettings
@@ -620,7 +560,7 @@ final class PatternGeneratorTests: XCTestCase {
             numberOfOctaves: 2,
             divisionsOfOctave: 7,
             tempo: 150.0,
-            timeSignature: .threeFour,
+            meter: .threeFour,
             primaryInterval: 2,
             secondaryInterval: 3,
             intervalPattern: .alternating,
@@ -631,10 +571,7 @@ final class PatternGeneratorTests: XCTestCase {
             retrogradeSections: true,
             registerShifts: .exponential,
             contourPattern: .wave,
-            noteDurationPattern: .progressive,
             baseNoteDuration: 0.3,
-            rhythmicDensity: 1.2,
-            syncopationLevel: 0.4,
             harmonicMode: .polymodal,
             velocitySettings: VelocitySettings(baseVelocity: 90, range: 25),
             toneShifting: ToneShiftSettings(toneIncrement: 1, maxToneShift: 6, shiftPattern: .exponential)
@@ -679,13 +616,6 @@ final class PatternGeneratorTests: XCTestCase {
         // Should now include Harmonic Pattern Generator and use layered mode
         XCTAssertTrue(parameterManager.activeGenerators.contains("Harmonic Pattern Generator"))
         XCTAssertEqual(parameterManager.combinationMode, .layered)
-        
-        // Test rhythmic parameters activation
-        parameterManager.noteDurationPattern = .alternating
-        parameterManager.rhythmicDensity = 1.5
-        
-        // Should now include Rhythmic Pattern Generator
-        XCTAssertTrue(parameterManager.activeGenerators.contains("Rhythmic Pattern Generator"))
         
         // Test symmetrical parameters activation
         parameterManager.symmetricalIntervals = true

@@ -422,7 +422,7 @@ final class CyclicalModulationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: .fourFour,
+            meter: .fourFour,
             primaryInterval: 2,
             secondaryInterval: 3,
             intervalPattern: .ascending,
@@ -435,8 +435,6 @@ final class CyclicalModulationTests: XCTestCase {
             primaryDirection: .ascending,
             mirrorPoints: 0,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            metricModulation: MetricModulationSettings(enabled: false),
             chordGeneration: ChordSettings(enabled: false), velocitySettings: VelocitySettings(),
             cyclicalSettings: CyclicalSettings()
         )

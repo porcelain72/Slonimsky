@@ -567,7 +567,7 @@ class MIDIIntegrationService: ObservableObject {
             numberOfOctaves: Int.random(in: 1...3),
             divisionsOfOctave: Int.random(in: 6...12),
             tempo: Double.random(in: 80...160),
-            timeSignature: .common,
+            meter: Meter.presets.randomElement() ?? .fourFour,
             iterations: Int.random(in: 1...3),
             randomiseOrder: Bool.random(),
             primaryInterval: Int.random(in: 1...7),
@@ -595,16 +595,7 @@ class MIDIIntegrationService: ObservableObject {
             retrogradeSections: Bool.random(),
             registerShifts: RegisterShiftPattern.allCases.randomElement() ?? .none,
             contourPattern: contourPatterns.randomElement() ?? .linear,
-            noteDurationPattern: DurationPattern.allCases.randomElement() ?? .uniform,
-            baseNoteDuration: Double.random(in: 0.125...0.5),
-            rhythmicDensity: Double.random(in: 0.5...1.5),
-            syncopationLevel: Double.random(in: 0...0.8),
-            metricModulation: MetricModulationSettings(
-                enabled: Bool.random(),
-                modulationType: MetricModulationType.allCases.randomElement() ?? .accelerando,
-                intensity: Double.random(in: 0.3...0.8),
-                frequency: Int.random(in: 2...8)
-            ),
+            baseNoteDuration: Double.random(in: 0.5...2.0),
             harmonicMode: HarmonicMode.allCases.randomElement() ?? .tonal,
             chordGeneration: ChordSettings(
                 enabled: Bool.random(),
@@ -630,7 +621,8 @@ class MIDIIntegrationService: ObservableObject {
                 toneIncrement: Int.random(in: 0...12),
                 maxToneShift: Int.random(in: 0...24),
                 shiftPattern: RegisterShiftPattern.allCases.randomElement() ?? .none
-            )
+            ),
+            rhythmSettings: ParameterManager.randomRhythmSettings()
         )
     }
     

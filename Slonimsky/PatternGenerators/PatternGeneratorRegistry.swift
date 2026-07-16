@@ -95,13 +95,14 @@ class PatternGeneratorRegistry: ObservableObject {
         let endMemory = getMemoryUsage()
         let memoryUsage = endMemory - startMemory
         
+        let pitches = notes.soundingNotes.map(\.note)
         let metadata = PatternMetadata(
             generatorName: generatorName,
             parameterHash: parameters.hashValue.description,
             generationTime: generationTime,
             noteCount: notes.count,
-            pitchRange: notes.map(\.note).min()!...notes.map(\.note).max()!,
-            duration: notes.reduce(0) { $0 + $1.beatLength },
+            pitchRange: (pitches.min() ?? 60)...(pitches.max() ?? 60),
+            duration: notes.totalLength,
             cycleIndex: cycleIndex
         )
         
@@ -141,9 +142,8 @@ class PatternGeneratorRegistry: ObservableObject {
             
             switch combinationMode {
             case .sequential:
-                allNotes.append(contentsOf: result.notes)
-            case .interleaved:
-                allNotes = interleaveNotes(allNotes, with: result.notes)
+                let offset = allNotes.totalLength
+                allNotes.append(contentsOf: result.notes.map { $0.offset(by: offset) })
             case .layered:
                 allNotes = layerNotes(allNotes, with: result.notes)
             }
@@ -165,7 +165,7 @@ class PatternGeneratorRegistry: ObservableObject {
             generationTime: totalGenerationTime,
             noteCount: allNotes.count,
             pitchRange: combinedPitchRange,
-            duration: allNotes.reduce(0) { $0 + $1.beatLength }
+            duration: allNotes.totalLength
         )
         
         let performance = PerformanceMetrics(
@@ -208,9 +208,8 @@ class PatternGeneratorRegistry: ObservableObject {
             
             switch combinationMode {
             case .sequential:
-                allNotes.append(contentsOf: result.notes)
-            case .interleaved:
-                allNotes = interleaveNotes(allNotes, with: result.notes)
+                let offset = allNotes.totalLength
+                allNotes.append(contentsOf: result.notes.map { $0.offset(by: offset) })
             case .layered:
                 allNotes = layerNotes(allNotes, with: result.notes)
             }
@@ -232,7 +231,7 @@ class PatternGeneratorRegistry: ObservableObject {
             generationTime: totalGenerationTime,
             noteCount: allNotes.count,
             pitchRange: combinedPitchRange,
-            duration: allNotes.reduce(0) { $0 + $1.beatLength },
+            duration: allNotes.totalLength,
             cycleIndex: cycleIndex
         )
         
@@ -268,7 +267,6 @@ class PatternGeneratorRegistry: ObservableObject {
         register(ScalePatternGenerator())
         register(IntervalPatternGenerator())
         register(ModulationPatternGenerator())
-        register(RhythmicPatternGenerator())
         register(HarmonicPatternGenerator())
         register(ContourPatternGenerator())
         register(SymmetricalPatternGenerator())
@@ -327,45 +325,22 @@ class PatternGeneratorRegistry: ObservableObject {
         return complexity
     }
     
-    private func interleaveNotes(_ notes1: [MIDIInfo], with notes2: [MIDIInfo]) -> [MIDIInfo] {
-        var result: [MIDIInfo] = []
-        let maxCount = max(notes1.count, notes2.count)
-        
-        for i in 0..<maxCount {
-            if i < notes1.count {
-                result.append(notes1[i])
-            }
-            if i < notes2.count {
-                result.append(notes2[i])
-            }
-        }
-        
-        return result
-    }
-    
     private func layerNotes(_ notes1: [MIDIInfo], with notes2: [MIDIInfo]) -> [MIDIInfo] {
-        // For layering, we'll combine notes that occur at the same time
-        // This is a simplified implementation - in practice, you might want
-        // to handle overlapping notes more sophisticatedly
+        // True layering: both patterns keep their onsets and play simultaneously.
+        // Drop exact duplicates (same onset and pitch) so MusicSequence doesn't
+        // receive doubled note-ons.
         var result = notes1
-        
+
         for note in notes2 {
-            // Find if there's a note at the same time and combine them
-            if let index = result.firstIndex(where: { $0.beatLength == note.beatLength }) {
-                // Combine velocities (average them)
-                let combinedVelocity = UInt8((Int(result[index].velocity) + Int(note.velocity)) / 2)
-                result[index] = MIDIInfo(
-                    note: result[index].note,
-                    velocity: combinedVelocity,
-                    beatLength: result[index].beatLength,
-                    cycleIndex: result[index].cycleIndex
-                )
-            } else {
+            let isDuplicate = !note.isRest && result.contains {
+                !$0.isRest && $0.note == note.note && abs($0.onset - note.onset) < 1e-6
+            }
+            if !isDuplicate {
                 result.append(note)
             }
         }
-        
-        return result
+
+        return result.sorted { $0.onset < $1.onset }
     }
 }
 
@@ -374,7 +349,6 @@ class PatternGeneratorRegistry: ObservableObject {
 /// Modes for combining multiple patterns
 enum PatternCombinationMode: String, CaseIterable {
     case sequential = "Sequential"
-    case interleaved = "Interleaved"
     case layered = "Layered"
 }
 

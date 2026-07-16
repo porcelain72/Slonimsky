@@ -13,7 +13,7 @@ class ModulationPatternGenerator: BasePatternGenerator {
     init() {
         super.init(
             name: "Modulation Pattern Generator",
-            description: "Generates complex modulation patterns using advanced Slonimsky techniques including interpolation, infrapolation, ultrapolation, and metric modulation"
+            description: "Generates complex modulation patterns using advanced Slonimsky techniques including interpolation, infrapolation, and ultrapolation"
         )
     }
     
@@ -32,15 +32,9 @@ class ModulationPatternGenerator: BasePatternGenerator {
             parameters: cyclicalParameters
         )
         
-        // Apply metric modulation if enabled
-        let metricModulatedSequence = applyMetricModulation(
-            sequence: modulatedSequence,
-            parameters: cyclicalParameters
-        )
-        
         // Apply register shifts
         let shiftedSequence = applyRegisterShifts(
-            notes: metricModulatedSequence,
+            notes: modulatedSequence,
             pattern: cyclicalParameters.registerShifts,
             maxShift: cyclicalParameters.toneShifting.maxToneShift
         )
@@ -91,11 +85,6 @@ class ModulationPatternGenerator: BasePatternGenerator {
         
         if parameters.ultrapolation.enabled {
             modulationMultiplier *= Double(parameters.ultrapolation.numberOfNotes + 1)
-        }
-        
-        // Metric modulation can add complexity
-        if parameters.metricModulation.enabled {
-            modulationMultiplier *= 1.5
         }
         
         // Directional patterns may affect note count
@@ -279,165 +268,19 @@ class ModulationPatternGenerator: BasePatternGenerator {
         return notes
     }
     
-    private func applyMetricModulation(
-        sequence: [Int],
-        parameters: PatternParameters
-    ) -> [Int] {
-        guard parameters.metricModulation.enabled else { return sequence }
-        
-        var modulatedSequence: [Int] = []
-        
-        for (index, note) in sequence.enumerated() {
-            modulatedSequence.append(note)
-            
-            // Apply metric modulation based on frequency
-            if index % parameters.metricModulation.frequency == 0 {
-                let metricNotes = generateMetricModulationNotes(
-                    baseNote: note,
-                    modulationType: parameters.metricModulation.modulationType,
-                    intensity: parameters.metricModulation.intensity,
-                    index: index
-                )
-                modulatedSequence.append(contentsOf: metricNotes)
-            }
-        }
-        
-        return modulatedSequence
-    }
-    
-    private func generateMetricModulationNotes(
-        baseNote: Int,
-        modulationType: MetricModulationType,
-        intensity: Double,
-        index: Int
-    ) -> [Int] {
-        var notes: [Int] = []
-        
-        switch modulationType {
-        case .accelerando:
-            // Add progressively faster notes
-            for i in 1...3 {
-                let interval = Int(Double(i) * intensity * 2)
-                let note = baseNote + interval
-                if note >= 0 && note <= 127 {
-                    notes.append(note)
-                }
-            }
-            
-        case .ritardando:
-            // Add progressively slower notes
-            for i in 1...3 {
-                let interval = Int(Double(i) * intensity * -2)
-                let note = baseNote + interval
-                if note >= 0 && note <= 127 {
-                    notes.append(note)
-                }
-            }
-            
-        case .rubato:
-            // Add notes with varying intervals
-            for i in 1...2 {
-                let interval = Int(sin(Double(i) * .pi) * intensity * 4)
-                let note = baseNote + interval
-                if note >= 0 && note <= 127 {
-                    notes.append(note)
-                }
-            }
-            
-        case .pulse:
-            // Add rhythmic pulse notes
-            for i in 1...2 {
-                let interval = (i % 2 == 0) ? 2 : -2
-                let note = baseNote + interval
-                if note >= 0 && note <= 127 {
-                    notes.append(note)
-                }
-            }
-        }
-        
-        return notes
-    }
-    
     private func convertToMIDIInfo(notes: [Int], parameters: PatternParameters) -> [MIDIInfo] {
-        return notes.enumerated().map { index, note in
-            let duration = calculateModulatedDuration(
-                baseDuration: parameters.baseNoteDuration,
-                pattern: parameters.noteDurationPattern,
-                index: index,
-                density: parameters.rhythmicDensity,
-                parameters: parameters
-            )
-            
-            let velocity = calculateModulatedVelocity(
-                for: index,
-                note: note,
-                settings: parameters.velocitySettings,
-                parameters: parameters
-            )
-            
-            return MIDIInfo(
-                note: note,
-                velocity: velocity,
-                beatLength: duration,
-                cycleIndex: 0
-            )
-        }
-    }
-    
-    private func calculateModulatedDuration(
-        baseDuration: TimeInterval,
-        pattern: DurationPattern,
-        index: Int,
-        density: Double,
-        parameters: PatternParameters
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        // Apply base duration pattern
-        switch pattern {
-        case .uniform:
-            break
-        case .alternating:
-            duration = index % 2 == 0 ? baseDuration : baseDuration * 0.5
-        case .progressive:
-            let progression = 1.0 + (Double(index) * 0.1)
-            duration = baseDuration * progression
-        case .random:
-            let randomFactor = Double.random(in: 0.5...1.5)
-            duration = baseDuration * randomFactor
-        }
-        
-        // Apply metric modulation effects
-        if parameters.metricModulation.enabled {
-            let modulationEffect = calculateMetricModulationEffect(
-                index: index,
-                modulationType: parameters.metricModulation.modulationType,
-                intensity: parameters.metricModulation.intensity
-            )
-            duration *= modulationEffect
-        }
-        
-        // Apply density factor
-        duration *= density
-        
-        return max(duration, 0.0625) // Minimum duration of 1/16 note
-    }
-    
-    private func calculateMetricModulationEffect(
-        index: Int,
-        modulationType: MetricModulationType,
-        intensity: Double
-    ) -> Double {
-        switch modulationType {
-        case .accelerando:
-            return 1.0 - (Double(index % 4) * intensity * 0.1)
-        case .ritardando:
-            return 1.0 + (Double(index % 4) * intensity * 0.1)
-        case .rubato:
-            return 1.0 + sin(Double(index) * 0.5) * intensity * 0.2
-        case .pulse:
-            return index % 2 == 0 ? 1.0 : 0.8
-        }
+        return MIDIPatternConverter.scheduleRhythm(
+            pitches: notes,
+            parameters: parameters,
+            velocityProvider: { [weak self] index, note in
+                self?.calculateModulatedVelocity(
+                    for: index,
+                    note: note,
+                    settings: parameters.velocitySettings,
+                    parameters: parameters
+                ) ?? parameters.velocitySettings.calculateVelocity(for: index, note: note)
+            }
+        )
     }
     
     private func calculateModulatedVelocity(
@@ -470,14 +313,6 @@ class ModulationPatternGenerator: BasePatternGenerator {
     ) -> [MIDIInfo] {
         var refinedSequence = sequence
         
-        // Apply syncopation if enabled
-        if parameters.syncopationLevel > 0 {
-            refinedSequence = applySyncopation(
-                sequence: refinedSequence,
-                level: parameters.syncopationLevel
-            )
-        }
-        
         // Apply harmonic context if available
         if parameters.harmonicMode != .atonal {
             refinedSequence = applyHarmonicContext(
@@ -489,32 +324,6 @@ class ModulationPatternGenerator: BasePatternGenerator {
         return refinedSequence
     }
     
-    private func applySyncopation(
-        sequence: [MIDIInfo],
-        level: Double
-    ) -> [MIDIInfo] {
-        guard level > 0 else { return sequence }
-        
-        var syncopatedSequence: [MIDIInfo] = []
-        
-        for (index, note) in sequence.enumerated() {
-            syncopatedSequence.append(note)
-            
-            // Add syncopated notes based on level
-            if Double.random(in: 0...1) < level && index < sequence.count - 1 {
-                let syncopatedNote = MIDIInfo(
-                    note: note.note,
-                    velocity: UInt8(clamping: Int(note.velocity) - 20),
-                    beatLength: note.beatLength * 0.5,
-                    cycleIndex: 0
-                )
-                syncopatedSequence.append(syncopatedNote)
-            }
-        }
-        
-        return syncopatedSequence
-    }
-    
     private func applyHarmonicContext(
         sequence: [MIDIInfo],
         parameters: PatternParameters
@@ -524,8 +333,8 @@ class ModulationPatternGenerator: BasePatternGenerator {
         for (index, note) in sequence.enumerated() {
             harmonizedSequence.append(note)
             
-            // Add harmonic notes based on harmonic mode
-            if index % 4 == 0 && parameters.chordGeneration.enabled {
+            // Add harmonic notes based on harmonic mode (never chord a rest)
+            if index % 4 == 0 && parameters.chordGeneration.enabled && !note.isRest {
                 let harmonicNotes = generateHarmonicNotes(
                     baseNote: note.note,
                     settings: parameters.chordGeneration
@@ -534,8 +343,9 @@ class ModulationPatternGenerator: BasePatternGenerator {
                 for harmonicNote in harmonicNotes {
                     let harmonicMIDI = MIDIInfo(
                         note: harmonicNote,
-                        velocity: UInt8(clamping: Int(note.velocity) * Int(parameters.chordGeneration.velocityScale)),
-                        beatLength: note.beatLength,
+                        velocity: UInt8(clamping: max(1, Int(Double(note.velocity) * parameters.chordGeneration.velocityScale))),
+                        onset: note.onset,
+                        duration: note.duration,
                         cycleIndex: 0
                     )
                     harmonizedSequence.append(harmonicMIDI)
@@ -597,7 +407,6 @@ class ModulationPatternGenerator: BasePatternGenerator {
         print("  - Interpolation: \(parameters.interpolation.enabled ? "Enabled (\(parameters.interpolation.numberOfNotes) notes)" : "Disabled")")
         print("  - Infrapolation: \(parameters.infrapolation.enabled ? "Enabled (\(parameters.infrapolation.numberOfNotes) notes)" : "Disabled")")
         print("  - Ultrapolation: \(parameters.ultrapolation.enabled ? "Enabled (\(parameters.ultrapolation.numberOfNotes) notes)" : "Disabled")")
-        print("  - Metric Modulation: \(parameters.metricModulation.enabled ? "Enabled (\(parameters.metricModulation.modulationType.rawValue))" : "Disabled")")
         #endif
     }
     
@@ -627,11 +436,6 @@ class ModulationPatternGenerator: BasePatternGenerator {
         if let baseDuration = getCyclicalValue(for: .baseNoteDuration, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
             modifiedParameters.baseNoteDuration = baseDuration
             print("🔄 Cycle \(cycleIndex): Base note duration = \(baseDuration)")
-        }
-        
-        if let density = getCyclicalValue(for: .rhythmicDensity, settings: parameters.cyclicalSettings, cycleIndex: cycleIndex) {
-            modifiedParameters.rhythmicDensity = density
-            print("🔄 Cycle \(cycleIndex): Rhythmic density = \(density)")
         }
         
         // Apply cyclical changes to velocity parameters

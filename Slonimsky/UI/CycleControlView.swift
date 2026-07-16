@@ -218,8 +218,6 @@ extension CyclicalSettings {
                     modulationInterval.currentCycle = newValue
                 case .baseNoteDuration:
                     baseNoteDuration.currentCycle = newValue
-                case .rhythmicDensity:
-                    rhythmicDensity.currentCycle = newValue
                 case .primaryInterval:
                     primaryInterval.currentCycle = newValue
                 case .secondaryInterval:
@@ -238,6 +236,8 @@ extension CyclicalSettings {
                     divisionsOfOctave.currentCycle = newValue
                 case .mirrorPoints:
                     mirrorPoints.currentCycle = newValue
+                case .euclideanRotation:
+                    euclideanRotation.currentCycle = newValue
                 }
             }
         }

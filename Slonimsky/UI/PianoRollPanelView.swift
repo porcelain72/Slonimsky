@@ -45,9 +45,6 @@ struct PianoRollPanelView: View {
             HStack(spacing: 0) {
                 // Piano Keys
                 pianoKeysView
-                    .background {
-                        Color.red
-                    }
                 // Note Grid
                 noteGridView
             }
@@ -157,24 +154,31 @@ struct PianoRollPanelView: View {
                     // Grid Background
                     gridBackground
                     
-                    // Notes
+                    // Notes and rests
                     if let pattern = midiService.currentPattern {
                         ForEach(Array(pattern.notes.enumerated()), id: \.offset) { index, note in
-                            let startTime = calculateStartTime(for: index, in: pattern)
-                            NoteView(
-                                note: note,
-                                startTime: startTime,
-                                isSelected: selectedNotes.contains(note.note),
-                                zoomLevel: zoomLevel,
-                                timeDivision: currentTimeDivision,
-                                tonalRange: tonalRange,
-                                noteHeight: dynamicNoteHeight
-                            )
-                            .onTapGesture {
-                                toggleNoteSelection(note.note)
-                            }
-                            .onHover { isHovered in
-                                hoveredNote = isHovered ? note.note : nil
+                            if note.isRest {
+                                RestColumnView(
+                                    rest: note,
+                                    timeDivision: currentTimeDivision
+                                )
+                            } else {
+                                NoteView(
+                                    note: note,
+                                    startTime: note.onset,
+                                    isSelected: selectedNotes.contains(note.note),
+                                    isAccented: parameterManager.meter.isGroupingStart(note.onset),
+                                    zoomLevel: zoomLevel,
+                                    timeDivision: currentTimeDivision,
+                                    tonalRange: tonalRange,
+                                    noteHeight: dynamicNoteHeight
+                                )
+                                .onTapGesture {
+                                    toggleNoteSelection(note.note)
+                                }
+                                .onHover { isHovered in
+                                    hoveredNote = isHovered ? note.note : nil
+                                }
                             }
                         }
                     }
@@ -214,16 +218,61 @@ struct PianoRollPanelView: View {
     
     private var gridBackground: some View {
         Canvas { context, size in
-            let gridColor = Color.garageBandPanel
-            let gridWidth: CGFloat = 1.0
+            let meter = parameterManager.meter
+            let beatWidth = currentTimeDivision  // 1.0 beat (quarter note) in points
+            let barBeats = max(meter.beatsPerBar, 0.25)
             
-            // Vertical lines (time divisions)
-            for x in stride(from: 0, through: size.width, by: currentTimeDivision) {
+            // Grouping-span shading: alternate groups get a faint accent tint so
+            // 2+2+3 reads differently from 3+2+2
+            let groupingOnsets = meter.groupingOnsets
+            let groupSpans: [(start: Double, end: Double)] = groupingOnsets.enumerated().map { index, onset in
+                let end = index + 1 < groupingOnsets.count ? groupingOnsets[index + 1] : barBeats
+                return (onset, end)
+            }
+            var barStart = 0.0
+            while barStart * beatWidth < size.width {
+                for (index, span) in groupSpans.enumerated() where index % 2 == 1 {
+                    let x0 = (barStart + span.start) * beatWidth
+                    let x1 = (barStart + span.end) * beatWidth
+                    let rect = CGRect(x: x0, y: 0, width: x1 - x0, height: size.height)
+                    context.fill(Path(rect), with: .color(Color.garageBandAccent.opacity(0.06)))
+                }
+                barStart += barBeats
+            }
+            
+            // Beat lines (thin) every 1.0 beat
+            let beatColor = Color.garageBandPanel
+            for beat in stride(from: 0.0, through: Double(size.width) / beatWidth, by: 1.0) {
+                let x = beat * beatWidth
                 let path = Path { path in
                     path.move(to: CGPoint(x: x, y: 0))
                     path.addLine(to: CGPoint(x: x, y: size.height))
                 }
-                context.stroke(path, with: .color(gridColor), lineWidth: gridWidth)
+                context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
+            }
+            
+            // Grouping-start lines (medium) within each bar
+            barStart = 0.0
+            while barStart * beatWidth < size.width {
+                for onset in groupingOnsets.dropFirst() {
+                    let x = (barStart + onset) * beatWidth
+                    let path = Path { path in
+                        path.move(to: CGPoint(x: x, y: 0))
+                        path.addLine(to: CGPoint(x: x, y: size.height))
+                    }
+                    context.stroke(path, with: .color(Color.garageBandAccent.opacity(0.35)), lineWidth: 1.0)
+                }
+                barStart += barBeats
+            }
+            
+            // Barlines (thick, bright) every beatsPerBar
+            for bar in stride(from: 0.0, through: Double(size.width) / beatWidth, by: barBeats) {
+                let x = bar * beatWidth
+                let path = Path { path in
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
+                }
+                context.stroke(path, with: .color(Color.garageBandText.opacity(0.4)), lineWidth: 2.0)
             }
             
             // Horizontal lines (note divisions)
@@ -232,7 +281,7 @@ struct PianoRollPanelView: View {
                     path.move(to: CGPoint(x: 0, y: y))
                     path.addLine(to: CGPoint(x: size.width, y: y))
                 }
-                context.stroke(path, with: .color(gridColor), lineWidth: gridWidth)
+                context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
             }
         }
     }
@@ -329,7 +378,7 @@ struct PianoRollPanelView: View {
     
     /// Calculate the median tone from the current pattern
     private func calculateMedianTone(from pattern: PatternGenerationResult) -> Int {
-        let sortedNotes = pattern.notes.map(\.note).sorted()
+        let sortedNotes = pattern.notes.soundingNotes.map(\.note).sorted()
         let count = sortedNotes.count
         
         if count == 0 {
@@ -357,7 +406,7 @@ struct PianoRollPanelView: View {
     
     /// Calculate the tonal range of the pattern
     private func calculateTonalRange(from pattern: PatternGenerationResult) -> ClosedRange<Int> {
-        let notes = pattern.notes.map(\.note)
+        let notes = pattern.notes.soundingNotes.map(\.note)
         guard let minNote = notes.min(), let maxNote = notes.max() else {
             return 21...108 // Default full piano range
         }
@@ -396,15 +445,6 @@ struct PianoRollPanelView: View {
         dynamicNoteHeight = optimalHeight
         print("🎹 Updated note height to: \(optimalHeight) for tonal range \(tonalRange.lowerBound)-\(tonalRange.upperBound)")
         print("🎹 Constrained height: \(constrainedHeight), Max height: \(maxPianoRollHeight)")
-    }
-    
-    /// Calculate the start time for a note at the given index
-    private func calculateStartTime(for index: Int, in pattern: PatternGenerationResult) -> TimeInterval {
-        var startTime: TimeInterval = 0
-        for i in 0..<index {
-            startTime += pattern.notes[i].beatLength
-        }
-        return startTime
     }
     
     /// Update the view when a new pattern is generated
@@ -531,6 +571,7 @@ struct NoteView: View {
     let note: MIDIInfo
     let startTime: TimeInterval
     let isSelected: Bool
+    var isAccented: Bool = false
     let zoomLevel: Double
     let timeDivision: CGFloat
     let tonalRange: ClosedRange<Int>
@@ -539,16 +580,18 @@ struct NoteView: View {
     private var noteColor: Color {
         if isSelected {
             return Color.garageBandAccent
-        } else {
-            return Color(hue: Double(note.note % 12) / 12.0, saturation: 0.7, brightness: 0.8)
         }
+        let base = Color(hue: Double(note.note % 12) / 12.0,
+                         saturation: 0.7,
+                         brightness: isAccented ? 0.95 : 0.8)
+        return base
     }
     
     var body: some View {
         let x = CGFloat(startTime) * timeDivision
         let notePosition = tonalRange.upperBound - note.note
         let y = CGFloat(Double(notePosition) * noteHeight * zoomLevel)
-        let width = CGFloat(note.beatLength) * timeDivision
+        let width = CGFloat(note.duration) * timeDivision
         let height = max(4, noteHeight * 0.9) * zoomLevel
         
         RoundedRectangle(cornerRadius: 4)
@@ -557,9 +600,34 @@ struct NoteView: View {
             .position(x: x + width / 2, y: y + 10 * zoomLevel)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
-                    .stroke(isSelected ? Color.garageBandAccent : Color.clear, lineWidth: 2)
+                    .stroke(isSelected ? Color.garageBandAccent
+                            : (isAccented ? Color.white.opacity(0.7) : Color.clear),
+                            lineWidth: isSelected ? 2 : 1)
             )
             .shadow(color: .black.opacity(0.2), radius: 2, x: 0, y: 1)
+    }
+}
+
+/// A rest rendered as a faint full-height column spanning its duration.
+struct RestColumnView: View {
+    let rest: MIDIInfo
+    let timeDivision: CGFloat
+    
+    var body: some View {
+        GeometryReader { geometry in
+            let x = CGFloat(rest.onset) * timeDivision
+            let width = max(1, CGFloat(rest.duration) * timeDivision)
+            
+            Rectangle()
+                .fill(Color.garageBandText.opacity(0.05))
+                .overlay(
+                    Rectangle()
+                        .stroke(Color.garageBandText.opacity(0.12), style: StrokeStyle(lineWidth: 1, dash: [3, 3]))
+                )
+                .frame(width: width, height: geometry.size.height)
+                .position(x: x + width / 2, y: geometry.size.height / 2)
+        }
+        .allowsHitTesting(false)
     }
 }
 
@@ -599,9 +667,9 @@ struct NoteDetailsView: View {
                                     .font(.caption)
                                     
                                     HStack {
-                                        Text("Duration: \(String(format: "%.3f", note.beatLength))s")
+                                        Text("Duration: \(String(format: "%.3f", note.duration)) beats")
                                         Spacer()
-                                        Text("Start: \(String(format: "%.3f", startTime(for: index, pattern: pattern)))s")
+                                        Text("Start: \(String(format: "%.3f", note.onset)) beats")
                                     }
                                     .font(.caption)
                                 }
@@ -635,13 +703,6 @@ struct NoteDetailsView: View {
         return "\(noteNames[noteInOctave])\(octave)"
     }
     
-    private func startTime(for index: Int, pattern: PatternGenerationResult) -> Double {
-        var time: Double = 0
-        for i in 0..<index {
-            time += pattern.notes[i].beatLength
-        }
-        return time
-    }
 }
 
 // MARK: - Preview

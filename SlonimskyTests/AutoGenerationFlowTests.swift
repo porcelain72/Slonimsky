@@ -111,13 +111,13 @@ class AutoGenerationFlowTests: XCTestCase {
         // Initially should be sequential (single generator)
         XCTAssertEqual(parameterManager.combinationMode, .sequential)
         
-        // Add rhythmic parameters to trigger multiple generators
-        parameterManager.noteDurationPattern = .alternating
-        parameterManager.rhythmicDensity = 1.5
+        // Add interval parameters to trigger multiple generators
+        parameterManager.primaryInterval = 3
+        parameterManager.secondaryInterval = 5
         
         // Should now have multiple generators and appropriate combination mode
         XCTAssertTrue(parameterManager.activeGenerators.count > 1)
-        XCTAssertTrue(parameterManager.activeGenerators.contains("Rhythmic Pattern Generator"))
+        XCTAssertTrue(parameterManager.activeGenerators.contains("Interval Pattern Generator"))
     }
     
     // MARK: - Error Handling Tests

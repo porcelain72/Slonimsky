@@ -429,74 +429,19 @@ class ContourPatternGenerator: BasePatternGenerator {
         contour: [ContourNote],
         parameters: PatternParameters
     ) -> [MIDIInfo] {
-        return contour.enumerated().map { index, contourNote in
-            let duration = calculateContourDuration(
-                index: index,
-                contourNote: contourNote,
-                baseDuration: parameters.baseNoteDuration,
-                parameters: parameters
-            )
-            
-            let velocity = calculateContourVelocity(
-                for: index,
-                contourNote: contourNote,
-                settings: parameters.velocitySettings
-            )
-            
-            return MIDIInfo(
-                note: contourNote.note,
-                velocity: velocity,
-                beatLength: duration,
-                cycleIndex: 0
-            )
-        }
-    }
-    
-    private func calculateContourDuration(
-        index: Int,
-        contourNote: ContourNote,
-        baseDuration: TimeInterval,
-        parameters: PatternParameters
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        // Apply contour-based duration variations
-        switch contourNote.contourType {
-        case .ascending:
-            duration *= 1.0 + (Double(index) * 0.01)
-        case .descending:
-            duration *= 1.0 - (Double(index) * 0.01)
-        case .level:
-            duration *= 1.0
-        }
-        
-        // Apply direction-based duration
-        switch contourNote.direction {
-        case .accelerating:
-            duration *= 0.9
-        case .decelerating:
-            duration *= 1.1
-        case .oscillating:
-            duration *= 1.0 + sin(Double(index) * 0.5) * 0.1
-        case .steady:
-            break
-        case .irregular:
-            duration *= Double.random(in: 0.8...1.2)
-        }
-        
-        // Apply pattern-based duration
-        switch parameters.noteDurationPattern {
-        case .uniform:
-            break
-        case .alternating:
-            duration = index % 2 == 0 ? baseDuration : baseDuration * 0.7
-        case .progressive:
-            duration *= 1.0 + (Double(index) * 0.05)
-        case .random:
-            duration *= Double.random(in: 0.7...1.3)
-        }
-        
-        return max(duration, 0.0625) // Minimum duration
+        let pitches = contour.map { $0.note }
+        return MIDIPatternConverter.scheduleRhythm(
+            pitches: pitches,
+            parameters: parameters,
+            velocityProvider: { [weak self] index, note in
+                let contourNote = contour[index % contour.count]
+                return self?.calculateContourVelocity(
+                    for: index,
+                    contourNote: contourNote,
+                    settings: parameters.velocitySettings
+                ) ?? parameters.velocitySettings.calculateVelocity(for: index, note: note)
+            }
+        )
     }
     
     private func calculateContourVelocity(

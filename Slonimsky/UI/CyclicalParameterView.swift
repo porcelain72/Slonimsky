@@ -92,8 +92,6 @@ struct CyclicalParameterView: View {
             return parameterManager.cyclicalSettings.modulationInterval
         case .baseNoteDuration:
             return parameterManager.cyclicalSettings.baseNoteDuration
-        case .rhythmicDensity:
-            return parameterManager.cyclicalSettings.rhythmicDensity
         case .primaryInterval:
             return parameterManager.cyclicalSettings.primaryInterval
         case .secondaryInterval:
@@ -112,6 +110,8 @@ struct CyclicalParameterView: View {
             return parameterManager.cyclicalSettings.divisionsOfOctave
         case .mirrorPoints:
             return parameterManager.cyclicalSettings.mirrorPoints
+        case .euclideanRotation:
+            return parameterManager.cyclicalSettings.euclideanRotation
         }
     }
     
@@ -127,8 +127,6 @@ struct CyclicalParameterView: View {
             parameterManager.cyclicalSettings.modulationInterval = newSettings
         case .baseNoteDuration:
             parameterManager.cyclicalSettings.baseNoteDuration = newSettings
-        case .rhythmicDensity:
-            parameterManager.cyclicalSettings.rhythmicDensity = newSettings
         case .primaryInterval:
             parameterManager.cyclicalSettings.primaryInterval = newSettings
         case .secondaryInterval:
@@ -147,6 +145,8 @@ struct CyclicalParameterView: View {
             parameterManager.cyclicalSettings.divisionsOfOctave = newSettings
         case .mirrorPoints:
             parameterManager.cyclicalSettings.mirrorPoints = newSettings
+        case .euclideanRotation:
+            parameterManager.cyclicalSettings.euclideanRotation = newSettings
         }
     }
 }

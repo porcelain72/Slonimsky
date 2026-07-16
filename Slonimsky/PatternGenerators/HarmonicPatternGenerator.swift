@@ -467,36 +467,54 @@ class HarmonicPatternGenerator: BasePatternGenerator {
         harmony: [VoicedChord],
         parameters: PatternParameters
     ) -> [MIDIInfo] {
-        var midiSequence: [MIDIInfo] = []
-        
-        for (index, voicedChord) in harmony.enumerated() {
-            for (noteIndex, note) in voicedChord.notes.enumerated() {
-                let velocity = calculateHarmonicVelocity(
-                    for: index,
-                    noteIndex: noteIndex,
+        guard !harmony.isEmpty else { return [] }
+
+        // Schedule one event per chord (its root) through the rhythm engine,
+        // then stack the remaining chord tones at each scheduled onset.
+        let roots = harmony.map { $0.notes.first ?? $0.chord.root }
+        let scheduled = MIDIPatternConverter.scheduleRhythm(
+            pitches: roots,
+            parameters: parameters,
+            velocityProvider: { [weak self] index, note in
+                let voicedChord = harmony[index % harmony.count]
+                return self?.calculateHarmonicVelocity(
+                    for: index % harmony.count,
+                    noteIndex: 0,
                     note: note,
                     chord: voicedChord.chord,
                     settings: parameters.velocitySettings
-                )
-                
-                let duration = calculateHarmonicDuration(
-                    chordIndex: index,
-                    noteIndex: noteIndex,
-                    baseDuration: parameters.baseNoteDuration,
-                    parameters: parameters
-                )
-                
-                let midiNote = MIDIInfo(
-                    note: note,
-                    velocity: velocity,
-                    beatLength: duration,
-                    cycleIndex: 0
-                )
-                
-                midiSequence.append(midiNote)
+                ) ?? parameters.velocitySettings.calculateVelocity(for: index, note: note)
             }
+        )
+
+        var midiSequence: [MIDIInfo] = []
+        var chordIndex = 0
+
+        for event in scheduled {
+            midiSequence.append(event)
+            guard !event.isRest else { continue }
+
+            let voicedChord = harmony[chordIndex % harmony.count]
+            for (noteIndex, tone) in voicedChord.notes.enumerated().dropFirst() {
+                let clampedTone = min(127, max(0, tone))
+                let velocity = calculateHarmonicVelocity(
+                    for: chordIndex % harmony.count,
+                    noteIndex: noteIndex,
+                    note: clampedTone,
+                    chord: voicedChord.chord,
+                    settings: parameters.velocitySettings
+                )
+                midiSequence.append(MIDIInfo(
+                    note: clampedTone,
+                    velocity: max(1, velocity),
+                    onset: event.onset,
+                    duration: event.duration,
+                    cycleIndex: 0
+                ))
+            }
+            chordIndex += 1
         }
-        
+
         return midiSequence
     }
     
@@ -531,28 +549,6 @@ class HarmonicPatternGenerator: BasePatternGenerator {
         }
         
         return velocity
-    }
-    
-    private func calculateHarmonicDuration(
-        chordIndex: Int,
-        noteIndex: Int,
-        baseDuration: TimeInterval,
-        parameters: PatternParameters
-    ) -> TimeInterval {
-        var duration = baseDuration
-        
-        // Apply harmonic rhythm
-        let changeFrequency = parameters.harmonicRhythm.chordChangeFrequency
-        if chordIndex % changeFrequency == 0 {
-            duration *= 1.5 // Longer duration for chord changes
-        }
-        
-        // Apply note position within chord
-        if noteIndex == 0 {
-            duration *= 1.2 // Root note gets longer duration
-        }
-        
-        return duration
     }
     
     private func applyHarmonicRefinements(

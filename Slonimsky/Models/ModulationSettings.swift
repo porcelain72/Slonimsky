@@ -64,39 +64,6 @@ enum RegisterShiftPattern: String, CaseIterable, Codable {
     }
 }
 
-/// Metric modulation settings for tempo changes
-struct MetricModulationSettings: Codable, Equatable, Hashable {
-    var enabled: Bool
-    var modulationType: MetricModulationType
-    var intensity: Double // 0.0 to 1.0
-    var frequency: Int // How often to apply modulation
-    
-    init(enabled: Bool = false, modulationType: MetricModulationType = .accelerando, intensity: Double = 0.5, frequency: Int = 4) {
-        self.enabled = enabled
-        self.modulationType = modulationType
-        self.intensity = intensity
-        self.frequency = frequency
-    }
-    
-    static var `default`: MetricModulationSettings {
-        MetricModulationSettings()
-    }
-    
-    func validate() -> Bool {
-        guard intensity >= 0.0 && intensity <= 1.0 else { return false }
-        guard frequency >= 1 && frequency <= 16 else { return false }
-        return true
-    }
-}
-
-/// Types of metric modulation
-enum MetricModulationType: String, CaseIterable, Codable {
-    case accelerando = "Accelerando"
-    case ritardando = "Ritardando"
-    case rubato = "Rubato"
-    case pulse = "Pulse"
-}
-
 /// Chord generation settings
 struct ChordSettings: Codable, Equatable, Hashable {
     var enabled: Bool

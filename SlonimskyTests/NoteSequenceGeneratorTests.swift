@@ -73,20 +73,6 @@ final class NoteSequenceGeneratorTests: XCTestCase {
         XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
     }
     
-    func testRhythmicPatternGenerator() throws {
-        let generator = RhythmicPatternGenerator()
-        let parameters = PatternParameters(
-            rootNote: 60,
-            numberOfOctaves: 1,
-            noteDurationPattern: .alternating
-        )
-        
-        let result = generator.generatePattern(parameters: parameters)
-        
-        XCTAssertFalse(result.isEmpty, "Generated pattern should not be empty")
-        XCTAssertTrue(generator.validateParameters(parameters: parameters), "Parameters should be valid")
-    }
-    
     func testModulationPatternGenerator() throws {
         let generator = ModulationPatternGenerator()
         let parameters = PatternParameters(

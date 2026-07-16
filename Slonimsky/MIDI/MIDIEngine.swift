@@ -70,8 +70,9 @@ class MIDIEngine: ObservableObject {
     func generateMusicSequence(from result: PatternGenerationResult, parameters: PatternParameters) -> MusicSequence? {
         guard let sequence = createNewSequence() else { return nil }
         
-        // Set tempo from parameters
+        // Set tempo and time signature from parameters
         setTempo(sequence: sequence, bpm: parameters.tempo)
+        setTimeSignature(sequence: sequence, meter: parameters.meter)
         
         // Create melody track (always needed)
         let melodyTrack = createMelodyTrack(sequence: sequence, notes: result.notes)
@@ -87,12 +88,8 @@ class MIDIEngine: ObservableObject {
         print("🎵 Track creation: Melody=✅, Harmony=\(shouldCreateHarmony ? "✅" : "❌"), Rhythm=\(shouldCreateRhythm ? "✅" : "❌")")
         print("🎵 Chord generation enabled: \(parameters.chordGeneration.enabled)")
         
-        // Calculate total duration from the notes
-        var currentTime: TimeInterval = 0.0
-        for note in result.notes {
-            currentTime += note.beatLength
-        }
-        self.totalDuration = currentTime
+        // Total duration in beats: latest event end (rests included)
+        self.totalDuration = result.notes.totalLength
         
         // Store the sequence
         self.musicSequence = sequence
@@ -235,37 +232,51 @@ class MIDIEngine: ObservableObject {
         
         // Cancel any in-progress external playback
         externalMIDIThread?.cancel()
-        
+
         let beatDuration = 60.0 / bpm
-        
+
+        // Build an onset-sorted event queue (note-offs before note-ons at equal
+        // times) so overlapping and simultaneous notes are sent correctly.
+        struct MIDIEvent {
+            let timeBeats: Double
+            let isNoteOn: Bool
+            let note: UInt8
+            let velocity: UInt8
+        }
+
+        var events: [MIDIEvent] = []
+        for note in notes.soundingNotes {
+            events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity))
+            events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0))
+        }
+        events.sort { lhs, rhs in
+            if abs(lhs.timeBeats - rhs.timeBeats) > 1e-9 {
+                return lhs.timeBeats < rhs.timeBeats
+            }
+            // Offs first at equal times to avoid stuck notes on repeated pitches
+            return !lhs.isNoteOn && rhs.isNoteOn
+        }
+
         let thread = Thread { [weak self] in
             guard let self = self else { return }
-            
+
             // Raise thread priority for tighter timing
             Thread.current.qualityOfService = .userInteractive
-            
-            for note in notes {
+
+            var elapsedBeats = 0.0
+            for event in events {
                 if Thread.current.isCancelled { break }
-                
-                let noteDuration = note.beatLength * beatDuration
-                
-                // Send note on
-                self.sendMIDIMessage(
-                    status: 0x90,
-                    data1: UInt8(clamping: note.note),
-                    data2: note.velocity,
-                    destination: destination
-                )
-                
-                // Hold for the note's duration, then send note off
-                if noteDuration > 0 {
-                    Thread.sleep(forTimeInterval: noteDuration)
+
+                let waitBeats = event.timeBeats - elapsedBeats
+                if waitBeats > 0 {
+                    Thread.sleep(forTimeInterval: waitBeats * beatDuration)
+                    elapsedBeats = event.timeBeats
                 }
-                
+
                 self.sendMIDIMessage(
-                    status: 0x80,
-                    data1: UInt8(clamping: note.note),
-                    data2: 0,
+                    status: event.isNoteOn ? 0x90 : 0x80,
+                    data1: event.note,
+                    data2: event.velocity,
                     destination: destination
                 )
             }
@@ -355,9 +366,45 @@ class MIDIEngine: ObservableObject {
     private func setTempo(sequence: MusicSequence, bpm: Double) {
         var tempoTrack: MusicTrack?
         MusicSequenceGetTempoTrack(sequence, &tempoTrack)
-        
+
         if let tempoTrack = tempoTrack {
             MusicTrackNewExtendedTempoEvent(tempoTrack, 0, bpm)
+        }
+    }
+
+    /// Write a MIDI time-signature meta event (FF 58) to the tempo track so
+    /// exported files carry the meter into DAWs.
+    private func setTimeSignature(sequence: MusicSequence, meter: Meter) {
+        var tempoTrack: MusicTrack?
+        MusicSequenceGetTempoTrack(sequence, &tempoTrack)
+        guard let track = tempoTrack else { return }
+
+        // Data: [numerator, log2(denominator), MIDI clocks per click, 32nds per quarter]
+        let dataSize = 4
+        // MIDIMetaEvent is a variable-length C struct (data[1] tail); allocate
+        // enough raw storage for the extra data bytes.
+        let eventSize = MemoryLayout<MIDIMetaEvent>.size + dataSize - 1
+        let rawPointer = UnsafeMutableRawPointer.allocate(
+            byteCount: eventSize,
+            alignment: MemoryLayout<MIDIMetaEvent>.alignment
+        )
+        defer { rawPointer.deallocate() }
+
+        let eventPointer = rawPointer.bindMemory(to: MIDIMetaEvent.self, capacity: 1)
+        eventPointer.pointee.metaEventType = 0x58
+        eventPointer.pointee.dataLength = UInt32(dataSize)
+        withUnsafeMutablePointer(to: &eventPointer.pointee.data) { dataPointer in
+            dataPointer.withMemoryRebound(to: UInt8.self, capacity: dataSize) { bytes in
+                bytes[0] = UInt8(clamping: meter.numerator)
+                bytes[1] = UInt8(clamping: Int(log2(Double(meter.denominator)).rounded()))
+                bytes[2] = 24 // MIDI clocks per metronome click
+                bytes[3] = 8  // 32nd notes per quarter note
+            }
+        }
+
+        let status = MusicTrackNewMetaEvent(track, 0, eventPointer)
+        if status != noErr {
+            print("⚠️ Failed to write time-signature meta event: \(status)")
         }
     }
     
@@ -366,25 +413,21 @@ class MIDIEngine: ObservableObject {
         MusicSequenceNewTrack(sequence, &track)
         
         guard let track = track else { return nil }
-        
-        var currentTime: MusicTimeStamp = 0.0
-        
-        print("🎵 Creating melody track with \(notes.count) notes:")
-        for (index, note) in notes.enumerated() {
-            print("   \(index + 1): Note \(note.note) at time \(currentTime)")
-            
+
+        let soundingNotes = notes.soundingNotes
+        print("🎵 Creating melody track with \(soundingNotes.count) sounding notes (\(notes.count - soundingNotes.count) rests skipped):")
+        for note in soundingNotes {
             var midiMessage = MIDINoteMessage(
                 channel: 0,
                 note: UInt8(clamping: note.note),
                 velocity: note.velocity,
                 releaseVelocity: 0,
-                duration: Float32(note.beatLength)
+                duration: Float32(note.duration)
             )
-            
-            MusicTrackNewMIDINoteEvent(track, currentTime, &midiMessage)
-            currentTime += MusicTimeStamp(note.beatLength)
+
+            MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(note.onset), &midiMessage)
         }
-        
+
         return track
     }
     
@@ -396,23 +439,22 @@ class MIDIEngine: ObservableObject {
         
         // Create harmonic accompaniment based on the melody
         let harmonicNotes = generateHarmonicAccompaniment(from: notes)
-        var currentTime: MusicTimeStamp = 0.0
-        
+
         for chord in harmonicNotes {
+            guard let chordOnset = chord.first?.onset else { continue }
             for note in chord {
                 var midiMessage = MIDINoteMessage(
                     channel: 1,
                     note: UInt8(clamping: note.note),
                     velocity: UInt8(clamping: Int(note.velocity) - 20), // Softer
                     releaseVelocity: 0,
-                    duration: Float32(note.beatLength)
+                    duration: Float32(note.duration)
                 )
-                
-                MusicTrackNewMIDINoteEvent(track, currentTime, &midiMessage)
+
+                MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(chordOnset), &midiMessage)
             }
-            currentTime += MusicTimeStamp(chord.first?.beatLength ?? 1.0)
         }
-        
+
         return track
     }
     
@@ -422,23 +464,21 @@ class MIDIEngine: ObservableObject {
         
         guard let track = track else { return nil }
         
-        // Create rhythmic accompaniment
+        // Create rhythmic accompaniment (hits carry their own onsets from the melody)
         let rhythmNotes = generateRhythmicAccompaniment(from: notes)
-        var currentTime: MusicTimeStamp = 0.0
-        
+
         for note in rhythmNotes {
             var midiMessage = MIDINoteMessage(
                 channel: 9, // Drum channel
                 note: UInt8(clamping: note.note),
                 velocity: note.velocity,
                 releaseVelocity: 0,
-                duration: Float32(note.beatLength)
+                duration: Float32(note.duration)
             )
-            
-            MusicTrackNewMIDINoteEvent(track, currentTime, &midiMessage)
-            currentTime += MusicTimeStamp(note.beatLength)
+
+            MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(note.onset), &midiMessage)
         }
-        
+
         return track
     }
     
@@ -450,29 +490,27 @@ class MIDIEngine: ObservableObject {
     
     private func generateHarmonicAccompaniment(from notes: [MIDIInfo]) -> [[MIDIInfo]] {
         var chords: [[MIDIInfo]] = []
-        
-        // Group notes into chords based on timing
+
+        // Group sounding notes that share the same onset into chords
         var currentChord: [MIDIInfo] = []
-        var lastTime: TimeInterval = 0.0
-        
-        for note in notes {
-            if abs(note.beatLength - lastTime) < 0.1 {
-                // Same time, add to current chord
+
+        for note in notes.soundingNotes.sorted(by: { $0.onset < $1.onset }) {
+            if let chordOnset = currentChord.first?.onset, abs(note.onset - chordOnset) < 1e-6 {
+                // Same onset, add to current chord
                 currentChord.append(note)
             } else {
-                // New time, start new chord
+                // New onset, start new chord
                 if !currentChord.isEmpty {
                     chords.append(currentChord)
                 }
                 currentChord = [note]
-                lastTime = note.beatLength
             }
         }
-        
+
         if !currentChord.isEmpty {
             chords.append(currentChord)
         }
-        
+
         return chords
     }
     
@@ -496,70 +534,70 @@ class MIDIEngine: ObservableObject {
         let baseVelocity = UInt8(clamping: Int(velocity * 127))
         
         // Create rhythmic pattern based on style
-        for (index, note) in notes.enumerated() {
+        for (index, note) in notes.soundingNotes.enumerated() {
             let densityMultiplier = Int(density * 4)
             
             switch style {
             case .basic:
                 if index % densityMultiplier == 0 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Hi-hat
-                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 
             case .jazz:
                 if index % densityMultiplier == 0 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Ride cymbal
-                    rhythmNotes.append(MIDIInfo(note: 51, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 51, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Snare drum
-                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.9)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.9)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 
             case .latin:
                 if index % densityMultiplier == 0 {
                     // Conga
-                    rhythmNotes.append(MIDIInfo(note: 60, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 60, velocity: baseVelocity, onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Claves
-                    rhythmNotes.append(MIDIInfo(note: 75, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 75, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Bongo
-                    rhythmNotes.append(MIDIInfo(note: 61, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 61, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 
             case .electronic:
                 if index % densityMultiplier == 0 {
                     // Kick drum
-                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 36, velocity: baseVelocity, onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Closed hi-hat
-                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.6)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 42, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.6)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 if index % densityMultiplier == 2 {
                     // Snare drum
-                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 38, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.8)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
                 
             case .orchestral:
                 if index % densityMultiplier == 0 {
                     // Timpani
-                    rhythmNotes.append(MIDIInfo(note: 47, velocity: baseVelocity, beatLength: 0.5, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 47, velocity: baseVelocity, onset: note.onset, duration: 0.5, cycleIndex: 0))
                 }
                 if index % (densityMultiplier / 2) == 1 {
                     // Bass drum
-                    rhythmNotes.append(MIDIInfo(note: 35, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), beatLength: 0.25, cycleIndex: 0))
+                    rhythmNotes.append(MIDIInfo(note: 35, velocity: UInt8(clamping: Int(Double(baseVelocity) * 0.7)), onset: note.onset, duration: 0.25, cycleIndex: 0))
                 }
             }
         }

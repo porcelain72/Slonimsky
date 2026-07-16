@@ -91,11 +91,7 @@ struct ParameterDescriptionHelper {
             ]
         case .rhythmic:
             return [
-                "rhythmic_parameters_duration_pattern".localized,
-                "rhythmic_parameters_base_duration".localized,
-                "rhythmic_parameters_density".localized,
-                "rhythmic_parameters_syncopation".localized,
-                "rhythmic_parameters_metric_modulation".localized
+                "rhythmic_parameters_base_duration".localized
             ]
         case .harmonic:
             return [

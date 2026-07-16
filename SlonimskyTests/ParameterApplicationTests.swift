@@ -20,7 +20,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -34,11 +34,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .alternating,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -66,7 +62,7 @@ final class ParameterApplicationTests: XCTestCase {
         XCTAssertTrue(velocities.contains { $0 <= 100 }, "Should have velocities within range")
         
         // Check that duration patterns are applied
-        let durations = result.map { $0.beatLength }
+        let durations = result.map { $0.duration }
         XCTAssertNotEqual(durations[0], durations[1], "Alternating duration pattern should create different durations")
     }
     
@@ -80,7 +76,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 2,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -94,11 +90,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -112,7 +104,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 2,
             secondaryInterval: 1,
             intervalPattern: .descending,
@@ -126,11 +118,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -167,7 +155,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -181,11 +169,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -199,7 +183,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -213,11 +197,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -231,7 +211,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 7,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -245,11 +225,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .arch,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -287,7 +263,7 @@ final class ParameterApplicationTests: XCTestCase {
     }
     
     func testVelocityClamping() throws {
-        let generator = RhythmicPatternGenerator()
+        let generator = ScalePatternGenerator()
         
         // Create parameters with high velocity settings that could overflow
         let parameters = PatternParameters(
@@ -296,7 +272,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 1,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .ascending,
@@ -310,11 +286,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .none,
             contourPattern: .linear,
-            noteDurationPattern: .uniform,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 1.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -341,7 +313,7 @@ final class ParameterApplicationTests: XCTestCase {
             numberOfOctaves: 2,
             divisionsOfOctave: 12,
             tempo: 120.0,
-            timeSignature: .common,
+            meter: .fourFour,
             primaryInterval: 1,
             secondaryInterval: 1,
             intervalPattern: .alternating,
@@ -355,11 +327,7 @@ final class ParameterApplicationTests: XCTestCase {
             retrogradeSections: false,
             registerShifts: .symmetrical,
             contourPattern: .wave,
-            noteDurationPattern: .progressive,
             baseNoteDuration: 0.25,
-            rhythmicDensity: 1.0,
-            syncopationLevel: 0.0,
-            metricModulation: .default,
             harmonicMode: .tonal,
             chordGeneration: .default,
             harmonicRhythm: .default,
@@ -379,7 +347,7 @@ final class ParameterApplicationTests: XCTestCase {
             XCTAssertLessThanOrEqual(midiInfo.note, 127, "Note should be <= 127")
             XCTAssertGreaterThanOrEqual(midiInfo.velocity, 1, "Velocity should be >= 1")
             XCTAssertLessThanOrEqual(midiInfo.velocity, 127, "Velocity should be <= 127")
-            XCTAssertGreaterThan(midiInfo.beatLength, 0, "Duration should be > 0")
+            XCTAssertGreaterThan(midiInfo.duration, 0, "Duration should be > 0")
         }
     }
 } 
