@@ -32,6 +32,8 @@
 		FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000008 /* PhaseCycleTests.swift */; };
 		FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000009 /* MeterCycleTests.swift */; };
 		FAB1E503000000000000000A /* ProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000A /* ProcessTests.swift */; };
+		FAB1E502000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
+		FAB1E503000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
@@ -172,6 +174,7 @@
 		FAB1E5010000000000000008 /* PhaseCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhaseCycleTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000009 /* MeterCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterCycleTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000A /* ProcessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessTests.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000B /* PresetsDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresetsDetailView.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -346,6 +349,7 @@
 				98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */,
 				98C3096F2E39333C000D9EC7 /* ParameterManager.swift */,
 				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
+				FAB1E501000000000000000B /* PresetsDetailView.swift */,
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
 				98C309722E39333C000D9EC7 /* ParameterPanelView.swift */,
 				98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */,
@@ -531,6 +535,7 @@
 				98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */,
 				98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */,
 				98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */,
+				FAB1E502000000000000000B /* PresetsDetailView.swift in Sources */,
 				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
 				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
 				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
@@ -596,6 +601,7 @@
 				987A91EA2F2121D4002A6706 /* ParameterInfoPopupView.swift in Sources */,
 				987A91EB2F2121D4002A6706 /* AutoGenerationSettingsView.swift in Sources */,
 				987A91EC2F2121D4002A6706 /* PresetPickerView.swift in Sources */,
+				FAB1E503000000000000000B /* PresetsDetailView.swift in Sources */,
 				987A91ED2F2121D4002A6706 /* ParameterDescriptionHelper.swift in Sources */,
 				98692B3F2E2FBE0F00223430 /* SlonimskyTests.swift in Sources */,
 				987A91DD2F212105002A6706 /* CyclicalSequenceGenerator.swift in Sources */,

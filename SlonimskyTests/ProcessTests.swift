@@ -8,6 +8,51 @@
 import XCTest
 @testable import Slonimsky
 
+/// Every shipped preset must validate and generate a non-empty pattern
+/// through the same pipeline the Presets panel uses.
+final class ShowcasePresetTests: XCTestCase {
+
+    func testAllPresetsValidate() {
+        for preset in allPresets {
+            XCTAssertTrue(preset.parameters.validate(), "Preset '\(preset.name)' has invalid parameters")
+        }
+    }
+
+    func testShowcasePresetsGenerate() {
+        for preset in showcasePresets {
+            let result: PatternGenerationResult?
+            if preset.parameters.isCyclicalGeneration {
+                result = CyclicalSequenceGenerator().generateCyclicalSequence(
+                    baseParameters: preset.parameters,
+                    generatorName: preset.generatorName
+                )
+            } else {
+                result = PatternGeneratorRegistry.shared.generatePattern(
+                    using: preset.generatorName,
+                    parameters: preset.parameters
+                )
+            }
+            XCTAssertNotNil(result, "Preset '\(preset.name)' failed to generate")
+            XCTAssertGreaterThan(result?.notes.soundingNotes.count ?? 0, 0,
+                                 "Preset '\(preset.name)' generated no sounding notes")
+        }
+    }
+
+    func testShowcasePresetsAreMultiCycleWhereExpected() {
+        let multiCycleNames = ["Balkan Machine", "Glass Pendulum", "Phase Music", "Odd-Time Traveler"]
+        for preset in showcasePresets where multiCycleNames.contains(preset.name) {
+            XCTAssertTrue(preset.parameters.isCyclicalGeneration,
+                          "Preset '\(preset.name)' should trigger multi-cycle generation")
+            let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+                baseParameters: preset.parameters,
+                generatorName: preset.generatorName
+            )
+            XCTAssertGreaterThan(result?.metadata.totalCycles ?? 0, 1,
+                                 "Preset '\(preset.name)' should produce multiple cycles")
+        }
+    }
+}
+
 final class ProcessTests: XCTestCase {
 
     // MARK: - Kept-note math

@@ -124,6 +124,8 @@ struct ParameterInfoPopupView: View {
     
     private var iconName: String {
         switch category {
+        case .presets:
+            return "square.grid.2x2"
         case .basic:
             return "music.note"
         case .intervals:

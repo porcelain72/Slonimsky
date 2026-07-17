@@ -324,8 +324,10 @@ class ParameterManager: ObservableObject {
                 randomizeHarmonicParameters()
             case .expression:
                 randomizeExpressionParameters()
-                    case .accompaniment:
-            randomizeRhythmicAccompanimentParameters()
+            case .accompaniment:
+                randomizeRhythmicAccompanimentParameters()
+            case .presets:
+                break // Presets panel has nothing to randomize
             }
         }
     }

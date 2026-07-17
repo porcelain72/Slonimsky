@@ -534,7 +534,13 @@ class MIDIIntegrationService: ObservableObject {
         let parameters = preset.parameters
         let generatorName = preset.generatorName
         
-        generatePatternAndMIDI(using: generatorName, parameters: parameters, completion: completion)
+        // Presets that use cyclical curves or a pattern process must run the
+        // multi-cycle pipeline, not the single-pattern path.
+        if parameters.isCyclicalGeneration {
+            generateCyclicalPatternAndMIDI(using: generatorName, parameters: parameters, completion: completion)
+        } else {
+            generatePatternAndMIDI(using: generatorName, parameters: parameters, completion: completion)
+        }
     }
     
     // MARK: - Private Methods
@@ -766,6 +772,7 @@ struct SlonimskyPreset {
     let description: String
     let generatorName: String
     let parameters: PatternParameters
+    var category: String = "Classic"
 }
 
 /// MIDI integration errors

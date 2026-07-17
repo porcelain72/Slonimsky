@@ -14,6 +14,8 @@ struct ParameterDescriptionHelper {
     
     static func sectionDescription(for category: ParameterCategory) -> String {
         switch category {
+        case .presets:
+            return "Ready-made configurations that demonstrate meters, meter cycles, isorhythm, Euclidean rhythms, phase curves, and the pattern process. Applying a preset loads every panel so you can inspect and tweak it."
         case .basic:
             return "basic_parameters_description".localized
         case .intervals:
@@ -35,6 +37,8 @@ struct ParameterDescriptionHelper {
     
     static func sectionTitle(for category: ParameterCategory) -> String {
         switch category {
+        case .presets:
+            return "Presets"
         case .basic:
             return "basic_parameters_title".localized
         case .intervals:
@@ -58,6 +62,11 @@ struct ParameterDescriptionHelper {
     
     static func parameterDetails(for category: ParameterCategory) -> [String] {
         switch category {
+        case .presets:
+            return [
+                "Rhythm Engine Showcase — meters, isorhythm, Euclidean, curves, process",
+                "Classic — original generator presets"
+            ]
         case .basic:
             return [
                 "basic_parameters_root_note".localized,

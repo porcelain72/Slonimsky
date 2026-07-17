@@ -25,9 +25,9 @@ struct PresetPickerView: View {
     // MARK: - Computed Properties
     private var filteredPresets: [SlonimskyPreset] {
         if searchText.isEmpty {
-            return defaultPresets
+            return allPresets
         } else {
-            return defaultPresets.filter { preset in
+            return allPresets.filter { preset in
                 preset.name.localizedCaseInsensitiveContains(searchText) ||
                 preset.description.localizedCaseInsensitiveContains(searchText) ||
                 preset.generatorName.localizedCaseInsensitiveContains(searchText)
@@ -266,7 +266,7 @@ struct ParameterBadge: View {
 
 // MARK: - Default Presets
 
-private let defaultPresets: [SlonimskyPreset] = [
+let defaultPresets: [SlonimskyPreset] = [
     // Basic Scale Patterns
     SlonimskyPreset(
         name: "Chromatic Ascending",

@@ -75,6 +75,7 @@ struct ParameterPanelView: View {
 // MARK: - Parameter Categories
 
 enum ParameterCategory: String, CaseIterable, Identifiable {
+    case presets = "Presets"
     case basic = "Basic"
     case intervals = "Intervals"
     case modulations = "Modulations"
@@ -88,6 +89,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     
     var title: String {
         switch self {
+        case .presets: return "Presets"
         case .basic: return "Basic Parameters"
         case .intervals: return "Interval Parameters"
         case .modulations: return "Slonimsky Modulations"
@@ -101,6 +103,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     
     var icon: String {
         switch self {
+        case .presets: return "square.grid.2x2"
         case .basic: return "music.note"
         case .intervals: return "arrow.up.and.down"
         case .modulations: return "waveform.path.ecg"
@@ -114,6 +117,8 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     
     var description: String {
         switch self {
+        case .presets:
+            return "Example configurations showcasing the engine"
         case .basic:
             return "Root note, scale type, octaves, tempo"
         case .intervals:
@@ -157,6 +162,12 @@ struct ParameterCategoryDetailView: View {
             ScrollView {
                 VStack(spacing: 16) {
                     switch category {
+                    case .presets:
+                        PresetsDetailView(
+                            parameterManager: parameterManager,
+                            midiService: midiService,
+                            isGenerating: $isGenerating
+                        )
                     case .basic:
                         BasicParametersDetailView(parameterManager: parameterManager)
                     case .intervals:

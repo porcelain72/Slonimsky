@@ -203,6 +203,12 @@ Details worth knowing:
 
 ## 7. Putting it all together — recipes
 
+> **Tip:** the **Presets** panel (top of the sidebar) ships a "Rhythm Engine
+> Showcase" section with one-tap versions of these ideas — *Balkan Machine*,
+> *Tresillo Bass*, *Machaut in Five*, *Glass Pendulum*, *Phase Music*, and
+> *Odd-Time Traveler*. Applying one loads every parameter panel, so you can
+> inspect exactly how it's built and tweak from there.
+
 ### "Balkan machine"
 | Setting | Value |
 |---|---|

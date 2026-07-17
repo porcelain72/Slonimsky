@@ -313,6 +313,13 @@ struct MainContentView: View {
         ScrollView{
             Group{
                 switch category {
+                case .presets:
+                    PresetsDetailView(
+                        parameterManager: parameterManager,
+                        midiService: midiService,
+                        isGenerating: $isGenerating
+                    )
+                    .navigationTitle(category.title)
                 case .basic:
                     BasicParametersDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
