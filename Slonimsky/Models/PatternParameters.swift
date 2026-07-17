@@ -15,7 +15,10 @@ struct PatternParameters: Codable, Equatable, Hashable {
     let numberOfOctaves: Int
     let divisionsOfOctave: Int
     let tempo: Double
-    var meter: Meter
+    /// Repeating bar sequence (single-bar cycles behave like a plain time signature)
+    var meterCycle: MeterCycle
+    /// First bar of the meter cycle (compatibility accessor for single-meter reads)
+    var meter: Meter { meterCycle.bars.first ?? .fourFour }
     let iterations: Int
     let randomiseOrder: Bool
     
@@ -57,6 +60,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
     // MARK: - Rhythm Engine
     var rhythmSettings: RhythmSettings
+
+    // MARK: - Pattern Process (additive/subtractive)
+    var processSettings: ProcessSettings
     
     // MARK: - Initialization
     init(
@@ -66,6 +72,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         divisionsOfOctave: Int = 12,
         tempo: Double = 120.0,
         meter: Meter = .fourFour,
+        meterCycle: MeterCycle? = nil,
         iterations: Int = 1,
         randomiseOrder: Bool = false,
         primaryInterval: Int = 1,
@@ -89,14 +96,15 @@ struct PatternParameters: Codable, Equatable, Hashable {
         velocitySettings: VelocitySettings = .default,
         toneShifting: ToneShiftSettings = .default,
         cyclicalSettings: CyclicalSettings = CyclicalSettings(),
-        rhythmSettings: RhythmSettings = .default
+        rhythmSettings: RhythmSettings = .default,
+        processSettings: ProcessSettings = ProcessSettings()
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
         self.numberOfOctaves = numberOfOctaves
         self.divisionsOfOctave = divisionsOfOctave
         self.tempo = tempo
-        self.meter = meter
+        self.meterCycle = meterCycle ?? MeterCycle(meter)
         self.iterations = iterations
         self.randomiseOrder = randomiseOrder
         self.primaryInterval = primaryInterval
@@ -121,6 +129,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.toneShifting = toneShifting
         self.cyclicalSettings = cyclicalSettings
         self.rhythmSettings = rhythmSettings
+        self.processSettings = processSettings
     }
     
     // MARK: - Validation
@@ -134,13 +143,21 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard secondaryInterval >= 1 && secondaryInterval <= 12 else { return false }
         guard mirrorPoints >= 0 && mirrorPoints <= 10 else { return false }
         guard baseNoteDuration >= 0.125 && baseNoteDuration <= 4.0 else { return false }
-        guard meter.isValid else { return false }
+        guard meterCycle.isValid else { return false }
         guard rhythmSettings.validate() else { return false }
+        guard processSettings.validate() else { return false }
         
         return true
     }
     
     // MARK: - Helper Methods
+
+    /// True when generation should run the multi-cycle pipeline: either a
+    /// cyclical parameter curve is enabled or a pattern process is active.
+    var isCyclicalGeneration: Bool {
+        !cyclicalSettings.enabledParameters.isEmpty || processSettings.mode != .none
+    }
+
     var totalNotes: Int {
         return numberOfOctaves * divisionsOfOctave
     }

@@ -188,7 +188,7 @@ class MIDIPatternConverter {
         guard boost > 0 else { return events }
 
         return events.map { event in
-            guard !event.isRest, parameters.meter.isGroupingStart(event.onset) else { return event }
+            guard !event.isRest, parameters.meterCycle.isGroupingStart(event.onset) else { return event }
             var accented = event
             accented.velocity = UInt8(clamping: Int(event.velocity) + boost)
             return accented

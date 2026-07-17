@@ -1,8 +1,9 @@
 import Foundation
 
-/// Generates sequences of patterns based on phase-based cyclical parameter curves.
-/// Each enabled parameter follows its own curve (period + shape); the sequence
-/// runs until all curves realign (lcm of the periods), capped at `cycleCap`.
+/// Generates sequences of patterns from phase-based cyclical parameter curves
+/// and the additive/subtractive pattern process. Each enabled parameter follows
+/// its own curve (period + shape); the process adds or removes notes per cycle.
+/// The sequence runs until curves and process realign (lcm), capped at `cycleCap`.
 class CyclicalSequenceGenerator {
 
     // MARK: - Constants
@@ -25,14 +26,23 @@ class CyclicalSequenceGenerator {
         generatorName: String
     ) -> PatternGenerationResult? {
 
-        let enabledParameters = baseParameters.cyclicalSettings.enabledParameters
-        guard !enabledParameters.isEmpty else {
-            // No cyclical parameters enabled, generate single pattern
+        guard baseParameters.isCyclicalGeneration else {
+            // No cyclical curves or process active, generate single pattern
             return patternRegistry.generatePattern(using: generatorName, parameters: baseParameters)
         }
 
-        let totalCycles = calculateTotalCycles(for: baseParameters.cyclicalSettings)
-        logSequenceStart(totalCycles: totalCycles, settings: baseParameters.cyclicalSettings, generatorCount: 1)
+        // Reference generation (cycle 0) to size the pattern process
+        guard let reference = patternRegistry.generatePattern(
+            using: generatorName, parameters: baseParameters, cycleIndex: 0
+        ) else {
+            print("❌ Failed to generate reference pattern")
+            return nil
+        }
+        let totalCycles = calculateTotalCycles(
+            for: baseParameters,
+            referenceSoundingCount: reference.notes.soundingNotes.count
+        )
+        logSequenceStart(totalCycles: totalCycles, parameters: baseParameters, generatorCount: 1)
 
         var allNotes: [MIDIInfo] = []
         var totalGenerationTime: TimeInterval = 0.0
@@ -49,11 +59,18 @@ class CyclicalSequenceGenerator {
                 return nil
             }
 
+            let processedNotes = applyProcess(
+                to: cycleResult.notes,
+                cycleIndex: cycleIndex,
+                settings: baseParameters.processSettings
+            )
+
             let notesToAppend = appendableNotes(
-                from: cycleResult.notes,
+                from: processedNotes,
                 cycleIndex: cycleIndex,
                 isLastCycle: cycleIndex == totalCycles - 1,
-                runningLength: allNotes.totalLength
+                runningLength: allNotes.totalLength,
+                dropSeamNote: baseParameters.processSettings.mode == .none
             )
 
             allNotes.append(contentsOf: notesToAppend)
@@ -85,9 +102,8 @@ class CyclicalSequenceGenerator {
         combinationMode: PatternCombinationMode
     ) -> PatternGenerationResult? {
 
-        let enabledParameters = baseParameters.cyclicalSettings.enabledParameters
-        guard !enabledParameters.isEmpty else {
-            // No cyclical parameters enabled, generate single combined pattern
+        guard baseParameters.isCyclicalGeneration else {
+            // No cyclical curves or process active, generate single combined pattern
             return patternRegistry.generateCombinedPattern(
                 using: generatorNames,
                 parameters: baseParameters,
@@ -95,8 +111,21 @@ class CyclicalSequenceGenerator {
             )
         }
 
-        let totalCycles = calculateTotalCycles(for: baseParameters.cyclicalSettings)
-        logSequenceStart(totalCycles: totalCycles, settings: baseParameters.cyclicalSettings, generatorCount: generatorNames.count)
+        // Reference generation (cycle 0) to size the pattern process
+        guard let reference = patternRegistry.generateCombinedPattern(
+            using: generatorNames,
+            parameters: baseParameters,
+            combinationMode: combinationMode,
+            cycleIndex: 0
+        ) else {
+            print("❌ Failed to generate reference pattern")
+            return nil
+        }
+        let totalCycles = calculateTotalCycles(
+            for: baseParameters,
+            referenceSoundingCount: reference.notes.soundingNotes.count
+        )
+        logSequenceStart(totalCycles: totalCycles, parameters: baseParameters, generatorCount: generatorNames.count)
 
         var allNotes: [MIDIInfo] = []
         var totalGenerationTime: TimeInterval = 0.0
@@ -114,11 +143,18 @@ class CyclicalSequenceGenerator {
                 return nil
             }
 
+            let processedNotes = applyProcess(
+                to: cycleResult.notes,
+                cycleIndex: cycleIndex,
+                settings: baseParameters.processSettings
+            )
+
             let notesToAppend = appendableNotes(
-                from: cycleResult.notes,
+                from: processedNotes,
                 cycleIndex: cycleIndex,
                 isLastCycle: cycleIndex == totalCycles - 1,
-                runningLength: allNotes.totalLength
+                runningLength: allNotes.totalLength,
+                dropSeamNote: baseParameters.processSettings.mode == .none
             )
 
             allNotes.append(contentsOf: notesToAppend)
@@ -140,33 +176,66 @@ class CyclicalSequenceGenerator {
 
     // MARK: - Private Helper Methods
 
-    /// Total cycles for a sequence: all enabled curves realign at the lcm of
-    /// their periods, capped at `cycleCap`.
-    private func calculateTotalCycles(for settings: CyclicalSettings) -> Int {
-        let realignment = settings.realignmentCycles
-        if realignment > CyclicalSequenceGenerator.cycleCap {
-            print("⚠️ Cyclical realignment (\(realignment) cycles) exceeds cap; truncating to \(CyclicalSequenceGenerator.cycleCap)")
+    /// Total cycles for a sequence: curve realignment (lcm of periods) merged
+    /// with the pattern process's own cycle count via lcm, capped at `cycleCap`.
+    private func calculateTotalCycles(for parameters: PatternParameters, referenceSoundingCount: Int) -> Int {
+        let curveRealignment = parameters.cyclicalSettings.realignmentCycles
+        let processCycles = parameters.processSettings.mode == .none
+            ? 1
+            : parameters.processSettings.cycleCount(forPatternLength: referenceSoundingCount)
+        let combined = CyclicalSettings.lcm(curveRealignment, processCycles)
+        if combined > CyclicalSequenceGenerator.cycleCap {
+            print("⚠️ Cyclical realignment (\(combined) cycles) exceeds cap; truncating to \(CyclicalSequenceGenerator.cycleCap)")
             return CyclicalSequenceGenerator.cycleCap
         }
-        return max(1, realignment)
+        return max(1, combined)
     }
 
-    private func logSequenceStart(totalCycles: Int, settings: CyclicalSettings, generatorCount: Int) {
-        let paramSummary = settings.enabledParameters
+    /// Truncate a cycle's scheduled events to the process's kept note count:
+    /// keep events (notes and interleaved rests) up to and including the k-th
+    /// sounding note, drop the rest. The cycle audibly grows/shrinks.
+    private func applyProcess(to notes: [MIDIInfo], cycleIndex: Int, settings: ProcessSettings) -> [MIDIInfo] {
+        guard settings.mode != .none else { return notes }
+        let soundingCount = notes.soundingNotes.count
+        guard soundingCount > 0 else { return notes }
+
+        let keep = settings.keptNoteCount(atCycle: cycleIndex, patternLength: soundingCount)
+        guard keep < soundingCount else { return notes }
+
+        var kept: [MIDIInfo] = []
+        var sounding = 0
+        for event in notes {
+            kept.append(event)
+            if !event.isRest {
+                sounding += 1
+                if sounding >= keep { break }
+            }
+        }
+        return kept
+    }
+
+    private func logSequenceStart(totalCycles: Int, parameters: PatternParameters, generatorCount: Int) {
+        let paramSummary = parameters.cyclicalSettings.enabledParameters
             .map { "\($0.key.rawValue) (period \($0.value.period), \($0.value.shape.rawValue))" }
             .joined(separator: ", ")
-        print("🔄 Generating cyclical sequence: \(totalCycles) cycles (curves realign at lcm of periods) using \(generatorCount) generator(s)")
-        print("   Curves: \(paramSummary)")
+        print("🔄 Generating cyclical sequence: \(totalCycles) cycles using \(generatorCount) generator(s)")
+        if !paramSummary.isEmpty { print("   Curves: \(paramSummary)") }
+        if parameters.processSettings.mode != .none {
+            print("   Process: \(parameters.processSettings.mode.rawValue) (start \(parameters.processSettings.startCount), step \(parameters.processSettings.notesPerCycle))")
+        }
     }
 
     /// Shift a cycle's notes onto the end of the running sequence and apply the
     /// drop-last-note rule (only the final cycle keeps its last sounding note,
     /// to avoid repeated notes at cycle seams; rests are never dropped).
+    /// The rule is disabled while a pattern process is active — truncated cycles
+    /// end exactly on the note the process added, which must be heard.
     private func appendableNotes(
         from notes: [MIDIInfo],
         cycleIndex: Int,
         isLastCycle: Bool,
-        runningLength: Double
+        runningLength: Double,
+        dropSeamNote: Bool
     ) -> [MIDIInfo] {
         let cycleNotes = notes.map { note -> MIDIInfo in
             var modifiedNote = note.offset(by: runningLength)
@@ -174,7 +243,7 @@ class CyclicalSequenceGenerator {
             return modifiedNote
         }
 
-        if isLastCycle {
+        if isLastCycle || !dropSeamNote {
             return cycleNotes
         } else if cycleNotes.count > 1, let last = cycleNotes.last, !last.isRest {
             return Array(cycleNotes.dropLast())

@@ -639,6 +639,7 @@ struct DirectionalParametersDetailView: View {
 
 struct RhythmMeterDetailView: View {
     @ObservedObject var parameterManager: ParameterManager
+    @State private var selectedBarIndex: Int = 0
     
     var body: some View {
         VStack(spacing: 20) {
@@ -647,55 +648,146 @@ struct RhythmMeterDetailView: View {
             rhythmModeSection
             Divider()
             accentSection
+            Divider()
+            processSection
         }
     }
     
-    // MARK: - Meter
+    // MARK: - Meter cycle
+    
+    /// The bar currently being edited (clamped to the cycle's bounds).
+    private var selectedBar: Meter {
+        let bars = parameterManager.meterCycle.bars
+        return bars[min(selectedBarIndex, bars.count - 1)]
+    }
+    
+    private func updateSelectedBar(_ transform: (inout Meter) -> Void) {
+        var cycle = parameterManager.meterCycle
+        let index = min(selectedBarIndex, cycle.bars.count - 1)
+        var bar = cycle.bars[index]
+        transform(&bar)
+        cycle.bars[index] = bar
+        parameterManager.meterCycle = cycle
+    }
     
     private var groupingsAreValid: Bool {
-        parameterManager.meter.groupings.reduce(0, +) == parameterManager.meter.numerator
+        selectedBar.groupings.reduce(0, +) == selectedBar.numerator
     }
     
     private var meterSection: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Meter")
+            Text("Meter Cycle")
                 .font(.subheadline).fontWeight(.semibold)
                 .foregroundColor(Color.garageBandText)
             
-            HStack {
-                Text("Preset:")
-                    .foregroundColor(Color.garageBandText)
-                Spacer()
-                Picker("Meter Preset", selection: $parameterManager.meter) {
-                    ForEach(Meter.presets, id: \.self) { meter in
-                        Text(meter.displayName).tag(meter)
+            // Bar list: tap to select, preset menu per bar
+            VStack(alignment: .leading, spacing: 4) {
+                ForEach(parameterManager.meterCycle.bars.indices, id: \.self) { index in
+                    HStack {
+                        Image(systemName: index == min(selectedBarIndex, parameterManager.meterCycle.bars.count - 1)
+                              ? "chevron.right.circle.fill" : "circle")
+                            .foregroundColor(Color.garageBandAccent)
+                            .font(.caption)
+                        
+                        Text("Bar \(index + 1):")
+                            .foregroundColor(Color.garageBandText)
+                        
+                        Picker("Bar \(index + 1)", selection: Binding(
+                            get: {
+                                let bars = parameterManager.meterCycle.bars
+                                let bar = index < bars.count ? bars[index] : .fourFour
+                                return Meter.presets.first(where: { $0 == bar }) ?? bar
+                            },
+                            set: { newValue in
+                                var cycle = parameterManager.meterCycle
+                                if index < cycle.bars.count {
+                                    cycle.bars[index] = newValue
+                                    parameterManager.meterCycle = cycle
+                                }
+                            }
+                        )) {
+                            ForEach(Meter.presets, id: \.self) { meter in
+                                Text(meter.displayName).tag(meter)
+                            }
+                            let bars = parameterManager.meterCycle.bars
+                            if index < bars.count, !Meter.presets.contains(bars[index]) {
+                                Text(bars[index].displayName).tag(bars[index])
+                            }
+                        }
+                        .pickerStyle(MenuPickerStyle())
+                        .frame(maxWidth: 180)
+                        
+                        Spacer()
+                    }
+                    .contentShape(Rectangle())
+                    .onTapGesture {
+                        selectedBarIndex = index
                     }
                 }
-                .pickerStyle(MenuPickerStyle())
-                .frame(maxWidth: 180)
+                
+                HStack {
+                    Button(action: {
+                        var cycle = parameterManager.meterCycle
+                        cycle.bars.append(cycle.bars.last ?? .fourFour)
+                        parameterManager.meterCycle = cycle
+                        selectedBarIndex = cycle.bars.count - 1
+                    }) {
+                        Label("Add Bar", systemImage: "plus.circle")
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .foregroundColor(Color.garageBandAccent)
+                    .disabled(parameterManager.meterCycle.bars.count >= 8)
+                    
+                    Button(action: {
+                        var cycle = parameterManager.meterCycle
+                        if cycle.bars.count > 1 {
+                            cycle.bars.removeLast()
+                            parameterManager.meterCycle = cycle
+                            selectedBarIndex = min(selectedBarIndex, cycle.bars.count - 1)
+                        }
+                    }) {
+                        Label("Remove Bar", systemImage: "minus.circle")
+                    }
+                    .buttonStyle(PlainButtonStyle())
+                    .foregroundColor(Color.garageBandAccent)
+                    .disabled(parameterManager.meterCycle.bars.count <= 1)
+                    
+                    Spacer()
+                }
             }
+            
+            Text("Cycle: \(parameterManager.meterCycle.displayName) — \(String(format: "%.2f", parameterManager.meterCycle.totalBeats)) beats")
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
+            
+            Divider().padding(.vertical, 2)
+            
+            // Custom editor for the selected bar
+            Text("Edit Bar \(min(selectedBarIndex, parameterManager.meterCycle.bars.count - 1) + 1)")
+                .font(.caption).fontWeight(.medium)
+                .foregroundColor(Color.garageBandText.opacity(0.8))
             
             HStack(spacing: 16) {
                 Stepper(value: Binding(
-                    get: { parameterManager.meter.numerator },
+                    get: { selectedBar.numerator },
                     set: { newValue in
-                        var meter = parameterManager.meter
-                        meter.numerator = newValue
-                        meter.groupings = Meter.defaultGroupings(numerator: newValue, denominator: meter.denominator)
-                        parameterManager.meter = meter
+                        updateSelectedBar { bar in
+                            bar.numerator = newValue
+                            bar.groupings = Meter.defaultGroupings(numerator: newValue, denominator: bar.denominator)
+                        }
                     }
                 ), in: 1...16) {
-                    Text("Beats: \(parameterManager.meter.numerator)")
+                    Text("Beats: \(selectedBar.numerator)")
                         .foregroundColor(Color.garageBandText)
                 }
                 
                 Picker("Unit", selection: Binding(
-                    get: { parameterManager.meter.denominator },
+                    get: { selectedBar.denominator },
                     set: { newValue in
-                        var meter = parameterManager.meter
-                        meter.denominator = newValue
-                        meter.groupings = Meter.defaultGroupings(numerator: meter.numerator, denominator: newValue)
-                        parameterManager.meter = meter
+                        updateSelectedBar { bar in
+                            bar.denominator = newValue
+                            bar.groupings = Meter.defaultGroupings(numerator: bar.numerator, denominator: newValue)
+                        }
                     }
                 )) {
                     Text("2").tag(2)
@@ -714,21 +806,20 @@ struct RhythmMeterDetailView: View {
                     .foregroundColor(Color.garageBandText.opacity(0.8))
                 
                 HStack(spacing: 8) {
-                    ForEach(parameterManager.meter.groupings.indices, id: \.self) { index in
+                    ForEach(selectedBar.groupings.indices, id: \.self) { index in
                         Stepper(value: Binding(
                             get: {
-                                index < parameterManager.meter.groupings.count
-                                    ? parameterManager.meter.groupings[index] : 1
+                                index < selectedBar.groupings.count ? selectedBar.groupings[index] : 1
                             },
                             set: { newValue in
-                                var meter = parameterManager.meter
-                                if index < meter.groupings.count {
-                                    meter.groupings[index] = newValue
-                                    parameterManager.meter = meter
+                                updateSelectedBar { bar in
+                                    if index < bar.groupings.count {
+                                        bar.groupings[index] = newValue
+                                    }
                                 }
                             }
                         ), in: 1...16) {
-                            Text("\(parameterManager.meter.groupings[index])")
+                            Text("\(selectedBar.groupings[index])")
                                 .font(.system(.body, design: .monospaced))
                                 .foregroundColor(Color.garageBandText)
                         }
@@ -736,38 +827,73 @@ struct RhythmMeterDetailView: View {
                     }
                     
                     Button(action: {
-                        var meter = parameterManager.meter
-                        meter.groupings.append(1)
-                        parameterManager.meter = meter
+                        updateSelectedBar { bar in
+                            bar.groupings.append(1)
+                        }
                     }) {
                         Image(systemName: "plus.circle")
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .disabled(parameterManager.meter.groupings.count >= 8)
+                    .disabled(selectedBar.groupings.count >= 8)
                     
                     Button(action: {
-                        var meter = parameterManager.meter
-                        if meter.groupings.count > 1 {
-                            meter.groupings.removeLast()
-                            parameterManager.meter = meter
+                        updateSelectedBar { bar in
+                            if bar.groupings.count > 1 {
+                                bar.groupings.removeLast()
+                            }
                         }
                     }) {
                         Image(systemName: "minus.circle")
                     }
                     .buttonStyle(PlainButtonStyle())
-                    .disabled(parameterManager.meter.groupings.count <= 1)
+                    .disabled(selectedBar.groupings.count <= 1)
                     
                     Spacer()
                 }
                 
                 if groupingsAreValid {
-                    Text("\(parameterManager.meter.displayName) — \(String(format: "%.2f", parameterManager.meter.beatsPerBar)) beats per bar")
+                    Text("\(selectedBar.displayName) — \(String(format: "%.2f", selectedBar.beatsPerBar)) beats per bar")
                         .font(.caption)
                         .foregroundColor(Color.garageBandText.opacity(0.7))
                 } else {
-                    Text("Groupings must sum to \(parameterManager.meter.numerator) (currently \(parameterManager.meter.groupings.reduce(0, +)))")
+                    Text("Groupings must sum to \(selectedBar.numerator) (currently \(selectedBar.groupings.reduce(0, +)))")
                         .font(.caption)
                         .foregroundColor(.red)
+                }
+            }
+        }
+    }
+    
+    // MARK: - Pattern Process
+    
+    private var processSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Pattern Process")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
+            
+            Picker("Process", selection: $parameterManager.processSettings.mode) {
+                ForEach(PatternProcessMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            
+            Text(parameterManager.processSettings.mode.description)
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
+            
+            if parameterManager.processSettings.mode != .none {
+                if parameterManager.processSettings.mode != .subtractive {
+                    Stepper(value: $parameterManager.processSettings.startCount, in: 1...16) {
+                        Text("Starting Notes: \(parameterManager.processSettings.startCount)")
+                            .foregroundColor(Color.garageBandText)
+                    }
+                }
+                
+                Stepper(value: $parameterManager.processSettings.notesPerCycle, in: 1...8) {
+                    Text("Notes per Cycle: \(parameterManager.processSettings.notesPerCycle)")
+                        .foregroundColor(Color.garageBandText)
                 }
             }
         }

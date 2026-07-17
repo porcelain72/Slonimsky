@@ -77,6 +77,81 @@ struct TaleaEntry: Codable, Equatable, Hashable {
     }
 }
 
+/// Glass-style pattern process: each cycle adds or removes notes from the pattern.
+enum PatternProcessMode: String, CaseIterable, Codable, Hashable {
+    case none = "Off"
+    case additive = "Additive"          // grow: start, start+step, ..., full pattern
+    case subtractive = "Subtractive"    // shrink: full pattern down to one note
+    case pendulum = "Pendulum"          // grow to full, then shrink back
+
+    var description: String {
+        switch self {
+        case .none:
+            return "Play the full pattern every cycle"
+        case .additive:
+            return "Each cycle adds notes until the full pattern is reached"
+        case .subtractive:
+            return "Each cycle removes notes until one remains"
+        case .pendulum:
+            return "Grow to the full pattern, then shrink back"
+        }
+    }
+}
+
+/// Settings for the additive/subtractive pattern process.
+struct ProcessSettings: Codable, Equatable, Hashable {
+    var mode: PatternProcessMode = .none
+
+    /// Notes sounding in the first cycle (additive/pendulum), 1...16.
+    var startCount: Int = 1
+
+    /// Notes added or removed per cycle, 1...8.
+    var notesPerCycle: Int = 1
+
+    /// Number of cycles the process needs for a pattern of `n` sounding notes.
+    func cycleCount(forPatternLength n: Int) -> Int {
+        guard n > 0 else { return 1 }
+        let step = max(1, notesPerCycle)
+        let start = min(max(1, startCount), n)
+        switch mode {
+        case .none:
+            return 1
+        case .additive:
+            return Int(ceil(Double(n - start) / Double(step))) + 1
+        case .subtractive:
+            return Int(ceil(Double(n - 1) / Double(step))) + 1
+        case .pendulum:
+            let up = Int(ceil(Double(n - start) / Double(step))) + 1
+            return max(1, 2 * up - 1)
+        }
+    }
+
+    /// How many sounding notes cycle `c` keeps, for a pattern of `n` notes.
+    func keptNoteCount(atCycle c: Int, patternLength n: Int) -> Int {
+        guard n > 0 else { return 0 }
+        let step = max(1, notesPerCycle)
+        let start = min(max(1, startCount), n)
+        switch mode {
+        case .none:
+            return n
+        case .additive:
+            return min(n, start + c * step)
+        case .subtractive:
+            return max(1, n - c * step)
+        case .pendulum:
+            let up = Int(ceil(Double(n - start) / Double(step))) + 1
+            if c < up {
+                return min(n, start + c * step)
+            }
+            return max(start, n - (c - up + 1) * step)
+        }
+    }
+
+    func validate() -> Bool {
+        startCount >= 1 && startCount <= 16 && notesPerCycle >= 1 && notesPerCycle <= 8
+    }
+}
+
 /// Configuration for the rhythm engine in MIDIPatternConverter.
 struct RhythmSettings: Codable, Equatable, Hashable {
     var mode: RhythmMode = .uniform

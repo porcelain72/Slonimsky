@@ -107,7 +107,7 @@ class MIDIIntegrationService: ObservableObject {
         
         // Check if cyclical parameters are enabled
         let enabledCyclicalParameters = parameters.cyclicalSettings.enabledParameters
-        let hasCyclicalParameters = !enabledCyclicalParameters.isEmpty
+        let hasCyclicalParameters = parameters.isCyclicalGeneration
         
         if hasCyclicalParameters {
             print("🔄 Cyclical parameters detected: \(enabledCyclicalParameters.keys.map { $0.rawValue }.joined(separator: ", "))")

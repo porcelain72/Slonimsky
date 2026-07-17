@@ -363,7 +363,7 @@ struct MainContentView: View {
         
         // Check if cyclical parameters are enabled
         let enabledCyclicalParameters = currentParameters.cyclicalSettings.enabledParameters
-        let hasCyclicalParameters = !enabledCyclicalParameters.isEmpty
+        let hasCyclicalParameters = currentParameters.isCyclicalGeneration
         
         if hasCyclicalParameters {
             print("🔄 Cyclical parameters detected: \(enabledCyclicalParameters.keys.map { $0.rawValue }.joined(separator: ", "))")

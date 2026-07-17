@@ -69,7 +69,7 @@ class CyclicalParameterManager {
             numberOfOctaves: Int(settings.numberOfOctaves.value(atCycle: cycleIndex, baseValue: Double(baseParameters.numberOfOctaves)).rounded()),
             divisionsOfOctave: Int(settings.divisionsOfOctave.value(atCycle: cycleIndex, baseValue: Double(baseParameters.divisionsOfOctave)).rounded()),
             tempo: settings.tempo.value(atCycle: cycleIndex, baseValue: baseParameters.tempo),
-            meter: baseParameters.meter,
+            meterCycle: baseParameters.meterCycle,
             iterations: baseParameters.iterations,
             randomiseOrder: baseParameters.randomiseOrder,
             primaryInterval: Int(settings.primaryInterval.value(atCycle: cycleIndex, baseValue: Double(baseParameters.primaryInterval)).rounded()),
@@ -80,6 +80,7 @@ class CyclicalParameterManager {
             interpolation: modifiedInterpolation,
             infrapolation: modifiedInfrapolation,
             ultrapolation: modifiedUltrapolation,
+            mirror: baseParameters.mirror,
             primaryDirection: baseParameters.primaryDirection,
             mirrorPoints: Int(settings.mirrorPoints.value(atCycle: cycleIndex, baseValue: Double(baseParameters.mirrorPoints)).rounded()),
             retrogradeSections: baseParameters.retrogradeSections,
@@ -92,7 +93,8 @@ class CyclicalParameterManager {
             velocitySettings: modifiedVelocitySettings,
             toneShifting: baseParameters.toneShifting,
             cyclicalSettings: settings,
-            rhythmSettings: modifiedRhythmSettings
+            rhythmSettings: modifiedRhythmSettings,
+            processSettings: baseParameters.processSettings
         )
     }
 }

@@ -49,8 +49,18 @@ class ParameterManager: ObservableObject {
     @Published var tempo: Double = 120.0 {
         didSet { validateAndNotify() }
     }
-    @Published var meter: Meter = .fourFour {
+    @Published var meterCycle: MeterCycle = .fourFour {
         didSet { validateAndNotify() }
+    }
+    @Published var processSettings: ProcessSettings = ProcessSettings() {
+        didSet { validateAndNotify() }
+    }
+    
+    /// Single-meter accessor: reads the first bar; writing replaces the whole
+    /// cycle with one bar (the full cycle editor lives in Rhythm & Meter).
+    var meter: Meter {
+        get { meterCycle.bars.first ?? .fourFour }
+        set { meterCycle = MeterCycle(newValue) }
     }
     @Published var rhythmSettings: RhythmSettings = .default {
         didSet { validateAndNotify() }
@@ -218,7 +228,7 @@ class ParameterManager: ObservableObject {
             numberOfOctaves: numberOfOctaves,
             divisionsOfOctave: divisionsOfOctave,
             tempo: tempo,
-            meter: meter,
+            meterCycle: meterCycle,
             iterations: iterations,
             randomiseOrder: randomiseOrder,
             primaryInterval: primaryInterval,
@@ -242,7 +252,8 @@ class ParameterManager: ObservableObject {
             velocitySettings: velocitySettings,
             toneShifting: toneShifting,
             cyclicalSettings: cyclicalSettings,
-            rhythmSettings: rhythmSettings
+            rhythmSettings: rhythmSettings,
+            processSettings: processSettings
         )
     }
     
@@ -253,7 +264,8 @@ class ParameterManager: ObservableObject {
         numberOfOctaves = parameters.numberOfOctaves
         divisionsOfOctave = parameters.divisionsOfOctave
         tempo = parameters.tempo
-        meter = parameters.meter
+        meterCycle = parameters.meterCycle
+        processSettings = parameters.processSettings
         rhythmSettings = parameters.rhythmSettings
         iterations = parameters.iterations
         randomiseOrder = parameters.randomiseOrder

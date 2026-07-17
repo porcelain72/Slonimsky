@@ -30,6 +30,8 @@
 		FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000006 /* IsorhythmTests.swift */; };
 		FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */; };
 		FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000008 /* PhaseCycleTests.swift */; };
+		FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000009 /* MeterCycleTests.swift */; };
+		FAB1E503000000000000000A /* ProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000A /* ProcessTests.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
@@ -168,6 +170,8 @@
 		FAB1E5010000000000000006 /* IsorhythmTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IsorhythmTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnsetSchedulingTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000008 /* PhaseCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhaseCycleTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000009 /* MeterCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterCycleTests.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000A /* ProcessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessTests.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -268,6 +272,8 @@
 				FAB1E5010000000000000006 /* IsorhythmTests.swift */,
 				FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */,
 				FAB1E5010000000000000008 /* PhaseCycleTests.swift */,
+				FAB1E5010000000000000009 /* MeterCycleTests.swift */,
+				FAB1E501000000000000000A /* ProcessTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
@@ -568,6 +574,8 @@
 				FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */,
 				FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */,
 				FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */,
+				FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */,
+				FAB1E503000000000000000A /* ProcessTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,

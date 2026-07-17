@@ -167,7 +167,7 @@ struct PianoRollPanelView: View {
                                     note: note,
                                     startTime: note.onset,
                                     isSelected: selectedNotes.contains(note.note),
-                                    isAccented: parameterManager.meter.isGroupingStart(note.onset),
+                                    isAccented: parameterManager.meterCycle.isGroupingStart(note.onset),
                                     zoomLevel: zoomLevel,
                                     timeDivision: currentTimeDivision,
                                     tonalRange: tonalRange,
@@ -218,42 +218,30 @@ struct PianoRollPanelView: View {
     
     private var gridBackground: some View {
         Canvas { context, size in
-            let meter = parameterManager.meter
+            let meterCycle = parameterManager.meterCycle
             let beatWidth = currentTimeDivision  // 1.0 beat (quarter note) in points
-            let barBeats = max(meter.beatsPerBar, 0.25)
+            let visibleBeats = Double(size.width) / beatWidth
+            let beatColor = Color.garageBandPanel
             
-            // Grouping-span shading: alternate groups get a faint accent tint so
-            // 2+2+3 reads differently from 3+2+2
-            let groupingOnsets = meter.groupingOnsets
-            let groupSpans: [(start: Double, end: Double)] = groupingOnsets.enumerated().map { index, onset in
-                let end = index + 1 < groupingOnsets.count ? groupingOnsets[index + 1] : barBeats
-                return (onset, end)
-            }
-            var barStart = 0.0
-            while barStart * beatWidth < size.width {
+            // Per-bar rendering: bars may have different meters
+            for (barStart, meter) in meterCycle.barStarts(upTo: visibleBeats) {
+                let barBeats = max(meter.beatsPerBar, 0.25)
+                let groupingOnsets = meter.groupingOnsets
+                
+                // Grouping-span shading: alternate groups get a faint accent tint so
+                // 2+2+3 reads differently from 3+2+2
+                let groupSpans: [(start: Double, end: Double)] = groupingOnsets.enumerated().map { index, onset in
+                    let end = index + 1 < groupingOnsets.count ? groupingOnsets[index + 1] : barBeats
+                    return (onset, end)
+                }
                 for (index, span) in groupSpans.enumerated() where index % 2 == 1 {
                     let x0 = (barStart + span.start) * beatWidth
                     let x1 = (barStart + span.end) * beatWidth
                     let rect = CGRect(x: x0, y: 0, width: x1 - x0, height: size.height)
                     context.fill(Path(rect), with: .color(Color.garageBandAccent.opacity(0.06)))
                 }
-                barStart += barBeats
-            }
-            
-            // Beat lines (thin) every 1.0 beat
-            let beatColor = Color.garageBandPanel
-            for beat in stride(from: 0.0, through: Double(size.width) / beatWidth, by: 1.0) {
-                let x = beat * beatWidth
-                let path = Path { path in
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x, y: size.height))
-                }
-                context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
-            }
-            
-            // Grouping-start lines (medium) within each bar
-            barStart = 0.0
-            while barStart * beatWidth < size.width {
+                
+                // Grouping-start lines (medium) within the bar
                 for onset in groupingOnsets.dropFirst() {
                     let x = (barStart + onset) * beatWidth
                     let path = Path { path in
@@ -262,17 +250,24 @@ struct PianoRollPanelView: View {
                     }
                     context.stroke(path, with: .color(Color.garageBandAccent.opacity(0.35)), lineWidth: 1.0)
                 }
-                barStart += barBeats
+                
+                // Barline (thick, bright) at the bar start
+                let x = barStart * beatWidth
+                let barlinePath = Path { path in
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
+                }
+                context.stroke(barlinePath, with: .color(Color.garageBandText.opacity(0.4)), lineWidth: 2.0)
             }
             
-            // Barlines (thick, bright) every beatsPerBar
-            for bar in stride(from: 0.0, through: Double(size.width) / beatWidth, by: barBeats) {
-                let x = bar * beatWidth
+            // Beat lines (thin) every 1.0 beat
+            for beat in stride(from: 0.0, through: visibleBeats, by: 1.0) {
+                let x = beat * beatWidth
                 let path = Path { path in
                     path.move(to: CGPoint(x: x, y: 0))
                     path.addLine(to: CGPoint(x: x, y: size.height))
                 }
-                context.stroke(path, with: .color(Color.garageBandText.opacity(0.4)), lineWidth: 2.0)
+                context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
             }
             
             // Horizontal lines (note divisions)

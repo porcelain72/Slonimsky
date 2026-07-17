@@ -107,3 +107,82 @@ struct Meter: Codable, Equatable, Hashable {
         return "\(base) (\(groupings.map(String.init).joined(separator: "+")))"
     }
 }
+
+/// A repeating sequence of bars with (possibly) different time signatures,
+/// e.g. 4/4 | 7/8 | 7/8 | 5/8. The pitch pattern flows continuously across
+/// the changing barlines and is re-accented by each bar's groupings.
+struct MeterCycle: Codable, Equatable, Hashable {
+    /// The bars of one cycle, in order. Never empty; cycles indefinitely.
+    var bars: [Meter]
+
+    init(bars: [Meter]) {
+        self.bars = bars.isEmpty ? [.fourFour] : bars
+    }
+
+    init(_ meter: Meter) {
+        self.bars = [meter]
+    }
+
+    static let fourFour = MeterCycle(.fourFour)
+
+    /// Length of one full cycle in beats (quarter = 1.0).
+    var totalBeats: Double {
+        bars.reduce(0.0) { $0 + $1.beatsPerBar }
+    }
+
+    var isValid: Bool {
+        !bars.isEmpty && bars.count <= 8 && bars.allSatisfy { $0.isValid }
+    }
+
+    /// Resolve an absolute onset (beats from sequence start) to the bar it
+    /// falls in and that bar's absolute start onset.
+    func bar(at onset: Double) -> (meter: Meter, barStart: Double) {
+        guard totalBeats > 0, let first = bars.first else {
+            return (.fourFour, 0)
+        }
+
+        let cycleLength = totalBeats
+        let cycleIndex = floor(onset / cycleLength)
+        let cycleStart = cycleIndex * cycleLength
+        var position = onset - cycleStart
+
+        var barStart = cycleStart
+        for bar in bars {
+            if position < bar.beatsPerBar - 1e-9 {
+                return (bar, barStart)
+            }
+            position -= bar.beatsPerBar
+            barStart += bar.beatsPerBar
+        }
+        // Floating-point edge: onset landed exactly on the next cycle boundary
+        return (first, cycleStart + cycleLength)
+    }
+
+    /// True when an absolute onset falls on a grouping start of whichever bar
+    /// contains it.
+    func isGroupingStart(_ onset: Double, epsilon: Double = 1e-6) -> Bool {
+        let (meter, barStart) = bar(at: onset)
+        let positionInBar = onset - barStart
+        return meter.groupingOnsets.contains { abs($0 - positionInBar) < epsilon }
+    }
+
+    /// Barline onsets (with their meters) from 0 up to and including `end`.
+    func barStarts(upTo end: Double) -> [(onset: Double, meter: Meter)] {
+        guard totalBeats > 0, end >= 0 else { return [] }
+        var result: [(Double, Meter)] = []
+        var onset = 0.0
+        var index = 0
+        while onset <= end + 1e-9 {
+            let meter = bars[index % bars.count]
+            result.append((onset, meter))
+            onset += meter.beatsPerBar
+            index += 1
+        }
+        return result
+    }
+
+    /// Display string, e.g. "4/4 | 7/8 (2+2+3)"; single-bar cycles show just the bar.
+    var displayName: String {
+        bars.map { $0.displayName }.joined(separator: " | ")
+    }
+}

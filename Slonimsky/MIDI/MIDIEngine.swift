@@ -72,7 +72,7 @@ class MIDIEngine: ObservableObject {
         
         // Set tempo and time signature from parameters
         setTempo(sequence: sequence, bpm: parameters.tempo)
-        setTimeSignature(sequence: sequence, meter: parameters.meter)
+        setTimeSignatures(sequence: sequence, meterCycle: parameters.meterCycle, duration: result.notes.totalLength)
         
         // Create melody track (always needed)
         let melodyTrack = createMelodyTrack(sequence: sequence, notes: result.notes)
@@ -372,13 +372,27 @@ class MIDIEngine: ObservableObject {
         }
     }
 
-    /// Write a MIDI time-signature meta event (FF 58) to the tempo track so
-    /// exported files carry the meter into DAWs.
-    private func setTimeSignature(sequence: MusicSequence, meter: Meter) {
+    /// Write MIDI time-signature meta events (FF 58) to the tempo track so
+    /// exported files carry the meter cycle into DAWs. One event at time 0,
+    /// plus one at every bar start whose meter differs from the previous bar.
+    private func setTimeSignatures(sequence: MusicSequence, meterCycle: MeterCycle, duration: Double) {
         var tempoTrack: MusicTrack?
         MusicSequenceGetTempoTrack(sequence, &tempoTrack)
         guard let track = tempoTrack else { return }
 
+        var previousMeter: Meter?
+        for (onset, meter) in meterCycle.barStarts(upTo: max(0, duration)) {
+            if let previous = previousMeter,
+               previous.numerator == meter.numerator && previous.denominator == meter.denominator {
+                previousMeter = meter
+                continue
+            }
+            writeTimeSignatureEvent(track: track, meter: meter, at: MusicTimeStamp(onset))
+            previousMeter = meter
+        }
+    }
+
+    private func writeTimeSignatureEvent(track: MusicTrack, meter: Meter, at timestamp: MusicTimeStamp) {
         // Data: [numerator, log2(denominator), MIDI clocks per click, 32nds per quarter]
         let dataSize = 4
         // MIDIMetaEvent is a variable-length C struct (data[1] tail); allocate
@@ -402,7 +416,7 @@ class MIDIEngine: ObservableObject {
             }
         }
 
-        let status = MusicTrackNewMetaEvent(track, 0, eventPointer)
+        let status = MusicTrackNewMetaEvent(track, timestamp, eventPointer)
         if status != noErr {
             print("⚠️ Failed to write time-signature meta event: \(status)")
         }
