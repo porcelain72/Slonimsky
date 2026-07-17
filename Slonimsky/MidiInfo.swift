@@ -25,14 +25,17 @@ struct MIDIInfo: Equatable {
     var duration: Double
     /// True for a rest: occupies time but produces no sound.
     var isRest: Bool
+    /// Voice index: 0 = primary voice, 1 = phasing voice (own MIDI channel/track).
+    var voice: Int
     var cycleIndex: Int
 
-    init(note: Int, velocity: UInt8, onset: Double = 0, duration: Double, isRest: Bool = false, cycleIndex: Int = 0) {
+    init(note: Int, velocity: UInt8, onset: Double = 0, duration: Double, isRest: Bool = false, voice: Int = 0, cycleIndex: Int = 0) {
         self.note = note
         self.velocity = velocity
         self.onset = onset
         self.duration = duration
         self.isRest = isRest
+        self.voice = voice
         self.cycleIndex = cycleIndex
     }
 

@@ -77,12 +77,16 @@ struct TaleaEntry: Codable, Equatable, Hashable {
     }
 }
 
-/// Glass-style pattern process: each cycle adds or removes notes from the pattern.
+/// Glass/Reich-style pattern process: each cycle adds or removes notes.
+/// Additive/subtractive/pendulum truncate (the time footprint grows/shrinks);
+/// construct/reduce mask (fixed footprint — beats substitute for rests in place).
 enum PatternProcessMode: String, CaseIterable, Codable, Hashable {
     case none = "Off"
     case additive = "Additive"          // grow: start, start+step, ..., full pattern
     case subtractive = "Subtractive"    // shrink: full pattern down to one note
     case pendulum = "Pendulum"          // grow to full, then shrink back
+    case construct = "Construct"        // fixed footprint: rests become beats one by one
+    case reduce = "Reduce"              // fixed footprint: beats become rests one by one
 
     var description: String {
         switch self {
@@ -94,7 +98,16 @@ enum PatternProcessMode: String, CaseIterable, Codable, Hashable {
             return "Each cycle removes notes until one remains"
         case .pendulum:
             return "Grow to the full pattern, then shrink back"
+        case .construct:
+            return "Beats substitute for rests one by one — the pattern length never changes"
+        case .reduce:
+            return "Beats fall silent one by one — the pattern length never changes"
         }
+    }
+
+    /// True for the fixed-footprint (masking) modes.
+    var isMasking: Bool {
+        self == .construct || self == .reduce
     }
 }
 
@@ -116,9 +129,9 @@ struct ProcessSettings: Codable, Equatable, Hashable {
         switch mode {
         case .none:
             return 1
-        case .additive:
+        case .additive, .construct:
             return Int(ceil(Double(n - start) / Double(step))) + 1
-        case .subtractive:
+        case .subtractive, .reduce:
             return Int(ceil(Double(n - 1) / Double(step))) + 1
         case .pendulum:
             let up = Int(ceil(Double(n - start) / Double(step))) + 1
@@ -134,9 +147,9 @@ struct ProcessSettings: Codable, Equatable, Hashable {
         switch mode {
         case .none:
             return n
-        case .additive:
+        case .additive, .construct:
             return min(n, start + c * step)
-        case .subtractive:
+        case .subtractive, .reduce:
             return max(1, n - c * step)
         case .pendulum:
             let up = Int(ceil(Double(n - start) / Double(step))) + 1
@@ -149,6 +162,79 @@ struct ProcessSettings: Codable, Equatable, Hashable {
 
     func validate() -> Bool {
         startCount >= 1 && startCount <= 16 && notesPerCycle >= 1 && notesPerCycle <= 8
+    }
+
+    /// Nested fill order for construct/reduce: the order in which the pattern's
+    /// sounding positions come alive (construct) or fall silent (reduce, reversed).
+    /// Greedy farthest-point on a circle: deterministic, evenly spread, and the
+    /// first k positions are always a subset of the first k+1 — once a beat is
+    /// placed, it never moves (Reich's substitution rule).
+    static func fillOrder(count: Int) -> [Int] {
+        guard count > 0 else { return [] }
+        var chosen: [Int] = [0]
+        var remaining = Set(1..<count)
+
+        while !remaining.isEmpty {
+            var best = -1
+            var bestDistance = -1
+            // Iterate candidates in ascending order for deterministic ties
+            for candidate in remaining.sorted() {
+                let nearest = chosen.map { position -> Int in
+                    let direct = abs(candidate - position)
+                    return min(direct, count - direct) // circular distance
+                }.min() ?? 0
+                if nearest > bestDistance {
+                    bestDistance = nearest
+                    best = candidate
+                }
+            }
+            chosen.append(best)
+            remaining.remove(best)
+        }
+        return chosen
+    }
+}
+
+/// Steve Reich phasing: a second voice plays the same pattern, slipping ahead
+/// by a controlled amount each cycle until the voices realign.
+enum PhasingMode: String, CaseIterable, Codable, Hashable {
+    case off = "Off"
+    case discrete = "Discrete"       // Clapping Music: jump whole grid steps per cycle
+    case continuous = "Continuous"   // Piano Phase: drift a fraction of a step per cycle
+
+    var description: String {
+        switch self {
+        case .off:
+            return "Single voice"
+        case .discrete:
+            return "A second voice jumps ahead by whole grid steps each cycle"
+        case .continuous:
+            return "A second voice drifts ahead by a fraction of a step each cycle"
+        }
+    }
+}
+
+/// Settings for the phasing voice.
+struct PhasingSettings: Codable, Equatable, Hashable {
+    var mode: PhasingMode = .off
+
+    /// Discrete: grid steps the second voice advances per cycle (1...8).
+    var stepsPerCycle: Int = 1
+
+    /// Continuous: fraction of one grid step drifted per cycle (0.05...1.0).
+    var driftPerCycle: Double = 0.25
+
+    /// Semitones added to the second voice (-12...12).
+    var voiceTranspose: Int = 0
+
+    /// Velocity offset for the second voice (-32...0), keeping it slightly softer.
+    var voiceVelocityOffset: Int = -8
+
+    func validate() -> Bool {
+        stepsPerCycle >= 1 && stepsPerCycle <= 8
+            && driftPerCycle >= 0.05 && driftPerCycle <= 1.0
+            && voiceTranspose >= -12 && voiceTranspose <= 12
+            && voiceVelocityOffset >= -32 && voiceVelocityOffset <= 0
     }
 }
 

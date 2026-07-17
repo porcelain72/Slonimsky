@@ -63,6 +63,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
     // MARK: - Pattern Process (additive/subtractive)
     var processSettings: ProcessSettings
+
+    // MARK: - Phasing (Reich voices)
+    var phasingSettings: PhasingSettings
     
     // MARK: - Initialization
     init(
@@ -97,7 +100,8 @@ struct PatternParameters: Codable, Equatable, Hashable {
         toneShifting: ToneShiftSettings = .default,
         cyclicalSettings: CyclicalSettings = CyclicalSettings(),
         rhythmSettings: RhythmSettings = .default,
-        processSettings: ProcessSettings = ProcessSettings()
+        processSettings: ProcessSettings = ProcessSettings(),
+        phasingSettings: PhasingSettings = PhasingSettings()
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
@@ -130,6 +134,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.cyclicalSettings = cyclicalSettings
         self.rhythmSettings = rhythmSettings
         self.processSettings = processSettings
+        self.phasingSettings = phasingSettings
     }
     
     // MARK: - Validation
@@ -146,6 +151,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard meterCycle.isValid else { return false }
         guard rhythmSettings.validate() else { return false }
         guard processSettings.validate() else { return false }
+        guard phasingSettings.validate() else { return false }
         
         return true
     }
@@ -155,7 +161,21 @@ struct PatternParameters: Codable, Equatable, Hashable {
     /// True when generation should run the multi-cycle pipeline: either a
     /// cyclical parameter curve is enabled or a pattern process is active.
     var isCyclicalGeneration: Bool {
-        !cyclicalSettings.enabledParameters.isEmpty || processSettings.mode != .none
+        !cyclicalSettings.enabledParameters.isEmpty
+            || processSettings.mode != .none
+            || phasingSettings.mode != .off
+    }
+
+    /// One grid step in beats — the unit phasing offsets move in.
+    var phaseStepBeats: Double {
+        switch rhythmSettings.mode {
+        case .euclidean:
+            return rhythmSettings.euclideanStepDuration.beats
+        case .isorhythm:
+            return rhythmSettings.talea.map { $0.value.beats }.min() ?? baseNoteDuration
+        case .uniform:
+            return baseNoteDuration
+        }
     }
 
     var totalNotes: Int {

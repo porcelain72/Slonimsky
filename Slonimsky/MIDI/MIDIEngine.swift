@@ -242,12 +242,14 @@ class MIDIEngine: ObservableObject {
             let isNoteOn: Bool
             let note: UInt8
             let velocity: UInt8
+            let channel: UInt8
         }
 
         var events: [MIDIEvent] = []
         for note in notes.soundingNotes {
-            events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity))
-            events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0))
+            let channel = MIDIEngine.channel(forVoice: note.voice)
+            events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity, channel: channel))
+            events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0, channel: channel))
         }
         events.sort { lhs, rhs in
             if abs(lhs.timeBeats - rhs.timeBeats) > 1e-9 {
@@ -274,7 +276,7 @@ class MIDIEngine: ObservableObject {
                 }
 
                 self.sendMIDIMessage(
-                    status: event.isNoteOn ? 0x90 : 0x80,
+                    status: (event.isNoteOn ? 0x90 : 0x80) | event.channel,
                     data1: event.note,
                     data2: event.velocity,
                     destination: destination
@@ -422,27 +424,38 @@ class MIDIEngine: ObservableObject {
         }
     }
     
+    /// MIDI channel for a melody voice. Channel 1 is reserved for the harmony
+    /// track and channel 9 for drums, so the phasing voice lands on channel 2.
+    static func channel(forVoice voice: Int) -> UInt8 {
+        voice == 0 ? 0 : UInt8(clamping: voice + 1)
+    }
+
     private func createMelodyTrack(sequence: MusicSequence, notes: [MIDIInfo]) -> MusicTrack? {
-        var track: MusicTrack?
-        MusicSequenceNewTrack(sequence, &track)
-        
-        guard let track = track else { return nil }
-
         let soundingNotes = notes.soundingNotes
-        print("🎵 Creating melody track with \(soundingNotes.count) sounding notes (\(notes.count - soundingNotes.count) rests skipped):")
-        for note in soundingNotes {
-            var midiMessage = MIDINoteMessage(
-                channel: 0,
-                note: UInt8(clamping: note.note),
-                velocity: note.velocity,
-                releaseVelocity: 0,
-                duration: Float32(note.duration)
-            )
+        let voices = Set(soundingNotes.map { $0.voice }).sorted()
+        print("🎵 Creating melody track(s) for \(voices.count) voice(s), \(soundingNotes.count) sounding notes (\(notes.count - soundingNotes.count) rests skipped)")
 
-            MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(note.onset), &midiMessage)
+        var firstTrack: MusicTrack?
+        for voice in voices {
+            var track: MusicTrack?
+            MusicSequenceNewTrack(sequence, &track)
+            guard let track = track else { continue }
+            if firstTrack == nil { firstTrack = track }
+
+            let channel = MIDIEngine.channel(forVoice: voice)
+            for note in soundingNotes where note.voice == voice {
+                var midiMessage = MIDINoteMessage(
+                    channel: channel,
+                    note: UInt8(clamping: note.note),
+                    velocity: note.velocity,
+                    releaseVelocity: 0,
+                    duration: Float32(note.duration)
+                )
+                MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(note.onset), &midiMessage)
+            }
         }
 
-        return track
+        return firstTrack
     }
     
     private func createHarmonyTrack(sequence: MusicSequence, notes: [MIDIInfo]) -> MusicTrack? {

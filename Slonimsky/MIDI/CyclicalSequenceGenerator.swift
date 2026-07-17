@@ -40,7 +40,8 @@ class CyclicalSequenceGenerator {
         }
         let totalCycles = calculateTotalCycles(
             for: baseParameters,
-            referenceSoundingCount: reference.notes.soundingNotes.count
+            referenceSoundingCount: reference.notes.soundingNotes.count,
+            referenceLength: reference.notes.totalLength
         )
         logSequenceStart(totalCycles: totalCycles, parameters: baseParameters, generatorCount: 1)
 
@@ -65,12 +66,19 @@ class CyclicalSequenceGenerator {
                 settings: baseParameters.processSettings
             )
 
+            let phasedNotes = applyPhasing(
+                to: processedNotes,
+                cycleIndex: cycleIndex,
+                parameters: baseParameters
+            )
+
             let notesToAppend = appendableNotes(
-                from: processedNotes,
+                from: phasedNotes,
                 cycleIndex: cycleIndex,
                 isLastCycle: cycleIndex == totalCycles - 1,
                 runningLength: allNotes.totalLength,
                 dropSeamNote: baseParameters.processSettings.mode == .none
+                    && baseParameters.phasingSettings.mode == .off
             )
 
             allNotes.append(contentsOf: notesToAppend)
@@ -123,7 +131,8 @@ class CyclicalSequenceGenerator {
         }
         let totalCycles = calculateTotalCycles(
             for: baseParameters,
-            referenceSoundingCount: reference.notes.soundingNotes.count
+            referenceSoundingCount: reference.notes.soundingNotes.count,
+            referenceLength: reference.notes.totalLength
         )
         logSequenceStart(totalCycles: totalCycles, parameters: baseParameters, generatorCount: generatorNames.count)
 
@@ -149,12 +158,19 @@ class CyclicalSequenceGenerator {
                 settings: baseParameters.processSettings
             )
 
+            let phasedNotes = applyPhasing(
+                to: processedNotes,
+                cycleIndex: cycleIndex,
+                parameters: baseParameters
+            )
+
             let notesToAppend = appendableNotes(
-                from: processedNotes,
+                from: phasedNotes,
                 cycleIndex: cycleIndex,
                 isLastCycle: cycleIndex == totalCycles - 1,
                 runningLength: allNotes.totalLength,
                 dropSeamNote: baseParameters.processSettings.mode == .none
+                    && baseParameters.phasingSettings.mode == .off
             )
 
             allNotes.append(contentsOf: notesToAppend)
@@ -176,14 +192,16 @@ class CyclicalSequenceGenerator {
 
     // MARK: - Private Helper Methods
 
-    /// Total cycles for a sequence: curve realignment (lcm of periods) merged
-    /// with the pattern process's own cycle count via lcm, capped at `cycleCap`.
-    private func calculateTotalCycles(for parameters: PatternParameters, referenceSoundingCount: Int) -> Int {
+    /// Total cycles for a sequence: curve realignment (lcm of periods), the
+    /// pattern process's cycle count, and the phasing realignment, all merged
+    /// via lcm and capped at `cycleCap`.
+    private func calculateTotalCycles(for parameters: PatternParameters, referenceSoundingCount: Int, referenceLength: Double) -> Int {
         let curveRealignment = parameters.cyclicalSettings.realignmentCycles
         let processCycles = parameters.processSettings.mode == .none
             ? 1
             : parameters.processSettings.cycleCount(forPatternLength: referenceSoundingCount)
-        let combined = CyclicalSettings.lcm(curveRealignment, processCycles)
+        let phasingCycles = phasingRealignmentCycles(for: parameters, cycleLength: referenceLength)
+        let combined = CyclicalSettings.lcm(CyclicalSettings.lcm(curveRealignment, processCycles), phasingCycles)
         if combined > CyclicalSequenceGenerator.cycleCap {
             print("⚠️ Cyclical realignment (\(combined) cycles) exceeds cap; truncating to \(CyclicalSequenceGenerator.cycleCap)")
             return CyclicalSequenceGenerator.cycleCap
@@ -191,9 +209,77 @@ class CyclicalSequenceGenerator {
         return max(1, combined)
     }
 
-    /// Truncate a cycle's scheduled events to the process's kept note count:
-    /// keep events (notes and interleaved rests) up to and including the k-th
-    /// sounding note, drop the rest. The cycle audibly grows/shrinks.
+    /// Cycles until the phasing voice returns to alignment with voice 1.
+    private func phasingRealignmentCycles(for parameters: PatternParameters, cycleLength: Double) -> Int {
+        let phasing = parameters.phasingSettings
+        let stepBeats = parameters.phaseStepBeats
+        guard phasing.mode != .off, stepBeats > 0, cycleLength > 0 else { return 1 }
+
+        let patternSteps = max(1, Int((cycleLength / stepBeats).rounded()))
+        switch phasing.mode {
+        case .off:
+            return 1
+        case .discrete:
+            return patternSteps / CyclicalSettings.gcd(phasing.stepsPerCycle, patternSteps)
+        case .continuous:
+            return max(1, Int(ceil(Double(patternSteps) / phasing.driftPerCycle)))
+        }
+    }
+
+    /// Add the phasing voice: a copy of the cycle's sounding events, rotated in
+    /// time by the cycle's phase offset (Piano Phase is a rotation — k steps
+    /// ahead is the pattern rotated by k), transposed and softened, on voice 1.
+    private func applyPhasing(to notes: [MIDIInfo], cycleIndex: Int, parameters: PatternParameters) -> [MIDIInfo] {
+        let phasing = parameters.phasingSettings
+        guard phasing.mode != .off else { return notes }
+
+        let cycleLength = notes.totalLength
+        let stepBeats = parameters.phaseStepBeats
+        guard cycleLength > 0, stepBeats > 0 else { return notes }
+
+        let offset: Double
+        switch phasing.mode {
+        case .off:
+            return notes
+        case .discrete:
+            let patternSteps = max(1, Int((cycleLength / stepBeats).rounded()))
+            let steps = (cycleIndex * phasing.stepsPerCycle) % patternSteps
+            offset = Double(steps) * stepBeats
+        case .continuous:
+            offset = (Double(cycleIndex) * phasing.driftPerCycle * stepBeats)
+                .truncatingRemainder(dividingBy: cycleLength)
+        }
+
+        var secondVoice: [MIDIInfo] = []
+        for event in notes.soundingNotes {
+            var copy = event
+            copy.voice = 1
+            copy.onset = (event.onset + offset).truncatingRemainder(dividingBy: cycleLength)
+            copy.velocity = UInt8(clamping: max(1, Int(event.velocity) + phasing.voiceVelocityOffset))
+            let transposed = event.note + phasing.voiceTranspose
+            secondVoice.append(MIDIInfo(
+                note: min(127, max(0, transposed)),
+                velocity: copy.velocity,
+                onset: copy.onset,
+                duration: min(copy.duration, cycleLength - copy.onset),
+                voice: 1,
+                cycleIndex: copy.cycleIndex
+            ))
+        }
+
+        return (notes + secondVoice).sorted { lhs, rhs in
+            lhs.onset != rhs.onset ? lhs.onset < rhs.onset : lhs.voice < rhs.voice
+        }
+    }
+
+    /// Apply the pattern process to a cycle's scheduled events.
+    ///
+    /// Truncating modes (additive/subtractive/pendulum): keep events up to and
+    /// including the k-th sounding note — the cycle audibly grows/shrinks.
+    ///
+    /// Masking modes (construct/reduce): the footprint stays fixed; only the
+    /// first k positions of a nested spread order sound, the rest become rests
+    /// in place — Reich's substitution of beats for rests.
     private func applyProcess(to notes: [MIDIInfo], cycleIndex: Int, settings: ProcessSettings) -> [MIDIInfo] {
         guard settings.mode != .none else { return notes }
         let soundingCount = notes.soundingNotes.count
@@ -201,6 +287,23 @@ class CyclicalSequenceGenerator {
 
         let keep = settings.keptNoteCount(atCycle: cycleIndex, patternLength: soundingCount)
         guard keep < soundingCount else { return notes }
+
+        if settings.mode.isMasking {
+            let order = ProcessSettings.fillOrder(count: soundingCount)
+            let audible = Set(order.prefix(keep))
+            var soundingIndex = 0
+            return notes.map { event -> MIDIInfo in
+                guard !event.isRest else { return event }
+                defer { soundingIndex += 1 }
+                if audible.contains(soundingIndex) {
+                    return event
+                }
+                // Silence this position without moving anything
+                return MIDIInfo(note: 0, velocity: 0, onset: event.onset,
+                                duration: event.duration, isRest: true,
+                                voice: event.voice, cycleIndex: event.cycleIndex)
+            }
+        }
 
         var kept: [MIDIInfo] = []
         var sounding = 0
@@ -222,6 +325,9 @@ class CyclicalSequenceGenerator {
         if !paramSummary.isEmpty { print("   Curves: \(paramSummary)") }
         if parameters.processSettings.mode != .none {
             print("   Process: \(parameters.processSettings.mode.rawValue) (start \(parameters.processSettings.startCount), step \(parameters.processSettings.notesPerCycle))")
+        }
+        if parameters.phasingSettings.mode != .off {
+            print("   Phasing: \(parameters.phasingSettings.mode.rawValue)")
         }
     }
 

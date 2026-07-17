@@ -19,7 +19,7 @@ final class ShowcasePresetTests: XCTestCase {
     }
 
     func testShowcasePresetsGenerate() {
-        for preset in showcasePresets {
+        for preset in showcasePresets + reichPresets {
             let result: PatternGenerationResult?
             if preset.parameters.isCyclicalGeneration {
                 result = CyclicalSequenceGenerator().generateCyclicalSequence(
@@ -39,8 +39,9 @@ final class ShowcasePresetTests: XCTestCase {
     }
 
     func testShowcasePresetsAreMultiCycleWhereExpected() {
-        let multiCycleNames = ["Balkan Machine", "Glass Pendulum", "Phase Music", "Odd-Time Traveler"]
-        for preset in showcasePresets where multiCycleNames.contains(preset.name) {
+        let multiCycleNames = ["Balkan Machine", "Glass Pendulum", "Phase Music", "Odd-Time Traveler",
+                               "Clapping Pattern", "Piano Phase", "Drumming Build", "Phase & Fade"]
+        for preset in (showcasePresets + reichPresets) where multiCycleNames.contains(preset.name) {
             XCTAssertTrue(preset.parameters.isCyclicalGeneration,
                           "Preset '\(preset.name)' should trigger multi-cycle generation")
             let result = CyclicalSequenceGenerator().generateCyclicalSequence(
@@ -106,6 +107,80 @@ final class ProcessTests: XCTestCase {
         let settings = ProcessSettings()
         XCTAssertEqual(settings.cycleCount(forPatternLength: 12), 1)
         XCTAssertEqual(settings.keptNoteCount(atCycle: 3, patternLength: 12), 12)
+    }
+
+    // MARK: - Fill order (construct/reduce)
+
+    func testFillOrderIsAPermutation() {
+        for n in 1...16 {
+            let order = ProcessSettings.fillOrder(count: n)
+            XCTAssertEqual(order.count, n)
+            XCTAssertEqual(Set(order), Set(0..<n), "fillOrder(\(n)) must visit every position once")
+        }
+    }
+
+    func testFillOrderIsSpread() {
+        // Greedy farthest-point: the second position of 8 is the circular opposite
+        let order = ProcessSettings.fillOrder(count: 8)
+        XCTAssertEqual(order[0], 0)
+        XCTAssertEqual(order[1], 4, "Second fill position should be maximally distant")
+    }
+
+    func testConstructKeepsFootprintFixed() {
+        var params = PatternParameters(scaleType: .pentatonic, numberOfOctaves: 1, divisionsOfOctave: 5, mirror: false)
+        params.processSettings.mode = .construct
+        params.processSettings.startCount = 1
+        params.processSettings.notesPerCycle = 1
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Scale Pattern Generator"
+        ) else {
+            return XCTFail("Generation failed")
+        }
+
+        let byCycle = Dictionary(grouping: result.notes) { $0.cycleIndex }
+        // Every cycle spans the same footprint (masking, not truncation)
+        let lengths = byCycle.mapValues { notes -> Double in
+            let start = notes.map { $0.onset }.min() ?? 0
+            let end = notes.map { $0.end }.max() ?? 0
+            return end - start
+        }
+        let distinctLengths = Set(lengths.values.map { ($0 * 1000).rounded() })
+        XCTAssertEqual(distinctLengths.count, 1, "Construct keeps the pattern length constant across cycles")
+
+        // Sounding counts grow: cycle 0 has 1, final cycle has all
+        let counts = byCycle.sorted { $0.key < $1.key }.map { $0.value.soundingNotes.count }
+        XCTAssertEqual(counts.first, 1)
+        XCTAssertEqual(counts, counts.sorted(), "Construct sounding counts are non-decreasing")
+
+        // Nesting: every cycle's sounding onsets are a subset of the next cycle's
+        let onsetsPerCycle = byCycle.sorted { $0.key < $1.key }.map { cycle -> Set<Double> in
+            let start = cycle.value.map { $0.onset }.min() ?? 0
+            return Set(cycle.value.soundingNotes.map { (($0.onset - start) * 1000).rounded() })
+        }
+        for i in 0..<(onsetsPerCycle.count - 1) {
+            XCTAssertTrue(onsetsPerCycle[i].isSubset(of: onsetsPerCycle[i + 1]),
+                          "Cycle \(i)'s beats must persist into cycle \(i + 1) (substitution rule)")
+        }
+    }
+
+    func testReduceMirrorsConstruct() {
+        var params = PatternParameters(scaleType: .pentatonic, numberOfOctaves: 1, divisionsOfOctave: 5, mirror: false)
+        params.processSettings.mode = .reduce
+        params.processSettings.notesPerCycle = 1
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Scale Pattern Generator"
+        ) else {
+            return XCTFail("Generation failed")
+        }
+
+        let byCycle = Dictionary(grouping: result.notes) { $0.cycleIndex }
+        let counts = byCycle.sorted { $0.key < $1.key }.map { $0.value.soundingNotes.count }
+        XCTAssertEqual(counts.last, 1, "Reduce ends with a single beat")
+        XCTAssertEqual(counts, counts.sorted(by: >), "Reduce sounding counts are non-increasing")
     }
 
     // MARK: - Sequence generation

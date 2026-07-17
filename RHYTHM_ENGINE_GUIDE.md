@@ -201,12 +201,50 @@ Details worth knowing:
 
 ---
 
-## 7. Putting it all together — recipes
+## 7. Reich techniques — phasing and construction
 
-> **Tip:** the **Presets** panel (top of the sidebar) ships a "Rhythm Engine
-> Showcase" section with one-tap versions of these ideas — *Balkan Machine*,
-> *Tresillo Bass*, *Machaut in Five*, *Glass Pendulum*, *Phase Music*, and
-> *Odd-Time Traveler*. Applying one loads every parameter panel, so you can
+*Where: Rhythm & Meter panel → Phasing / Pattern Process*
+
+### Phasing voices
+
+Turn on Phasing and a **second voice** plays the same pattern, slipping ahead of the
+first by a controlled amount each cycle until the two realign:
+
+- **Discrete** (*Clapping Music*): voice 2 jumps whole grid steps per cycle. A
+  12-step pattern shifting 1 step/cycle realigns after 12 cycles; the realignment
+  joins the sequence-length lcm automatically.
+- **Continuous** (*Piano Phase*): voice 2 drifts a fraction of a step per cycle
+  (the Drift slider), passing through the blurred zones between lock points.
+
+Voice 2 can be **transposed** (±12 semitones; +12 keeps the voices separable) and is
+slightly softer by default. In the piano roll, voice 1 keeps its pitch-hue colors and
+voice 2 renders in a fixed cool tint, so you can watch the patterns slide apart.
+Voice 2 plays on **MIDI channel 2** (channel 1 is the harmony track, 9 the drums), so
+exports open in a DAW as two separate parts.
+
+### Construction — substitution of beats for rests
+
+Two additional Pattern Process modes with a **fixed time footprint** (unlike
+Additive/Subtractive, which grow and shrink the bar):
+
+- **Construct** (*Drumming*): the pattern's positions come alive one at a time —
+  rests become beats in an evenly-spread, *nested* order, so once a beat lands it
+  never moves.
+- **Reduce**: the reverse — beats fall silent one at a time until one remains.
+
+Both work inside Euclidean and isorhythm grids, and both combine with phasing:
+reduce + discrete phasing gives you a pattern hollowing out while a second voice
+slips against it.
+
+---
+
+## 8. Putting it all together — recipes
+
+> **Tip:** the **Presets** panel (top of the sidebar) ships one-tap versions of
+> these ideas: a "Rhythm Engine Showcase" section (*Balkan Machine*, *Tresillo
+> Bass*, *Machaut in Five*, *Glass Pendulum*, *Phase Music*, *Odd-Time Traveler*)
+> and a "Reich Showcase" section (*Clapping Pattern*, *Piano Phase*, *Drumming
+> Build*, *Phase & Fade*). Applying one loads every parameter panel, so you can
 > inspect exactly how it's built and tweak from there.
 
 ### "Balkan machine"
@@ -244,7 +282,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 8. Seeing and exporting the results
+## 9. Seeing and exporting the results
 
 - **Piano roll** (bottom pane, resizable): onset-accurate notes, thick barlines that
   follow the meter cycle, alternating grouping shading, brighter/outlined accented
@@ -257,7 +295,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 9. Quick reference
+## 10. Quick reference
 
 | Feature | Panel | Key controls |
 |---|---|---|
@@ -268,7 +306,8 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 | Euclidean | Rhythm & Meter | steps / hits / rotation, step duration, dot preview |
 | Parameter curves | per-parameter "Cyclical" | min/max, period (cycles per sweep), shape |
 | Euclidean rotation cycling | Rhythm & Meter | "Cyclical Rotation" toggle |
-| Pattern process | Rhythm & Meter | mode, starting notes, notes per cycle |
+| Pattern process | Rhythm & Meter | mode (incl. Construct/Reduce), starting notes, notes per cycle |
+| Phasing voices | Rhythm & Meter | mode (Discrete/Continuous), steps or drift per cycle, voice-2 transpose |
 
 *Sequence length rules:* curves realign at the **lcm of their periods**; a pattern
 process contributes its own cycle count; both merge via lcm, capped at **64 cycles**.

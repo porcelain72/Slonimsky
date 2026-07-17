@@ -94,7 +94,8 @@ class CyclicalParameterManager {
             toneShifting: baseParameters.toneShifting,
             cyclicalSettings: settings,
             rhythmSettings: modifiedRhythmSettings,
-            processSettings: baseParameters.processSettings
+            processSettings: baseParameters.processSettings,
+            phasingSettings: baseParameters.phasingSettings
         )
     }
 }

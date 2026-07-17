@@ -512,12 +512,25 @@ class MIDIIntegrationService: ObservableObject {
     /// Generate a random pattern using random parameters
     /// - Parameter completion: Completion handler with result
     func generateRandomPattern(completion: @escaping (Result<PatternGenerationResult, Error>) -> Void) {
-        let randomParameters = generateRandomParameters()
+        var randomParameters = generateRandomParameters()
         let generators = patternRegistry.getAllGeneratorNames()
         
         guard let randomGenerator = generators.randomElement() else {
             completion(.failure(MIDIIntegrationError.noGeneratorsAvailable))
             return
+        }
+        
+        // The modulation generator rejects parameters with no modulation enabled;
+        // random rolls can disable all three, so guarantee one.
+        if randomGenerator == "Modulation Pattern Generator",
+           !randomParameters.interpolation.enabled,
+           !randomParameters.infrapolation.enabled,
+           !randomParameters.ultrapolation.enabled {
+            randomParameters.interpolation = ModulationSettings(
+                numberOfNotes: Int.random(in: 1...3),
+                interval: Int.random(in: 1...4),
+                enabled: true
+            )
         }
         
         generatePatternAndMIDI(using: randomGenerator, parameters: randomParameters, completion: completion)

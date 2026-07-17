@@ -661,6 +661,8 @@ struct RhythmMeterDetailView: View {
             accentSection
             Divider()
             processSection
+            Divider()
+            phasingSection
         }
     }
     
@@ -888,14 +890,16 @@ struct RhythmMeterDetailView: View {
                     Text(mode.rawValue).tag(mode)
                 }
             }
-            .pickerStyle(SegmentedPickerStyle())
+            .pickerStyle(MenuPickerStyle())
+            .frame(maxWidth: 200)
             
             Text(parameterManager.processSettings.mode.description)
                 .font(.caption)
                 .foregroundColor(Color.garageBandText.opacity(0.7))
             
             if parameterManager.processSettings.mode != .none {
-                if parameterManager.processSettings.mode != .subtractive {
+                if parameterManager.processSettings.mode != .subtractive
+                    && parameterManager.processSettings.mode != .reduce {
                     Stepper(value: $parameterManager.processSettings.startCount, in: 1...16) {
                         Text("Starting Notes: \(parameterManager.processSettings.startCount)")
                             .foregroundColor(Color.garageBandText)
@@ -908,6 +912,76 @@ struct RhythmMeterDetailView: View {
                 }
             }
         }
+    }
+    
+    // MARK: - Phasing (Reich voices)
+    
+    private var phasingSection: some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text("Phasing")
+                .font(.subheadline).fontWeight(.semibold)
+                .foregroundColor(Color.garageBandText)
+            
+            Picker("Phasing", selection: $parameterManager.phasingSettings.mode) {
+                ForEach(PhasingMode.allCases, id: \.self) { mode in
+                    Text(mode.rawValue).tag(mode)
+                }
+            }
+            .pickerStyle(SegmentedPickerStyle())
+            
+            Text(parameterManager.phasingSettings.mode.description)
+                .font(.caption)
+                .foregroundColor(Color.garageBandText.opacity(0.7))
+            
+            if parameterManager.phasingSettings.mode == .discrete {
+                Stepper(value: $parameterManager.phasingSettings.stepsPerCycle, in: 1...8) {
+                    Text("Steps per Cycle: \(parameterManager.phasingSettings.stepsPerCycle)")
+                        .foregroundColor(Color.garageBandText)
+                }
+            }
+            
+            if parameterManager.phasingSettings.mode == .continuous {
+                HStack {
+                    Text("Drift per Cycle:")
+                        .foregroundColor(Color.garageBandText)
+                    Spacer()
+                    Text(String(format: "%.2f steps", parameterManager.phasingSettings.driftPerCycle))
+                        .font(.system(.body, design: .monospaced))
+                        .foregroundColor(Color.garageBandText)
+                }
+                Slider(value: $parameterManager.phasingSettings.driftPerCycle, in: 0.05...1.0, step: 0.05)
+            }
+            
+            if parameterManager.phasingSettings.mode != .off {
+                Stepper(value: $parameterManager.phasingSettings.voiceTranspose, in: -12...12) {
+                    Text("Voice 2 Transpose: \(parameterManager.phasingSettings.voiceTranspose) st")
+                        .foregroundColor(Color.garageBandText)
+                }
+                
+                phasingRealignmentCaption
+            }
+        }
+    }
+    
+    private var phasingRealignmentCaption: some View {
+        // Approximation from the current settings; the real pattern length is
+        // known only after generation.
+        let phasing = parameterManager.phasingSettings
+        let stepBeats = parameterManager.currentParameters.phaseStepBeats
+        let barBeats = parameterManager.meterCycle.totalBeats
+        let approxSteps = stepBeats > 0 ? max(1, Int((barBeats / stepBeats).rounded())) : 1
+        let cycles: Int
+        switch phasing.mode {
+        case .off:
+            cycles = 1
+        case .discrete:
+            cycles = approxSteps / CyclicalSettings.gcd(phasing.stepsPerCycle, approxSteps)
+        case .continuous:
+            cycles = max(1, Int(ceil(Double(approxSteps) / phasing.driftPerCycle)))
+        }
+        return Text("Voices realign roughly every \(cycles) cycles (exact length depends on the generated pattern)")
+            .font(.caption)
+            .foregroundColor(Color.garageBandText.opacity(0.7))
     }
     
     // MARK: - Rhythm mode

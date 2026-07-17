@@ -55,6 +55,9 @@ class ParameterManager: ObservableObject {
     @Published var processSettings: ProcessSettings = ProcessSettings() {
         didSet { validateAndNotify() }
     }
+    @Published var phasingSettings: PhasingSettings = PhasingSettings() {
+        didSet { validateAndNotify() }
+    }
     
     /// Single-meter accessor: reads the first bar; writing replaces the whole
     /// cycle with one bar (the full cycle editor lives in Rhythm & Meter).
@@ -253,7 +256,8 @@ class ParameterManager: ObservableObject {
             toneShifting: toneShifting,
             cyclicalSettings: cyclicalSettings,
             rhythmSettings: rhythmSettings,
-            processSettings: processSettings
+            processSettings: processSettings,
+            phasingSettings: phasingSettings
         )
     }
     
@@ -266,6 +270,7 @@ class ParameterManager: ObservableObject {
         tempo = parameters.tempo
         meterCycle = parameters.meterCycle
         processSettings = parameters.processSettings
+        phasingSettings = parameters.phasingSettings
         rhythmSettings = parameters.rhythmSettings
         iterations = parameters.iterations
         randomiseOrder = parameters.randomiseOrder

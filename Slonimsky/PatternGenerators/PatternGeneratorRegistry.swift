@@ -329,7 +329,7 @@ class PatternGeneratorRegistry: ObservableObject {
 
         for note in notes2 {
             let isDuplicate = !note.isRest && result.contains {
-                !$0.isRest && $0.note == note.note && abs($0.onset - note.onset) < 1e-6
+                !$0.isRest && $0.note == note.note && $0.voice == note.voice && abs($0.onset - note.onset) < 1e-6
             }
             if !isDuplicate {
                 result.append(note)

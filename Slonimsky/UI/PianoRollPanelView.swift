@@ -576,10 +576,14 @@ struct NoteView: View {
         if isSelected {
             return Color.garageBandAccent
         }
-        let base = Color(hue: Double(note.note % 12) / 12.0,
-                         saturation: 0.7,
-                         brightness: isAccented ? 0.95 : 0.8)
-        return base
+        // Voice 0: hue follows pitch class. Phasing voice: fixed cool tint so the
+        // two patterns stay separable as they slide apart.
+        if note.voice > 0 {
+            return Color(hue: 0.55, saturation: 0.65, brightness: isAccented ? 0.95 : 0.75)
+        }
+        return Color(hue: Double(note.note % 12) / 12.0,
+                     saturation: 0.7,
+                     brightness: isAccented ? 0.95 : 0.8)
     }
     
     var body: some View {

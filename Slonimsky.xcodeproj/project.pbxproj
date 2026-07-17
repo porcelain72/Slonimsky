@@ -32,6 +32,7 @@
 		FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000008 /* PhaseCycleTests.swift */; };
 		FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000009 /* MeterCycleTests.swift */; };
 		FAB1E503000000000000000A /* ProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000A /* ProcessTests.swift */; };
+		FAB1E503000000000000000C /* PhasingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000C /* PhasingTests.swift */; };
 		FAB1E502000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
 		FAB1E503000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
@@ -174,6 +175,7 @@
 		FAB1E5010000000000000008 /* PhaseCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhaseCycleTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000009 /* MeterCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterCycleTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000A /* ProcessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessTests.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000C /* PhasingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhasingTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000B /* PresetsDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresetsDetailView.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -277,6 +279,7 @@
 				FAB1E5010000000000000008 /* PhaseCycleTests.swift */,
 				FAB1E5010000000000000009 /* MeterCycleTests.swift */,
 				FAB1E501000000000000000A /* ProcessTests.swift */,
+				FAB1E501000000000000000C /* PhasingTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
@@ -581,6 +584,7 @@
 				FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */,
 				FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */,
 				FAB1E503000000000000000A /* ProcessTests.swift in Sources */,
+				FAB1E503000000000000000C /* PhasingTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,

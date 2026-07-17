@@ -191,9 +191,144 @@ let showcasePresets: [SlonimskyPreset] = [
     )
 ]
 
-/// All presets known to the app, showcase first.
+// MARK: - Reich Showcase
+
+/// Presets built on Steve Reich's techniques: phasing voices, and
+/// substitution of beats for rests (construct/reduce).
+let reichPresets: [SlonimskyPreset] = [
+
+    // Discrete phasing: the second voice jumps one grid step per cycle,
+    // realigning after one full trip around the pattern
+    SlonimskyPreset(
+        name: "Clapping Pattern",
+        description: "E(7,12) sixteenths; a second voice jumps one step ahead each cycle and realigns after 12",
+        generatorName: "Scale Pattern Generator",
+        parameters: {
+            var rhythm = RhythmSettings()
+            rhythm.mode = .euclidean
+            rhythm.euclideanHits = 7
+            rhythm.euclideanSteps = 12
+            rhythm.euclideanStepDuration = .sixteenth
+            rhythm.accentBoost = 20
+
+            var phasing = PhasingSettings()
+            phasing.mode = .discrete
+            phasing.stepsPerCycle = 1
+
+            return PatternParameters(
+                rootNote: 60,
+                scaleType: .minorPentatonic,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 5,
+                tempo: 138.0,
+                meter: Meter(numerator: 12, denominator: 16, groupings: [3, 3, 3, 3]),
+                mirror: false,
+                rhythmSettings: rhythm,
+                phasingSettings: phasing
+            )
+        }(),
+        category: "Reich Showcase"
+    ),
+
+    // Continuous phasing: the second voice drifts a quarter step per cycle,
+    // passing through the blurred zones between lock points
+    SlonimskyPreset(
+        name: "Piano Phase",
+        description: "Two voices on the same line; voice 2 drifts a quarter of a step each cycle — blur, lock, repeat",
+        generatorName: "Scale Pattern Generator",
+        parameters: {
+            var phasing = PhasingSettings()
+            phasing.mode = .continuous
+            phasing.driftPerCycle = 0.25
+            phasing.voiceVelocityOffset = -12
+
+            return PatternParameters(
+                rootNote: 64,
+                scaleType: .diatonic,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 7,
+                tempo: 144.0,
+                mirror: false,
+                baseNoteDuration: 0.25,
+                phasingSettings: phasing
+            )
+        }(),
+        category: "Reich Showcase"
+    ),
+
+    // Substitution of beats for rests: fixed footprint, notes arrive one at a
+    // time in spread order and never move once placed
+    SlonimskyPreset(
+        name: "Drumming Build",
+        description: "Construction over E(9,16): beats replace rests one per cycle while the bar length never changes",
+        generatorName: "Scale Pattern Generator",
+        parameters: {
+            var rhythm = RhythmSettings()
+            rhythm.mode = .euclidean
+            rhythm.euclideanHits = 9
+            rhythm.euclideanSteps = 16
+            rhythm.euclideanStepDuration = .eighth
+            rhythm.accentBoost = 18
+
+            var process = ProcessSettings()
+            process.mode = .construct
+            process.startCount = 1
+            process.notesPerCycle = 1
+
+            return PatternParameters(
+                rootNote: 55,
+                scaleType: .hirajoshi,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 5,
+                tempo: 120.0,
+                mirror: false,
+                rhythmSettings: rhythm,
+                processSettings: process
+            )
+        }(),
+        category: "Reich Showcase"
+    ),
+
+    // Construction and phasing interacting: the pattern hollows out while the
+    // second voice slips against it, an octave up
+    SlonimskyPreset(
+        name: "Phase & Fade",
+        description: "Reduce mode empties the pattern beat by beat while a second voice phases against it an octave up",
+        generatorName: "Scale Pattern Generator",
+        parameters: {
+            var rhythm = RhythmSettings()
+            rhythm.accentBoost = 16
+
+            var process = ProcessSettings()
+            process.mode = .reduce
+            process.notesPerCycle = 1
+
+            var phasing = PhasingSettings()
+            phasing.mode = .discrete
+            phasing.stepsPerCycle = 1
+            phasing.voiceTranspose = 12
+            phasing.voiceVelocityOffset = -10
+
+            return PatternParameters(
+                rootNote: 57,
+                scaleType: .pentatonic,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 5,
+                tempo: 112.0,
+                mirror: false,
+                baseNoteDuration: 0.5,
+                rhythmSettings: rhythm,
+                processSettings: process,
+                phasingSettings: phasing
+            )
+        }(),
+        category: "Reich Showcase"
+    )
+]
+
+/// All presets known to the app, showcase groups first.
 var allPresets: [SlonimskyPreset] {
-    showcasePresets + defaultPresets
+    showcasePresets + reichPresets + defaultPresets
 }
 
 // MARK: - Presets Panel
@@ -290,6 +425,9 @@ struct PresetsDetailView: View {
         let curveCount = parameters.cyclicalSettings.enabledParameters.count
         if curveCount > 0 {
             chips.append("Curves: \(curveCount)")
+        }
+        if parameters.phasingSettings.mode != .off {
+            chips.append("Phasing: \(parameters.phasingSettings.mode.rawValue)")
         }
         return chips
     }
