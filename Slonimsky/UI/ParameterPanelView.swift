@@ -846,14 +846,14 @@ struct RhythmMeterDetailView: View {
             Divider().padding(.vertical, 4)
             Text("Cyclical Settings").font(.subheadline).fontWeight(.medium).foregroundColor(Color.garageBandText)
             HStack {
-                Text("Cycle Type:").foregroundColor(Color.garageBandText)
+                Text("Shape:").foregroundColor(Color.garageBandText)
                 Spacer()
-                Picker("Cycle Type", selection: Binding(
-                    get: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType },
-                    set: { parameterManager.cyclicalSettings.baseNoteDuration.cycleType = $0 }
+                Picker("Shape", selection: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.shape },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.shape = $0 }
                 )) {
-                    ForEach(CycleType.allCases, id: \.self) { type in
-                        Text(type.rawValue).tag(type)
+                    ForEach(CycleShape.allCases, id: \.self) { shape in
+                        Text(shape.rawValue).tag(shape)
                     }
                 }
             }
@@ -878,28 +878,31 @@ struct RhythmMeterDetailView: View {
                 .frame(width: 80)
             }
             HStack {
-                Text("Step Size:").foregroundColor(Color.garageBandText)
+                Text("Period:").foregroundColor(Color.garageBandText)
                 Spacer()
-                TextField("Step", value: Binding(
-                    get: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize },
-                    set: { parameterManager.cyclicalSettings.baseNoteDuration.stepSize = $0 }
-                ), formatter: NumberFormatter())
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .frame(width: 80)
-            }
-            HStack {
-                Text("Operation:").foregroundColor(Color.garageBandText)
-                Spacer()
-                Picker("Operation", selection: Binding(
-                    get: { parameterManager.cyclicalSettings.baseNoteDuration.operationType },
-                    set: { parameterManager.cyclicalSettings.baseNoteDuration.operationType = $0 }
-                )) {
-                    ForEach(CyclicalOperationType.allCases, id: \.self) { op in
-                        Text(op.rawValue).tag(op)
-                    }
+                Stepper(value: Binding(
+                    get: { parameterManager.cyclicalSettings.baseNoteDuration.period },
+                    set: { parameterManager.cyclicalSettings.baseNoteDuration.period = $0 }
+                ), in: 1...64) {
+                    Text("\(parameterManager.cyclicalSettings.baseNoteDuration.period) cycles")
+                        .foregroundColor(Color.garageBandText)
                 }
+                .fixedSize()
             }
+            realignmentCaption
         }
+    }
+
+    /// Shows when all enabled cyclical curves realign (lcm of their periods).
+    private var realignmentCaption: some View {
+        let realignment = parameterManager.cyclicalSettings.realignmentCycles
+        let capped = realignment > CyclicalSequenceGenerator.cycleCap
+        let text = capped
+            ? "Curves realign every \(realignment) patterns (sequence capped at \(CyclicalSequenceGenerator.cycleCap))"
+            : "All cyclical curves realign every \(realignment) pattern\(realignment == 1 ? "" : "s")"
+        return Text(text)
+            .font(.caption)
+            .foregroundColor(capped ? .orange : Color.garageBandText.opacity(0.7))
     }
     
     // MARK: - Talea (isorhythm)
@@ -1045,17 +1048,22 @@ struct RhythmMeterDetailView: View {
                 set: { enabled in
                     parameterManager.cyclicalSettings.euclideanRotation.isEnabled = enabled
                     if enabled {
-                        // One full turn of the current grid, one step at a time
+                        // One full turn of the current grid over one period
+                        let steps = max(1, parameterManager.rhythmSettings.euclideanSteps)
                         parameterManager.cyclicalSettings.euclideanRotation.minValue = 0
-                        parameterManager.cyclicalSettings.euclideanRotation.maxValue =
-                            Double(max(1, parameterManager.rhythmSettings.euclideanSteps - 1))
-                        parameterManager.cyclicalSettings.euclideanRotation.stepSize = 1
+                        parameterManager.cyclicalSettings.euclideanRotation.maxValue = Double(steps - 1)
+                        parameterManager.cyclicalSettings.euclideanRotation.period = steps
+                        parameterManager.cyclicalSettings.euclideanRotation.shape = .rampUp
                     }
                 }
             ))
             .toggleStyle(CheckboxToggleStyle())
             .font(.system(size: 12, weight: .medium))
             .foregroundColor(Color.garageBandText)
+
+            if parameterManager.cyclicalSettings.euclideanRotation.isEnabled {
+                realignmentCaption
+            }
         }
     }
     
@@ -1637,10 +1645,11 @@ struct CyclicalParameterControl<T: Comparable>: View {
                     get: { cyclicalSettings?.isEnabled ?? false },
                     set: { isEnabled in
                         if isEnabled {
+                            // Default to a sweep from the current value to the top of the range
                             cyclicalSettings = CyclicalParameterSettings(
                                 isEnabled: true,
                                 minValue: Double(truncating: defaultValue as! NSNumber),
-                                maxValue: Double(truncating: defaultValue as! NSNumber)
+                                maxValue: Double(truncating: range.upperBound as! NSNumber)
                             )
                         } else {
                             cyclicalSettings = nil
@@ -1693,65 +1702,35 @@ struct CyclicalParameterControl<T: Comparable>: View {
                             }
                         }
                         
-                        // Step Size
+                        // Shape
                         VStack(alignment: .leading) {
-                            Text("Step Size")
+                            Text("Shape")
                                 .font(.caption)
                                 .foregroundColor(Color.garageBandText)
-                            TextField("1", text: Binding(
-                                get: { 
-                                    let value = cyclicalSettings?.stepSize ?? 1.0
-                                    return String(format: "%.0f", value)
-                                },
+                            Picker("Shape", selection: Binding(
+                                get: { cyclicalSettings?.shape ?? .rampUp },
                                 set: { newValue in
-                                    if let doubleValue = Double(newValue) {
-                                        cyclicalSettings?.stepSize = doubleValue
-                                    }
-                                }
-                            ))
-                            .textFieldStyle(.roundedBorder)
-                        }
-                        
-                        
-                        // Operation Type
-                        VStack(alignment: .leading) {
-                            Text("Operation Type")
-                                .font(.caption)
-                                .foregroundColor(Color.garageBandText)
-                            Picker("Operation", selection: Binding(
-                                get: { cyclicalSettings?.operationType ?? .replace },
-                                set: { newValue in
-                                    cyclicalSettings?.operationType = newValue
+                                    cyclicalSettings?.shape = newValue
                                 }
                             )) {
-                                ForEach(CyclicalOperationType.allCases, id: \.self) { operation in
-                                    Text(operation.rawValue).tag(operation)
+                                ForEach(CycleShape.allCases, id: \.self) { shape in
+                                    Text(shape.rawValue).tag(shape)
                                 }
                             }
                             .pickerStyle(.menu)
                             .foregroundColor(Color.garageBandText)
                         }
-                        
-                        // Reset After Max
-                        Toggle("Reset After Max", isOn: Binding(
-                            get: { cyclicalSettings?.resetAfterMax ?? false },
+
+                        // Period (pattern cycles per full sweep)
+                        Stepper(value: Binding(
+                            get: { cyclicalSettings?.period ?? 8 },
                             set: { newValue in
-                                cyclicalSettings?.resetAfterMax = newValue
+                                cyclicalSettings?.period = newValue
                             }
-                        ))
-                        .foregroundColor(Color.garageBandText)
-                        
-                        // Current Cycle Display
-                        HStack {
-                            Text("Current Cycle: \(cyclicalSettings?.currentCycle ?? 0)")
+                        ), in: 1...64) {
+                            Text("Period: \(cyclicalSettings?.period ?? 8) cycles per sweep")
                                 .font(.caption)
                                 .foregroundColor(Color.garageBandText)
-                            Spacer()
-                            Button("Reset") {
-                                cyclicalSettings?.currentCycle = 0
-                            }
-                            .buttonStyle(.bordered)
-                            .controlSize(.small)
                         }
                     }
                     .padding()
@@ -1844,22 +1823,22 @@ struct CyclicalModulationSection: View {
                             .fontWeight(.medium)
                             .foregroundColor(Color.garageBandText)
                         
-                        // Cycle Type
+                        // Shape
                         HStack {
-                            Text("Cycle Type:")
+                            Text("Shape:")
                                 .foregroundColor(Color.garageBandText)
                             Spacer()
-                            Picker("Cycle Type", selection: Binding(
-                                get: { cyclicalSettings?.cycleType ?? .increment },
+                            Picker("Shape", selection: Binding(
+                                get: { cyclicalSettings?.shape ?? .rampUp },
                                 set: { newValue in
                                     if var current = cyclicalSettings {
-                                        current.cycleType = newValue
+                                        current.shape = newValue
                                         cyclicalSettings = current
                                     }
                                 }
                             )) {
-                                ForEach(CycleType.allCases, id: \.self) { cycleType in
-                                    Text(cycleType.rawValue).tag(cycleType)
+                                ForEach(CycleShape.allCases, id: \.self) { shape in
+                                    Text(shape.rawValue).tag(shape)
                                 }
                             }
                             .pickerStyle(.menu)
@@ -1902,44 +1881,24 @@ struct CyclicalModulationSection: View {
                             .frame(width: 80)
                         }
                         
-                        // Step Size
+                        // Period
                         HStack {
-                            Text("Step Size:")
+                            Text("Period:")
                                 .foregroundColor(Color.garageBandText)
                             Spacer()
-                            TextField("Step", value: Binding(
-                                get: { cyclicalSettings?.stepSize ?? 1.0 },
+                            Stepper(value: Binding(
+                                get: { cyclicalSettings?.period ?? 8 },
                                 set: { newValue in
                                     if var current = cyclicalSettings {
-                                        current.stepSize = newValue
+                                        current.period = newValue
                                         cyclicalSettings = current
                                     }
                                 }
-                            ), format: .number)
-                            .textFieldStyle(.roundedBorder)
-                            .frame(width: 80)
-                        }
-                        
-                        // Operation Type
-                        HStack {
-                            Text("Operation:")
-                                .foregroundColor(Color.garageBandText)
-                            Spacer()
-                            Picker("Operation", selection: Binding(
-                                get: { cyclicalSettings?.operationType ?? .replace },
-                                set: { newValue in
-                                    if var current = cyclicalSettings {
-                                        current.operationType = newValue
-                                        cyclicalSettings = current
-                                    }
-                                }
-                            )) {
-                                ForEach(CyclicalOperationType.allCases, id: \.self) { operation in
-                                    Text(operation.rawValue).tag(operation)
-                                }
+                            ), in: 1...64) {
+                                Text("\(cyclicalSettings?.period ?? 8) cycles")
+                                    .foregroundColor(Color.garageBandText)
                             }
-                            .pickerStyle(.menu)
-                            .foregroundColor(Color.garageBandText)
+                            .fixedSize()
                         }
                     }
                     .padding(.top, 4)

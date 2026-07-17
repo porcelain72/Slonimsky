@@ -19,126 +19,85 @@ public enum CyclicalParameterType: String, CaseIterable, Codable {
     case euclideanRotation = "Euclidean Rotation"
 }
 
-/// How cyclical values should be applied to base values
-public enum CyclicalOperationType: String, CaseIterable, Codable {
-    case replace = "Replace"
-    case add = "Add"
-    case multiply = "Multiply"
-    case modulate = "Modulate"
+/// Waveform shape of a phase-based parameter curve
+public enum CycleShape: String, CaseIterable, Codable {
+    case rampUp = "Ramp Up"
+    case rampDown = "Ramp Down"
+    case triangle = "Triangle"
+    case sine = "Sine"
+    case randomHold = "Random"
+
+    public var description: String {
+        switch self {
+        case .rampUp:
+            return "Rise from min to max over one period, then wrap"
+        case .rampDown:
+            return "Fall from max to min over one period, then wrap"
+        case .triangle:
+            return "Rise to max mid-period, fall back to min"
+        case .sine:
+            return "Smooth rise and fall (raised cosine)"
+        case .randomHold:
+            return "A different random value each cycle, repeating every period"
+        }
+    }
 }
 
-/// Defines how a parameter should change cyclically
+/// A phase-based parameter curve: the parameter sweeps its range over `period`
+/// pattern cycles following `shape`, then wraps. Parameters with different
+/// periods phase against each other and realign at the lcm of their periods.
 public struct CyclicalParameterSettings: Codable, Equatable, Hashable {
     /// Whether cyclical changes are enabled for this parameter
     public var isEnabled: Bool = false
-    
+
     /// The minimum value for the parameter
     public var minValue: Double = 0.0
-    
+
     /// The maximum value for the parameter
     public var maxValue: Double = 10.0
-    
-    /// The step size for each cycle increment
-    public var stepSize: Double = 1.0
-    
-    /// The current cycle value (0-based)
-    public var currentCycle: Int = 0
-    
-    /// Whether to reset to minValue after reaching maxCycles
-    public var resetAfterMax: Bool = true
-    
-    /// How the cyclical value should be applied to the base value
-    public var operationType: CyclicalOperationType = .replace
-    
-    /// The type of cycling behavior
-    public var cycleType: CycleType = .increment
-    
+
+    /// Pattern cycles per full sweep of the curve (1...64)
+    public var period: Int = 8
+
+    /// Waveform of the sweep
+    public var shape: CycleShape = .rampUp
+
     public init(
         isEnabled: Bool = false,
         minValue: Double = 0.0,
         maxValue: Double = 10.0,
-        stepSize: Double = 1.0,
-        currentCycle: Int = 0,
-        resetAfterMax: Bool = true,
-        cycleType: CycleType = .increment
+        period: Int = 8,
+        shape: CycleShape = .rampUp
     ) {
         self.isEnabled = isEnabled
         self.minValue = minValue
         self.maxValue = maxValue
-        self.stepSize = stepSize
-        self.currentCycle = currentCycle
-        self.resetAfterMax = resetAfterMax
-        self.cycleType = cycleType
+        self.period = period
+        self.shape = shape
     }
-    
-    /// Calculate the current parameter value based on cycle
-    public func currentValue(baseValue: Double) -> Double {
-        guard isEnabled else { return baseValue }
-        
-        let cycleValue: Double
-        switch cycleType {
-        case .increment:
-            cycleValue = minValue + (Double(currentCycle) * stepSize)
-        case .decrement:
-            cycleValue = maxValue - (Double(currentCycle) * stepSize)
-        case .oscillate:
-            let maxCycles = Int(ceil((maxValue - minValue) / stepSize)) + 1
-            let halfCycles = maxCycles / 2
-            let cycleInHalf = currentCycle % (halfCycles * 2)
-            if cycleInHalf < halfCycles {
-                cycleValue = minValue + (Double(cycleInHalf) * stepSize)
-            } else {
-                cycleValue = maxValue - (Double(cycleInHalf - halfCycles) * stepSize)
-            }
-        case .random:
-            // Use currentCycle as seed for deterministic randomness
-            let random = Double((currentCycle * 12345) % 1000) / 1000.0
-            cycleValue = minValue + (random * (maxValue - minValue))
-        }
-        
-        return max(minValue, min(maxValue, cycleValue))
-    }
-    
-    /// Advance to the next cycle
-    public mutating func advanceCycle() {
-        guard isEnabled else { return }
-        
-        let maxCycles = Int(ceil((maxValue - minValue) / stepSize)) + 1
-        currentCycle += 1
-        
-        if currentCycle >= maxCycles {
-            if resetAfterMax {
-                currentCycle = 0
-            } else {
-                currentCycle = maxCycles - 1
-            }
-        }
-    }
-    
-    /// Reset the cycle counter
-    public mutating func resetCycle() {
-        currentCycle = 0
-    }
-}
 
-/// Types of cycling behavior
-public enum CycleType: String, CaseIterable, Codable {
-    case increment = "Increment"
-    case decrement = "Decrement"
-    case oscillate = "Oscillate"
-    case random = "Random"
-    
-    public var description: String {
-        switch self {
-        case .increment:
-            return "Gradually increase from min to max"
-        case .decrement:
-            return "Gradually decrease from max to min"
-        case .oscillate:
-            return "Oscillate between min and max values"
-        case .random:
-            return "Use random values within range"
+    /// Value at a global cycle index.
+    /// Guaranteed periodic: `value(atCycle: c) == value(atCycle: c + period)`.
+    public func value(atCycle cycle: Int, baseValue: Double) -> Double {
+        guard isEnabled, period >= 1 else { return baseValue }
+
+        let step = ((cycle % period) + period) % period
+        let phase = Double(step) / Double(period)
+        let t: Double
+        switch shape {
+        case .rampUp:
+            t = phase
+        case .rampDown:
+            t = 1.0 - phase
+        case .triangle:
+            t = 1.0 - abs(2.0 * phase - 1.0)
+        case .sine:
+            t = 0.5 - 0.5 * cos(2.0 * .pi * phase)
+        case .randomHold:
+            // Deterministic pseudo-random per step; repeats every period
+            t = Double((step &* 2654435761) % 1000) / 999.0
         }
+        return minValue + t * (maxValue - minValue)
     }
 }
 
@@ -148,121 +107,106 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
     public var interpolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
-        maxValue: 5.0,
-        stepSize: 1.0
+        maxValue: 5.0
     )
-    
+
     public var infrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
-        maxValue: 5.0,
-        stepSize: 1.0
+        maxValue: 5.0
     )
-    
+
     public var ultrapolationNotes: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
-        maxValue: 5.0,
-        stepSize: 1.0
+        maxValue: 5.0
     )
-    
+
     public var modulationInterval: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
-        maxValue: 12.0,
-        stepSize: 1.0
+        maxValue: 12.0
     )
-    
-    // Rhythmic Parameters (quarter note = 1.0 beat: cycles 16th note up to half note)
+
+    // Rhythmic Parameters (quarter note = 1.0 beat: sweeps 16th note up to half note)
     public var baseNoteDuration: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.25,
-        maxValue: 2.0,
-        stepSize: 0.25
+        maxValue: 2.0
     )
-    
+
     // Interval Parameters
     public var primaryInterval: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
-        maxValue: 12.0,
-        stepSize: 1.0
+        maxValue: 12.0
     )
-    
+
     public var secondaryInterval: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
-        maxValue: 12.0,
-        stepSize: 1.0
+        maxValue: 12.0
     )
-    
+
     // Velocity Parameters
     public var baseVelocity: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 40.0,
-        maxValue: 100.0,
-        stepSize: 10.0
+        maxValue: 100.0
     )
-    
+
     public var velocityRange: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 10.0,
-        maxValue: 50.0,
-        stepSize: 5.0
+        maxValue: 50.0
     )
-    
+
     // Tempo Parameters
     public var tempo: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 60.0,
-        maxValue: 180.0,
-        stepSize: 20.0
+        maxValue: 180.0
     )
-    
+
     // Basic Parameters
     public var rootNote: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 48.0, // C3
-        maxValue: 72.0, // C5
-        stepSize: 1.0
+        maxValue: 72.0  // C5
     )
-    
+
     public var numberOfOctaves: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 1.0,
-        maxValue: 4.0,
-        stepSize: 1.0
+        maxValue: 4.0
     )
-    
+
     public var divisionsOfOctave: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 12.0,
-        maxValue: 24.0,
-        stepSize: 1.0
+        maxValue: 24.0
     )
-    
+
     // Directional Parameters
     public var mirrorPoints: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
-        maxValue: 5.0,
-        stepSize: 1.0
+        maxValue: 5.0
     )
 
     // Rhythm Engine Parameters (rotates the Euclidean grid one step per cycle)
     public var euclideanRotation: CyclicalParameterSettings = CyclicalParameterSettings(
         isEnabled: false,
         minValue: 0.0,
-        maxValue: 8.0,
-        stepSize: 1.0
+        maxValue: 8.0
     )
-    
+
     public init() {}
-    
+
     /// Get all enabled cyclical parameters
     public var enabledParameters: [CyclicalParameterType: CyclicalParameterSettings] {
         var enabled: [CyclicalParameterType: CyclicalParameterSettings] = [:]
-        
+
         if interpolationNotes.isEnabled { enabled[.interpolationNotes] = interpolationNotes }
         if infrapolationNotes.isEnabled { enabled[.infrapolationNotes] = infrapolationNotes }
         if ultrapolationNotes.isEnabled { enabled[.ultrapolationNotes] = ultrapolationNotes }
@@ -278,45 +222,27 @@ public struct CyclicalSettings: Codable, Equatable, Hashable {
         if divisionsOfOctave.isEnabled { enabled[.divisionsOfOctave] = divisionsOfOctave }
         if mirrorPoints.isEnabled { enabled[.mirrorPoints] = mirrorPoints }
         if euclideanRotation.isEnabled { enabled[.euclideanRotation] = euclideanRotation }
-        
+
         return enabled
     }
-    
-    /// Advance all enabled parameters to the next cycle
-    public mutating func advanceAllCycles() {
-        interpolationNotes.advanceCycle()
-        infrapolationNotes.advanceCycle()
-        ultrapolationNotes.advanceCycle()
-        modulationInterval.advanceCycle()
-        baseNoteDuration.advanceCycle()
-        primaryInterval.advanceCycle()
-        secondaryInterval.advanceCycle()
-        baseVelocity.advanceCycle()
-        velocityRange.advanceCycle()
-        tempo.advanceCycle()
-        rootNote.advanceCycle()
-        numberOfOctaves.advanceCycle()
-        divisionsOfOctave.advanceCycle()
-        mirrorPoints.advanceCycle()
-        euclideanRotation.advanceCycle()
+
+    /// Number of pattern cycles after which all enabled curves realign
+    /// (lcm of their periods), before capping.
+    public var realignmentCycles: Int {
+        let periods = enabledParameters.values.map { max(1, $0.period) }
+        guard !periods.isEmpty else { return 1 }
+        return periods.reduce(1, CyclicalSettings.lcm)
     }
-    
-    /// Reset all cycle counters
-    public mutating func resetAllCycles() {
-        interpolationNotes.resetCycle()
-        infrapolationNotes.resetCycle()
-        ultrapolationNotes.resetCycle()
-        modulationInterval.resetCycle()
-        baseNoteDuration.resetCycle()
-        primaryInterval.resetCycle()
-        secondaryInterval.resetCycle()
-        baseVelocity.resetCycle()
-        velocityRange.resetCycle()
-        tempo.resetCycle()
-        rootNote.resetCycle()
-        numberOfOctaves.resetCycle()
-        divisionsOfOctave.resetCycle()
-        mirrorPoints.resetCycle()
-        euclideanRotation.resetCycle()
+
+    public static func lcm(_ a: Int, _ b: Int) -> Int {
+        let g = gcd(a, b)
+        guard g > 0 else { return max(a, b, 1) }
+        return abs(a / g * b)
     }
-} 
+
+    public static func gcd(_ a: Int, _ b: Int) -> Int {
+        var (a, b) = (abs(a), abs(b))
+        while b != 0 { (a, b) = (b, a % b) }
+        return max(a, 1)
+    }
+}

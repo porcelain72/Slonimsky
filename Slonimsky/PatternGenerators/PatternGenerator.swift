@@ -15,9 +15,8 @@ protocol PatternGenerator {
     /// - Parameters:
     ///   - parameters: The pattern generation parameters
     ///   - cycleIndex: The current cycle index for cyclical parameters
-    ///   - parameterCycles: Optional mapping of parameter types to their individual cycle indices (for nested cycling)
     /// - Returns: Array of MIDI note numbers (0-127)
-    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]?) -> [Int]
+    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int]
     
     /// Generate a musical pattern based on the given parameters
     /// - Parameter parameters: The pattern generation parameters
@@ -28,9 +27,8 @@ protocol PatternGenerator {
     /// - Parameters:
     ///   - parameters: The pattern generation parameters
     ///   - cycleIndex: The current cycle index for cyclical parameters
-    ///   - parameterCycles: Optional mapping of parameter types to their individual cycle indices (for nested cycling)
     /// - Returns: Array of MIDI note information
-    func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]?) -> [MIDIInfo]
+    func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo]
     
     /// Estimate the number of notes that will be generated
     /// - Parameter parameters: The pattern generation parameters
@@ -65,7 +63,7 @@ class BasePatternGenerator: PatternGenerator {
     /// Subclasses MUST override this method. For generators that still override generatePattern()
     /// directly (legacy code), they should implement this to extract notes from their generatePattern()
     /// result, e.g.: `return generatePattern(parameters: parameters, cycleIndex: cycleIndex).map { $0.note }`
-    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]?) -> [Int] {
+    func generateNotePattern(parameters: PatternParameters, cycleIndex: Int) -> [Int] {
         fatalError("Subclasses must implement generateNotePattern(). For legacy generators, extract notes from generatePattern() result.")
     }
     
@@ -81,9 +79,9 @@ class BasePatternGenerator: PatternGenerator {
     /// Default implementation uses generateNotePattern() then converts to MIDI via MIDIPatternConverter.
     /// Subclasses that override this method completely should also override generateNotePattern()
     /// to ensure proper separation of mathematical pattern generation from MIDI conversion.
-    func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [MIDIInfo] {
+    func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         // Generate pure note pattern
-        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
+        let notePattern = generateNotePattern(parameters: parameters, cycleIndex: cycleIndex)
         
         // Convert to MIDI with modulations applied
         return MIDIPatternConverter.convertWithModulations(
@@ -92,24 +90,10 @@ class BasePatternGenerator: PatternGenerator {
         )
     }
     
-    /// Apply cyclical changes to parameters for the current cycle
-    func applyCyclicalChanges(to parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> PatternParameters {
-        // Create a cyclical parameter manager with the current settings
+    /// Apply phase-based cyclical parameter curves for the given cycle index
+    func applyCyclicalChanges(to parameters: PatternParameters, cycleIndex: Int) -> PatternParameters {
         let cyclicalManager = CyclicalParameterManager(cyclicalSettings: parameters.cyclicalSettings)
-        
-        // Set the current cycle
-        cyclicalManager.currentCycle = cycleIndex
-        
-        print("🔄 Applying cyclical changes for cycle \(cycleIndex)")
-        print("   Original root note: \(parameters.rootNote)")
-        
-        // Get the modified parameters (using individual parameter cycles if provided)
-        let modifiedParameters = cyclicalManager.getModifiedParameters(from: parameters, parameterCycles: parameterCycles)
-        
-        print("   Modified root note: \(modifiedParameters.rootNote)")
-        print("   Cyclical settings enabled parameters: \(parameters.cyclicalSettings.enabledParameters.keys.map { $0.rawValue })")
-        
-        return modifiedParameters
+        return cyclicalManager.getModifiedParameters(from: parameters, cycleIndex: cycleIndex)
     }
     
     func estimateNoteCount(parameters: PatternParameters) -> Int {
@@ -204,82 +188,6 @@ class BasePatternGenerator: PatternGenerator {
         }
     }
     
-    // MARK: - Cyclical Parameter Helpers
-    
-    /// Apply cyclical parameter changes to a value
-    func applyCyclicalParameter(
-        baseValue: Double,
-        settings: CyclicalParameterSettings,
-        cycleIndex: Int
-    ) -> Double {
-        guard settings.isEnabled else { return baseValue }
-        
-        // Calculate max cycles dynamically based on parameter range
-        let maxCycles = Int(ceil((settings.maxValue - settings.minValue) / settings.stepSize)) + 1
-        let adjustedCycle = cycleIndex % maxCycles
-        let cyclicalValue = settings.minValue + (Double(adjustedCycle) * settings.stepSize)
-        
-        // Clamp to max value
-        let clampedValue = min(cyclicalValue, settings.maxValue)
-        
-        // Apply to base value based on operation type
-        switch settings.operationType {
-        case .replace:
-            return clampedValue
-        case .add:
-            return baseValue + clampedValue
-        case .multiply:
-            return baseValue * clampedValue
-        case .modulate:
-            let modulation = sin(Double(adjustedCycle) * .pi / Double(maxCycles))
-            return baseValue + (modulation * settings.maxValue)
-        }
-    }
-    
-    /// Get cyclical parameter value for a specific parameter
-    func getCyclicalValue(
-        for parameter: CyclicalParameterType,
-        settings: CyclicalSettings,
-        cycleIndex: Int
-    ) -> Double? {
-        let parameterSettings: CyclicalParameterSettings?
-        
-        switch parameter {
-        case .interpolationNotes:
-            parameterSettings = settings.interpolationNotes
-        case .infrapolationNotes:
-            parameterSettings = settings.infrapolationNotes
-        case .ultrapolationNotes:
-            parameterSettings = settings.ultrapolationNotes
-        case .modulationInterval:
-            parameterSettings = settings.modulationInterval
-        case .baseNoteDuration:
-            parameterSettings = settings.baseNoteDuration
-        case .primaryInterval:
-            parameterSettings = settings.primaryInterval
-        case .secondaryInterval:
-            parameterSettings = settings.secondaryInterval
-        case .baseVelocity:
-            parameterSettings = settings.baseVelocity
-        case .velocityRange:
-            parameterSettings = settings.velocityRange
-        case .tempo:
-            parameterSettings = settings.tempo
-        case .rootNote:
-            parameterSettings = settings.rootNote
-        case .numberOfOctaves:
-            parameterSettings = settings.numberOfOctaves
-        case .divisionsOfOctave:
-            parameterSettings = settings.divisionsOfOctave
-        case .mirrorPoints:
-            parameterSettings = settings.mirrorPoints
-        case .euclideanRotation:
-            parameterSettings = settings.euclideanRotation
-        }
-        
-        guard let settings = parameterSettings, settings.isEnabled else { return nil }
-        return applyCyclicalParameter(baseValue: 0.0, settings: settings, cycleIndex: cycleIndex)
-    }
 }
 
 /// Harmonic context for velocity calculation

@@ -51,13 +51,14 @@ final class SimpleCyclicalTest: XCTestCase {
         XCTAssertEqual(result1.metadata.totalCycles, 1, "Should have 1 cycle (single pattern)")
         XCTAssertGreaterThan(result1.notes.count, 0, "Should have generated notes")
         
-        // Test 2: With cyclical root note changes
+        // Test 2: With cyclical root note changes (rampUp over a period of 2 cycles)
         var cyclicalSettings = CyclicalSettings()
         cyclicalSettings.rootNote = CyclicalParameterSettings(
             isEnabled: true,
             minValue: 60.0,
             maxValue: 64.0,
-            stepSize: 2.0
+            period: 2,
+            shape: .rampUp
         )
         
         let baseParametersWithCyclical = PatternParameters(
@@ -92,13 +93,14 @@ final class SimpleCyclicalTest: XCTestCase {
         }
         
         XCTAssertTrue(result2.metadata.isCyclicalSequence, "Should be marked as cyclical")
-        XCTAssertEqual(result2.metadata.totalCycles, 2, "Should have 2 cycles (stops when parameter reaches max value)")
+        XCTAssertEqual(result2.metadata.totalCycles, 2, "Sequence runs one full period of the curve")
         
         // Verify we have notes from multiple cycles
         let notesByCycle = Dictionary(grouping: result2.notes) { $0.cycleIndex }
         XCTAssertEqual(notesByCycle.count, 2, "Should have notes from 2 different cycles")
         
-        // Verify each cycle has distinct root notes (60, 62)
+        // Verify each cycle has distinct root notes: rampUp over period 2
+        // gives phase 0 -> 60 and phase 0.5 -> 62
         for cycleIndex in 0..<2 {
             guard let cycleNotes = notesByCycle[cycleIndex] else {
                 XCTFail("Missing notes for cycle \(cycleIndex)")

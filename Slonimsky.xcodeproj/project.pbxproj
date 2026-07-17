@@ -29,6 +29,7 @@
 		FAB1E5030000000000000005 /* EuclideanRhythmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */; };
 		FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000006 /* IsorhythmTests.swift */; };
 		FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */; };
+		FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000008 /* PhaseCycleTests.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
@@ -53,8 +54,6 @@
 		987A91E42F2121D4002A6706 /* SheetMusicPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */; };
 		987A91E52F2121D4002A6706 /* PianoRollPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */; };
 		987A91E62F2121D4002A6706 /* SheetMusicPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */; };
-		987A91E72F2121D4002A6706 /* CycleControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */; };
-		987A91E82F2121D4002A6706 /* CyclicalParameterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */; };
 		987A91E92F2121D4002A6706 /* MainContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309742E39333C000D9EC7 /* MainContentView.swift */; };
 		987A91EA2F2121D4002A6706 /* ParameterInfoPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309942E3940B7000D9EC7 /* ParameterInfoPopupView.swift */; };
 		987A91EB2F2121D4002A6706 /* AutoGenerationSettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */; };
@@ -102,8 +101,6 @@
 		98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */; };
 		98C3099D2E3B893D000D9EC7 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		98C3099F2E3B8E64000D9EC7 /* CyclicalParameterManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */; };
-		98C309A22E3B8FC8000D9EC7 /* CycleControlView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */; };
-		98C309A32E3B8FC8000D9EC7 /* CyclicalParameterView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */; };
 		98C309A52E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */; };
 /* End PBXBuildFile section */
 
@@ -170,6 +167,7 @@
 		FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EuclideanRhythmTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000006 /* IsorhythmTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IsorhythmTests.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OnsetSchedulingTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000008 /* PhaseCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhaseCycleTests.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C309802E393378000D9EC7 /* SlonimskyTests/MIDIFileGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/MIDIFileGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -185,8 +183,6 @@
 		98C3099A2E3B6F77000D9EC7 /* SheetMusicPopupView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SheetMusicPopupView.swift; sourceTree = "<group>"; };
 		98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterSettings.swift; sourceTree = "<group>"; };
 		98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterManager.swift; sourceTree = "<group>"; };
-		98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CycleControlView.swift; sourceTree = "<group>"; };
-		98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalParameterView.swift; sourceTree = "<group>"; };
 		98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CyclicalSequenceGenerator.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -271,6 +267,7 @@
 				FAB1E5010000000000000005 /* EuclideanRhythmTests.swift */,
 				FAB1E5010000000000000006 /* IsorhythmTests.swift */,
 				FAB1E5010000000000000007 /* OnsetSchedulingTests.swift */,
+				FAB1E5010000000000000008 /* PhaseCycleTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
@@ -341,8 +338,6 @@
 			children = (
 				98AF6E142EACDC1200DD60AC /* GarageBandColors.swift */,
 				98C309932E3A51C3000D9EC7 /* AutoGenerationSettingsView.swift */,
-				98C309A02E3B8FC8000D9EC7 /* CycleControlView.swift */,
-				98C309A12E3B8FC8000D9EC7 /* CyclicalParameterView.swift */,
 				98C3096F2E39333C000D9EC7 /* ParameterManager.swift */,
 				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
@@ -525,14 +520,12 @@
 				98C309752E39333C000D9EC7 /* ParameterManager.swift in Sources */,
 				98C309772E39333C000D9EC7 /* PianoRollPanelView.swift in Sources */,
 				98C309622E393312000D9EC7 /* ContourPatternGenerator.swift in Sources */,
-				98C309A22E3B8FC8000D9EC7 /* CycleControlView.swift in Sources */,
 				98C3095E2E393311000D9EC7 /* HarmonicPatternGenerator.swift in Sources */,
 				98C309A52E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift in Sources */,
 				98C3097A2E39333C000D9EC7 /* MainContentView.swift in Sources */,
 				98C309512E3932FE000D9EC7 /* PatternParameters.swift in Sources */,
 				98C309762E39333C000D9EC7 /* PresetPickerView.swift in Sources */,
 				98C309532E3932FE000D9EC7 /* ModulationSettings.swift in Sources */,
-				98C309A32E3B8FC8000D9EC7 /* CyclicalParameterView.swift in Sources */,
 				98C309612E393312000D9EC7 /* SymmetricalPatternGenerator.swift in Sources */,
 				98C309602E393311000D9EC7 /* ScalePatternGenerator.swift in Sources */,
 				98C3099B2E3B6F78000D9EC7 /* SheetMusicPopupView.swift in Sources */,
@@ -574,6 +567,7 @@
 				FAB1E5030000000000000005 /* EuclideanRhythmTests.swift in Sources */,
 				FAB1E5030000000000000006 /* IsorhythmTests.swift in Sources */,
 				FAB1E5030000000000000007 /* OnsetSchedulingTests.swift in Sources */,
+				FAB1E5030000000000000008 /* PhaseCycleTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,
@@ -590,8 +584,6 @@
 				882D788B016F4E598CF5A6B9 /* ScaleGeneratorParameterTests.swift in Sources */,
 				987A91E52F2121D4002A6706 /* PianoRollPanelView.swift in Sources */,
 				987A91E62F2121D4002A6706 /* SheetMusicPanelView.swift in Sources */,
-				987A91E72F2121D4002A6706 /* CycleControlView.swift in Sources */,
-				987A91E82F2121D4002A6706 /* CyclicalParameterView.swift in Sources */,
 				987A91E92F2121D4002A6706 /* MainContentView.swift in Sources */,
 				987A91EA2F2121D4002A6706 /* ParameterInfoPopupView.swift in Sources */,
 				987A91EB2F2121D4002A6706 /* AutoGenerationSettingsView.swift in Sources */,

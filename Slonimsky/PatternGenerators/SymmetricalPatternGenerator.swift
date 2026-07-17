@@ -21,7 +21,7 @@ class SymmetricalPatternGenerator: BasePatternGenerator {
         return generatePattern(parameters: parameters, cycleIndex: 0)
     }
     
-    override func generatePattern(parameters: PatternParameters, cycleIndex: Int, parameterCycles: [CyclicalParameterType: Int]? = nil) -> [MIDIInfo] {
+    override func generatePattern(parameters: PatternParameters, cycleIndex: Int) -> [MIDIInfo] {
         let startTime = CFAbsoluteTimeGetCurrent()
         
         // Apply cyclical changes to parameters for the current cycle

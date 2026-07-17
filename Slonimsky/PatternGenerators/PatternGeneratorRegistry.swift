@@ -68,13 +68,11 @@ class PatternGeneratorRegistry: ObservableObject {
     ///   - generatorName: The name of the generator to use
     ///   - parameters: The pattern generation parameters
     ///   - cycleIndex: The current cycle index for cyclical parameters
-    ///   - parameterCycles: Optional mapping of parameter types to their individual cycle indices (for sequential cycling)
     /// - Returns: Generated pattern result with metadata
     func generatePattern(
         using generatorName: String,
         parameters: PatternParameters,
-        cycleIndex: Int,
-        parameterCycles: [CyclicalParameterType: Int]? = nil
+        cycleIndex: Int
     ) -> PatternGenerationResult? {
         guard let generator = getGenerator(name: generatorName) else {
             print("❌ Pattern generator '\(generatorName)' not found")
@@ -89,7 +87,7 @@ class PatternGeneratorRegistry: ObservableObject {
         let startTime = CFAbsoluteTimeGetCurrent()
         let startMemory = getMemoryUsage()
         
-        let notes = generator.generatePattern(parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles)
+        let notes = generator.generatePattern(parameters: parameters, cycleIndex: cycleIndex)
         
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
         let endMemory = getMemoryUsage()
@@ -187,14 +185,12 @@ class PatternGeneratorRegistry: ObservableObject {
     ///   - parameters: The pattern generation parameters
     ///   - combinationMode: How to combine the patterns
     ///   - cycleIndex: The current cycle index for cyclical parameters
-    ///   - parameterCycles: Optional mapping of parameter types to their individual cycle indices (for sequential cycling)
     /// - Returns: Combined pattern result
     func generateCombinedPattern(
         using generatorNames: [String],
         parameters: PatternParameters,
         combinationMode: PatternCombinationMode = .sequential,
-        cycleIndex: Int = 0,
-        parameterCycles: [CyclicalParameterType: Int]? = nil
+        cycleIndex: Int = 0
     ) -> PatternGenerationResult? {
         var allNotes: [MIDIInfo] = []
         var totalGenerationTime: TimeInterval = 0
@@ -202,7 +198,7 @@ class PatternGeneratorRegistry: ObservableObject {
         var allPitchRanges: [ClosedRange<Int>] = []
         
         for generatorName in generatorNames {
-            guard let result = generatePattern(using: generatorName, parameters: parameters, cycleIndex: cycleIndex, parameterCycles: parameterCycles) else {
+            guard let result = generatePattern(using: generatorName, parameters: parameters, cycleIndex: cycleIndex) else {
                 continue
             }
             

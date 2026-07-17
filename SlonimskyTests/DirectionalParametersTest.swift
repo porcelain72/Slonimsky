@@ -216,7 +216,8 @@ final class DirectionalParametersTest: XCTestCase {
             isEnabled: true,
             minValue: 0,
             maxValue: 3,
-            stepSize: 1
+            period: 4,
+            shape: .rampUp
         )
         
         let parameters = PatternParameters(
