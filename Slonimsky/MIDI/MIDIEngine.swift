@@ -246,10 +246,11 @@ class MIDIEngine: ObservableObject {
         }
 
         var events: [MIDIEvent] = []
-        let voices = Set(notes.soundingNotes.map { $0.voice })
+        let dedupedNotes = notes.soundingNotes.dedupedExactUnisons()
+        let voices = Set(dedupedNotes.map { $0.voice })
         for voice in voices {
             let channel = MIDIEngine.channel(forVoice: voice)
-            let voiceNotes = notes.soundingNotes.filter { $0.voice == voice }.gatedSamePitch()
+            let voiceNotes = dedupedNotes.filter { $0.voice == voice }.gatedSamePitch()
             for note in voiceNotes {
                 events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity, channel: channel))
                 events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0, channel: channel))
@@ -435,7 +436,9 @@ class MIDIEngine: ObservableObject {
     }
 
     private func createMelodyTrack(sequence: MusicSequence, notes: [MIDIInfo]) -> MusicTrack? {
-        let soundingNotes = notes.soundingNotes
+        // Cross-voice unison de-dup first: phasing lock points would otherwise
+        // double every note sample-identically on two channels
+        let soundingNotes = notes.soundingNotes.dedupedExactUnisons()
         let voices = Set(soundingNotes.map { $0.voice }).sorted()
         print("🎵 Creating melody track(s) for \(voices.count) voice(s), \(soundingNotes.count) sounding notes (\(notes.count - soundingNotes.count) rests skipped)")
 

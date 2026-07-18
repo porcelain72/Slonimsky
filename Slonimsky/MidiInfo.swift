@@ -72,6 +72,36 @@ extension Array where Element == MIDIInfo {
         filter { !$0.isRest }
     }
 
+    /// Emission-only cleanup across voices: two sounding notes with the same
+    /// pitch at the same onset (e.g. the phasing voices at cycle 0 and at every
+    /// realignment, with zero transpose) render as two sample-identical hits
+    /// summed at zero offset — comb filtering and clipping that reads as crunch.
+    /// Keep only the louder of each exact unison; perceptually it is one player.
+    func dedupedExactUnisons(epsilon: Double = 1e-6) -> [MIDIInfo] {
+        var kept: [MIDIInfo] = []
+        let byPitch = Dictionary(grouping: self) { $0.note }
+
+        for (_, group) in byPitch {
+            let sorted = group.sorted { $0.onset < $1.onset }
+            var groupKept: [MIDIInfo] = []
+            for note in sorted {
+                if let lastIndex = groupKept.indices.last,
+                   !note.isRest, !groupKept[lastIndex].isRest,
+                   abs(groupKept[lastIndex].onset - note.onset) < epsilon {
+                    // Exact unison: keep the louder hit
+                    if note.velocity > groupKept[lastIndex].velocity {
+                        groupKept[lastIndex] = note
+                    }
+                } else {
+                    groupKept.append(note)
+                }
+            }
+            kept.append(contentsOf: groupKept)
+        }
+
+        return kept.sorted { $0.onset < $1.onset }
+    }
+
     /// Emission-only cleanup for notes sharing one MIDI channel: when consecutive
     /// same-pitch notes touch or overlap, the earlier one is trimmed to end `gap`
     /// beats before the next onset. A simultaneous note-off/note-on pair on the

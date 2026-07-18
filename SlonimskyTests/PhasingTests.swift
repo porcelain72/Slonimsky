@@ -165,6 +165,46 @@ final class PhasingTests: XCTestCase {
         XCTAssertTrue(hasOffGrid, "Cycle 1's voice 2 should sit a quarter-step off the grid")
     }
 
+    // MARK: - Crunch regression (unison de-dup)
+
+    func testExactUnisonsAreDeduped() {
+        // Two voices, same pitch, same onset — the phasing lock-point case
+        let notes = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0.0, duration: 1.0, voice: 0),
+            MIDIInfo(note: 60, velocity: 72, onset: 0.0, duration: 1.0, voice: 1),
+            MIDIInfo(note: 62, velocity: 80, onset: 1.0, duration: 1.0, voice: 0),
+            MIDIInfo(note: 62, velocity: 72, onset: 1.5, duration: 1.0, voice: 1) // offset: kept
+        ]
+
+        let deduped = notes.dedupedExactUnisons()
+
+        XCTAssertEqual(deduped.count, 3, "Exact unison collapses to one note; offset notes survive")
+        let unison = deduped.filter { $0.note == 60 }
+        XCTAssertEqual(unison.count, 1)
+        XCTAssertEqual(unison[0].velocity, 80, "The louder hit wins")
+    }
+
+    func testPhasingLockCycleHasNoDoubledNotes() {
+        // Cycle 0 of any phased sequence is a full lock: voice 2 duplicates
+        // voice 1 exactly. After emission de-dup no pitch+onset pair may repeat.
+        guard let result = generate(phasingParameters(mode: .discrete)) else {
+            return XCTFail("Generation failed")
+        }
+
+        let cycle0 = result.notes.filter { $0.cycleIndex == 0 }.soundingNotes.dedupedExactUnisons()
+        var seen = Set<String>()
+        for note in cycle0 {
+            let key = "\(note.note)@\(Int((note.onset * 1000).rounded()))"
+            XCTAssertFalse(seen.contains(key), "Duplicate emission at lock point: \(key)")
+            seen.insert(key)
+        }
+
+        // Sanity: a mid-phase cycle still carries both voices after de-dup
+        let midCycle = result.notes.filter { $0.cycleIndex == 1 }.soundingNotes.dedupedExactUnisons()
+        let voices = Set(midCycle.map { $0.voice })
+        XCTAssertEqual(voices, [0, 1], "Offset cycles keep both voices audible")
+    }
+
     // MARK: - Crunch regression (same-pitch gate + sliver guard)
 
     func testGatedSamePitchTrimsButtedNotes() {
