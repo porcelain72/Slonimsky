@@ -165,6 +165,82 @@ final class PhasingTests: XCTestCase {
         XCTAssertTrue(hasOffGrid, "Cycle 1's voice 2 should sit a quarter-step off the grid")
     }
 
+    // MARK: - Crunch regression (same-pitch gate + sliver guard)
+
+    func testGatedSamePitchTrimsButtedNotes() {
+        // Two identical pitches exactly butted: the classic crunch case
+        let notes = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0.0, duration: 1.0),
+            MIDIInfo(note: 60, velocity: 80, onset: 1.0, duration: 1.0),
+            MIDIInfo(note: 62, velocity: 80, onset: 2.0, duration: 1.0)
+        ]
+
+        let gated = notes.gatedSamePitch(gap: 0.02)
+
+        XCTAssertEqual(gated.count, 3, "No notes dropped for a simple butt joint")
+        let firstC = gated.first { $0.note == 60 && $0.onset == 0.0 }!
+        XCTAssertEqual(firstC.end, 0.98, accuracy: 1e-9, "Earlier same-pitch note trimmed to leave a gap")
+        let secondC = gated.first { $0.note == 60 && $0.onset == 1.0 }!
+        XCTAssertEqual(secondC.duration, 1.0, accuracy: 1e-9, "Later note untouched (different pitch follows)")
+    }
+
+    func testGatedSamePitchDropsFullyOverlappedDuplicates() {
+        // Same pitch at the same onset on one channel: earlier entry is dropped
+        let notes = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0.0, duration: 1.0),
+            MIDIInfo(note: 60, velocity: 90, onset: 0.0, duration: 1.0)
+        ]
+        let gated = notes.gatedSamePitch()
+        XCTAssertEqual(gated.count, 1, "A same-pitch same-onset duplicate cannot be emitted safely")
+    }
+
+    func testGatedSamePitchLeavesDifferentPitchesAlone() {
+        let notes = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0.0, duration: 1.0),
+            MIDIInfo(note: 62, velocity: 80, onset: 1.0, duration: 1.0)
+        ]
+        let gated = notes.gatedSamePitch()
+        XCTAssertEqual(gated.map { $0.duration }, [1.0, 1.0], "Legato between different pitches is untouched")
+    }
+
+    func testAdditiveSeamsSurviveGating() {
+        // Additive process seams repeat the pattern's opening pitch back-to-back;
+        // after gating, no same-pitch pair may touch or overlap.
+        var params = PatternParameters(scaleType: .pentatonic, numberOfOctaves: 1, divisionsOfOctave: 5, mirror: false)
+        params.processSettings.mode = .additive
+        params.processSettings.startCount = 1
+        params.processSettings.notesPerCycle = 1
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Scale Pattern Generator"
+        ) else {
+            return XCTFail("Generation failed")
+        }
+
+        let gated = result.notes.soundingNotes.filter { $0.voice == 0 }.gatedSamePitch()
+        let byPitch = Dictionary(grouping: gated) { $0.note }
+        for (pitch, group) in byPitch {
+            let sorted = group.sorted { $0.onset < $1.onset }
+            for i in 0..<(sorted.count - 1) {
+                XCTAssertLessThan(sorted[i].end, sorted[i + 1].onset,
+                                  "Pitch \(pitch): gated notes must not touch (\(sorted[i].end) vs \(sorted[i + 1].onset))")
+            }
+        }
+    }
+
+    func testContinuousPhasingEmitsNoSlivers() {
+        // Continuous drift slices notes at the cycle boundary; slivers under the
+        // minimum must be dropped, not emitted as clicks.
+        guard let result = generate(phasingParameters(mode: .continuous, drift: 0.35)) else {
+            return XCTFail("Generation failed")
+        }
+        for note in result.notes.soundingNotes {
+            XCTAssertGreaterThanOrEqual(note.duration, 0.05 - 1e-9,
+                                        "No sounding note may be shorter than the sliver minimum")
+        }
+    }
+
     // MARK: - MIDI export channels
 
     func testPhasedExportUsesSecondChannel() throws {

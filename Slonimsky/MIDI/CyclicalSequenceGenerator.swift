@@ -250,18 +250,24 @@ class CyclicalSequenceGenerator {
                 .truncatingRemainder(dividingBy: cycleLength)
         }
 
+        // Notes sliced at the cycle boundary shorter than this are dropped:
+        // near-zero durations are pure attack transient and sound like clicks.
+        let minimumSliceDuration = 0.05
+
         var secondVoice: [MIDIInfo] = []
         for event in notes.soundingNotes {
             var copy = event
             copy.voice = 1
             copy.onset = (event.onset + offset).truncatingRemainder(dividingBy: cycleLength)
             copy.velocity = UInt8(clamping: max(1, Int(event.velocity) + phasing.voiceVelocityOffset))
+            let slicedDuration = min(copy.duration, cycleLength - copy.onset)
+            guard slicedDuration >= minimumSliceDuration else { continue }
             let transposed = event.note + phasing.voiceTranspose
             secondVoice.append(MIDIInfo(
                 note: min(127, max(0, transposed)),
                 velocity: copy.velocity,
                 onset: copy.onset,
-                duration: min(copy.duration, cycleLength - copy.onset),
+                duration: slicedDuration,
                 voice: 1,
                 cycleIndex: copy.cycleIndex
             ))

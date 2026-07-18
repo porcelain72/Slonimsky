@@ -71,6 +71,35 @@ extension Array where Element == MIDIInfo {
     var soundingNotes: [MIDIInfo] {
         filter { !$0.isRest }
     }
+
+    /// Emission-only cleanup for notes sharing one MIDI channel: when consecutive
+    /// same-pitch notes touch or overlap, the earlier one is trimmed to end `gap`
+    /// beats before the next onset. A simultaneous note-off/note-on pair on the
+    /// same pitch has undefined ordering in MIDI and audibly crunches (choked or
+    /// retriggered notes) in synths and DAWs. Notes that would shrink below
+    /// `minimumDuration` are dropped — the later note wins.
+    func gatedSamePitch(gap: Double = 0.02, minimumDuration: Double = 0.01) -> [MIDIInfo] {
+        var kept: [MIDIInfo] = []
+        let byPitch = Dictionary(grouping: self) { $0.note }
+
+        for (_, group) in byPitch {
+            let sorted = group.sorted { $0.onset < $1.onset }
+            for (index, note) in sorted.enumerated() {
+                var trimmed = note
+                if index + 1 < sorted.count {
+                    let nextOnset = sorted[index + 1].onset
+                    if trimmed.end > nextOnset - gap {
+                        let newDuration = nextOnset - gap - trimmed.onset
+                        if newDuration < minimumDuration { continue }
+                        trimmed.duration = newDuration
+                    }
+                }
+                kept.append(trimmed)
+            }
+        }
+
+        return kept.sorted { $0.onset < $1.onset }
+    }
 }
 
 /// Base note duration values for pattern generation

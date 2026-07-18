@@ -246,10 +246,14 @@ class MIDIEngine: ObservableObject {
         }
 
         var events: [MIDIEvent] = []
-        for note in notes.soundingNotes {
-            let channel = MIDIEngine.channel(forVoice: note.voice)
-            events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity, channel: channel))
-            events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0, channel: channel))
+        let voices = Set(notes.soundingNotes.map { $0.voice })
+        for voice in voices {
+            let channel = MIDIEngine.channel(forVoice: voice)
+            let voiceNotes = notes.soundingNotes.filter { $0.voice == voice }.gatedSamePitch()
+            for note in voiceNotes {
+                events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity, channel: channel))
+                events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0, channel: channel))
+            }
         }
         events.sort { lhs, rhs in
             if abs(lhs.timeBeats - rhs.timeBeats) > 1e-9 {
@@ -443,7 +447,8 @@ class MIDIEngine: ObservableObject {
             if firstTrack == nil { firstTrack = track }
 
             let channel = MIDIEngine.channel(forVoice: voice)
-            for note in soundingNotes where note.voice == voice {
+            let voiceNotes = soundingNotes.filter { $0.voice == voice }.gatedSamePitch()
+            for note in voiceNotes {
                 var midiMessage = MIDINoteMessage(
                     channel: channel,
                     note: UInt8(clamping: note.note),
@@ -464,22 +469,29 @@ class MIDIEngine: ObservableObject {
         
         guard let track = track else { return nil }
         
-        // Create harmonic accompaniment based on the melody
+        // Create harmonic accompaniment based on the melody. Flatten chord tones
+        // to their chord onsets and gate same-pitch collisions before emitting.
         let harmonicNotes = generateHarmonicAccompaniment(from: notes)
-
+        var flattened: [MIDIInfo] = []
         for chord in harmonicNotes {
             guard let chordOnset = chord.first?.onset else { continue }
             for note in chord {
-                var midiMessage = MIDINoteMessage(
-                    channel: 1,
-                    note: UInt8(clamping: note.note),
-                    velocity: UInt8(clamping: Int(note.velocity) - 20), // Softer
-                    releaseVelocity: 0,
-                    duration: Float32(note.duration)
-                )
-
-                MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(chordOnset), &midiMessage)
+                var tone = note
+                tone.onset = chordOnset
+                flattened.append(tone)
             }
+        }
+
+        for note in flattened.gatedSamePitch() {
+            var midiMessage = MIDINoteMessage(
+                channel: 1,
+                note: UInt8(clamping: note.note),
+                velocity: UInt8(clamping: Int(note.velocity) - 20), // Softer
+                releaseVelocity: 0,
+                duration: Float32(note.duration)
+            )
+
+            MusicTrackNewMIDINoteEvent(track, MusicTimeStamp(note.onset), &midiMessage)
         }
 
         return track
