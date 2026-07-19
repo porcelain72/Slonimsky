@@ -238,7 +238,37 @@ slips against it.
 
 ---
 
-## 8. Putting it all together — recipes
+## 8. Custom melodies
+
+*Where: Custom Melody panel (sidebar, below Basic Parameters)*
+
+Instead of generated scales, you can enter **your own melody** as the base material —
+everything else in the app then transforms it.
+
+- **Step entry**: pick a note value from the palette (sixteenth through dotted half),
+  then click keys on the on-screen keyboard — each click appends a note. The **Rest**
+  button appends silence of the selected value. Octave stepper shifts the keyboard.
+- **Time signature**: pick it right in the panel (the same meter the whole engine
+  uses); the preview draws barlines and grouping shading from the meter cycle.
+- **Preview**: a mini piano-roll of the entered melody — click any note or rest to
+  delete it; Undo removes the last event; capacity caption shows beats used.
+- **Limit**: 8 bars of the current meter cycle.
+
+The transformation contract:
+
+- Rhythm mode **Uniform** plays the melody **as entered** — durations and rests
+  preserved exactly (internally the entered rhythm becomes a talea, so if mirror or
+  modulations lengthen the pitch stream, your rhythm cycles against it isorhythmically).
+- **Isorhythm / Euclidean** modes re-rhythm the melody's pitches with your explicit
+  settings — enter a tune, then euclideanize it.
+- Mirror, modulations, curves, meter cycles, processes, and phasing all treat the
+  melody exactly like generated material: enter a two-bar motif, switch on discrete
+  phasing, and it phases against itself (the *Entered Motif Phase* preset ships
+  exactly that).
+
+---
+
+## 9. Putting it all together — recipes
 
 > **Tip:** the **Presets** panel (top of the sidebar) ships one-tap versions of
 > these ideas: a "Rhythm Engine Showcase" section (*Balkan Machine*, *Tresillo
@@ -282,7 +312,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 9. Seeing and exporting the results
+## 10. Seeing and exporting the results
 
 - **Piano roll** (bottom pane, resizable): onset-accurate notes, thick barlines that
   follow the meter cycle, alternating grouping shading, brighter/outlined accented
@@ -295,7 +325,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 10. Quick reference
+## 11. Quick reference
 
 | Feature | Panel | Key controls |
 |---|---|---|
@@ -308,6 +338,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 | Euclidean rotation cycling | Rhythm & Meter | "Cyclical Rotation" toggle |
 | Pattern process | Rhythm & Meter | mode (incl. Construct/Reduce), starting notes, notes per cycle |
 | Phasing voices | Rhythm & Meter | mode (Discrete/Continuous), steps or drift per cycle, voice-2 transpose |
+| Custom melody | Custom Melody | step entry, duration palette, rests, keyboard, 8-bar limit |
 
 *Sequence length rules:* curves realign at the **lcm of their periods**; a pattern
 process contributes its own cycle count; both merge via lcm, capped at **64 cycles**.

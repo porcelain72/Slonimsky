@@ -66,6 +66,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
     // MARK: - Phasing (Reich voices)
     var phasingSettings: PhasingSettings
+
+    // MARK: - Custom Melody
+    var customMelody: CustomMelody
     
     // MARK: - Initialization
     init(
@@ -101,7 +104,8 @@ struct PatternParameters: Codable, Equatable, Hashable {
         cyclicalSettings: CyclicalSettings = CyclicalSettings(),
         rhythmSettings: RhythmSettings = .default,
         processSettings: ProcessSettings = ProcessSettings(),
-        phasingSettings: PhasingSettings = PhasingSettings()
+        phasingSettings: PhasingSettings = PhasingSettings(),
+        customMelody: CustomMelody = CustomMelody()
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
@@ -135,6 +139,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.rhythmSettings = rhythmSettings
         self.processSettings = processSettings
         self.phasingSettings = phasingSettings
+        self.customMelody = customMelody
     }
     
     // MARK: - Validation
@@ -152,6 +157,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard rhythmSettings.validate() else { return false }
         guard processSettings.validate() else { return false }
         guard phasingSettings.validate() else { return false }
+        guard customMelody.validate() else { return false }
         
         return true
     }

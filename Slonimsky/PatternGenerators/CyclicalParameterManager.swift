@@ -95,7 +95,8 @@ class CyclicalParameterManager {
             cyclicalSettings: settings,
             rhythmSettings: modifiedRhythmSettings,
             processSettings: baseParameters.processSettings,
-            phasingSettings: baseParameters.phasingSettings
+            phasingSettings: baseParameters.phasingSettings,
+            customMelody: baseParameters.customMelody
         )
     }
 }

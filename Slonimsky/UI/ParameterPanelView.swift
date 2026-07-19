@@ -77,6 +77,7 @@ struct ParameterPanelView: View {
 enum ParameterCategory: String, CaseIterable, Identifiable {
     case presets = "Presets"
     case basic = "Basic"
+    case melody = "Melody"
     case intervals = "Intervals"
     case modulations = "Modulations"
     case directional = "Directional"
@@ -91,6 +92,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         switch self {
         case .presets: return "Presets"
         case .basic: return "Basic Parameters"
+        case .melody: return "Custom Melody"
         case .intervals: return "Interval Parameters"
         case .modulations: return "Slonimsky Modulations"
         case .directional: return "Directional Parameters"
@@ -105,6 +107,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         switch self {
         case .presets: return "square.grid.2x2"
         case .basic: return "music.note"
+        case .melody: return "pianokeys"
         case .intervals: return "arrow.up.and.down"
         case .modulations: return "waveform.path.ecg"
         case .directional: return "arrow.triangle.turn.up.right.circle"
@@ -121,6 +124,8 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
             return "Example configurations showcasing the engine"
         case .basic:
             return "Root note, scale type, octaves, tempo"
+        case .melody:
+            return "Enter your own melody as the pattern source"
         case .intervals:
             return "Primary/secondary intervals, patterns, inversions"
         case .modulations:
@@ -170,6 +175,8 @@ struct ParameterCategoryDetailView: View {
                         )
                     case .basic:
                         BasicParametersDetailView(parameterManager: parameterManager)
+                    case .melody:
+                        MelodyEditorView(parameterManager: parameterManager)
                     case .intervals:
                         IntervalParametersDetailView(parameterManager: parameterManager)
                     case .modulations:

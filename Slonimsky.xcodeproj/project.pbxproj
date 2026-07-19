@@ -33,6 +33,13 @@
 		FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000009 /* MeterCycleTests.swift */; };
 		FAB1E503000000000000000A /* ProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000A /* ProcessTests.swift */; };
 		FAB1E503000000000000000C /* PhasingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000C /* PhasingTests.swift */; };
+		FAB1E502000000000000000D /* CustomMelody.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000D /* CustomMelody.swift */; };
+		FAB1E503000000000000000D /* CustomMelody.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000D /* CustomMelody.swift */; };
+		FAB1E502000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */; };
+		FAB1E503000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */; };
+		FAB1E502000000000000000F /* MelodyEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000F /* MelodyEditorView.swift */; };
+		FAB1E503000000000000000F /* MelodyEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000F /* MelodyEditorView.swift */; };
+		FAB1E5030000000000000010 /* CustomMelodyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000010 /* CustomMelodyTests.swift */; };
 		FAB1E502000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
 		FAB1E503000000000000000B /* PresetsDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000B /* PresetsDetailView.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
@@ -176,6 +183,10 @@
 		FAB1E5010000000000000009 /* MeterCycleTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MeterCycleTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000A /* ProcessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000C /* PhasingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhasingTests.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000D /* CustomMelody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelody.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelodyPatternGenerator.swift; sourceTree = "<group>"; };
+		FAB1E501000000000000000F /* MelodyEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MelodyEditorView.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000010 /* CustomMelodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelodyTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000B /* PresetsDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresetsDetailView.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -280,6 +291,7 @@
 				FAB1E5010000000000000009 /* MeterCycleTests.swift */,
 				FAB1E501000000000000000A /* ProcessTests.swift */,
 				FAB1E501000000000000000C /* PhasingTests.swift */,
+				FAB1E5010000000000000010 /* CustomMelodyTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
@@ -309,6 +321,7 @@
 				98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */,
 				FAB1E5010000000000000001 /* Meter.swift */,
 				FAB1E5010000000000000002 /* RhythmSettings.swift */,
+				FAB1E501000000000000000D /* CustomMelody.swift */,
 				98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */,
 				98C309502E3932FE000D9EC7 /* ModulationSettings.swift */,
 			);
@@ -320,6 +333,7 @@
 			children = (
 				987A91C62F2113A2002A6706 /* MIDIPatternConverter.swift */,
 				FAB1E5010000000000000003 /* EuclideanRhythm.swift */,
+				FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */,
 				98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */,
 				98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */,
 				98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */,
@@ -353,6 +367,7 @@
 				98C3096F2E39333C000D9EC7 /* ParameterManager.swift */,
 				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
 				FAB1E501000000000000000B /* PresetsDetailView.swift */,
+				FAB1E501000000000000000F /* MelodyEditorView.swift */,
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
 				98C309722E39333C000D9EC7 /* ParameterPanelView.swift */,
 				98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */,
@@ -550,6 +565,9 @@
 				98C309782E39333C000D9EC7 /* ParameterPanelView.swift in Sources */,
 				98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */,
 				FAB1E5020000000000000001 /* Meter.swift in Sources */,
+				FAB1E502000000000000000D /* CustomMelody.swift in Sources */,
+				FAB1E502000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */,
+				FAB1E502000000000000000F /* MelodyEditorView.swift in Sources */,
 				FAB1E5020000000000000002 /* RhythmSettings.swift in Sources */,
 				FAB1E5020000000000000003 /* EuclideanRhythm.swift in Sources */,
 				98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */,
@@ -585,6 +603,10 @@
 				FAB1E5030000000000000009 /* MeterCycleTests.swift in Sources */,
 				FAB1E503000000000000000A /* ProcessTests.swift in Sources */,
 				FAB1E503000000000000000C /* PhasingTests.swift in Sources */,
+				FAB1E503000000000000000D /* CustomMelody.swift in Sources */,
+				FAB1E503000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */,
+				FAB1E503000000000000000F /* MelodyEditorView.swift in Sources */,
+				FAB1E5030000000000000010 /* CustomMelodyTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,

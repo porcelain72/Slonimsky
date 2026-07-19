@@ -261,6 +261,7 @@ class PatternGeneratorRegistry: ObservableObject {
     
     private func registerDefaultGenerators() {
         register(ScalePatternGenerator())
+        register(CustomMelodyPatternGenerator())
         register(IntervalPatternGenerator())
         register(ModulationPatternGenerator())
         register(HarmonicPatternGenerator())

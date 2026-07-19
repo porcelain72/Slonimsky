@@ -16,6 +16,8 @@ struct ParameterDescriptionHelper {
         switch category {
         case .presets:
             return "Ready-made configurations that demonstrate meters, meter cycles, isorhythm, Euclidean rhythms, phase curves, and the pattern process. Applying a preset loads every panel so you can inspect and tweak it."
+        case .melody:
+            return "Enter a custom melody by step entry — pick a note value or rest, then click keys. The melody becomes the base material that every other panel transforms: mirror, modulations, rhythm modes, meter cycles, curves, processes, and phasing."
         case .basic:
             return "basic_parameters_description".localized
         case .intervals:
@@ -39,6 +41,8 @@ struct ParameterDescriptionHelper {
         switch category {
         case .presets:
             return "Presets"
+        case .melody:
+            return "Custom Melody"
         case .basic:
             return "basic_parameters_title".localized
         case .intervals:
@@ -66,6 +70,12 @@ struct ParameterDescriptionHelper {
             return [
                 "Rhythm Engine Showcase — meters, isorhythm, Euclidean, curves, process",
                 "Classic — original generator presets"
+            ]
+        case .melody:
+            return [
+                "Step entry — duration palette, rests, on-screen keyboard",
+                "Preview with barlines; click a note to delete",
+                "Maximum 8 bars of the current meter cycle"
             ]
         case .basic:
             return [

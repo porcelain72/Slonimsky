@@ -513,7 +513,10 @@ class MIDIIntegrationService: ObservableObject {
     /// - Parameter completion: Completion handler with result
     func generateRandomPattern(completion: @escaping (Result<PatternGenerationResult, Error>) -> Void) {
         var randomParameters = generateRandomParameters()
+        // The custom melody generator needs user-entered material; random
+        // exploration should not fabricate a melody
         let generators = patternRegistry.getAllGeneratorNames()
+            .filter { $0 != "Custom Melody Generator" }
         
         guard let randomGenerator = generators.randomElement() else {
             completion(.failure(MIDIIntegrationError.noGeneratorsAvailable))

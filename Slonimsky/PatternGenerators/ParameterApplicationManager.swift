@@ -142,8 +142,10 @@ class ParameterApplicationManager {
         parameters: PatternParameters,
         generatorType: String
     ) -> [Int] {
-        // Skip contour patterns for interval and scale generators to preserve their relationships
-        if generatorType.contains("Interval") || generatorType.contains("Scale") {
+        // Skip contour patterns for interval, scale, and melody generators to
+        // preserve their pitch relationships (a user's entered melody must play
+        // back verbatim unless explicitly transformed)
+        if generatorType.contains("Interval") || generatorType.contains("Scale") || generatorType.contains("Melody") {
             return notes
         }
         

@@ -58,6 +58,9 @@ class ParameterManager: ObservableObject {
     @Published var phasingSettings: PhasingSettings = PhasingSettings() {
         didSet { validateAndNotify() }
     }
+    @Published var customMelody: CustomMelody = CustomMelody() {
+        didSet { validateAndNotify() }
+    }
     
     /// Single-meter accessor: reads the first bar; writing replaces the whole
     /// cycle with one bar (the full cycle editor lives in Rhythm & Meter).
@@ -257,7 +260,8 @@ class ParameterManager: ObservableObject {
             cyclicalSettings: cyclicalSettings,
             rhythmSettings: rhythmSettings,
             processSettings: processSettings,
-            phasingSettings: phasingSettings
+            phasingSettings: phasingSettings,
+            customMelody: customMelody
         )
     }
     
@@ -271,6 +275,7 @@ class ParameterManager: ObservableObject {
         meterCycle = parameters.meterCycle
         processSettings = parameters.processSettings
         phasingSettings = parameters.phasingSettings
+        customMelody = parameters.customMelody
         rhythmSettings = parameters.rhythmSettings
         iterations = parameters.iterations
         randomiseOrder = parameters.randomiseOrder
@@ -331,8 +336,8 @@ class ParameterManager: ObservableObject {
                 randomizeExpressionParameters()
             case .accompaniment:
                 randomizeRhythmicAccompanimentParameters()
-            case .presets:
-                break // Presets panel has nothing to randomize
+            case .presets, .melody:
+                break // Nothing to randomize in these panels
             }
         }
     }
@@ -504,8 +509,14 @@ class ParameterManager: ObservableObject {
         
         var generators: Set<String> = []
         
-        // Always include Scale Pattern Generator for basic parameters
-        generators.insert("Scale Pattern Generator")
+        // The custom melody replaces the scale generator as the base source
+        if customMelody.isEnabled && !customMelody.notes.isEmpty {
+            generators.insert("Custom Melody Generator")
+            print("   Using Custom Melody Generator as base (melody enabled)")
+        } else {
+            // Always include Scale Pattern Generator for basic parameters
+            generators.insert("Scale Pattern Generator")
+        }
         print("   Added Scale Pattern Generator (always active)")
         
         // Check interval parameters

@@ -289,6 +289,45 @@ let reichPresets: [SlonimskyPreset] = [
         category: "Reich Showcase"
     ),
 
+    // A preloaded entered melody phasing against itself: the point of the
+    // custom-melody feature in one preset
+    SlonimskyPreset(
+        name: "Entered Motif Phase",
+        description: "A hand-entered two-bar motif (rests included) phasing against itself, one step per cycle",
+        generatorName: "Custom Melody Generator",
+        parameters: {
+            var melody = CustomMelody()
+            melody.isEnabled = true
+            melody.notes = [
+                MelodyNote(pitch: 62, value: .quarter),                // D4
+                MelodyNote(pitch: 64, value: .eighth),                 // E4
+                MelodyNote(pitch: 65, value: .eighth),                 // F4
+                MelodyNote(pitch: 67, value: .quarter),                // G4
+                MelodyNote(pitch: 0,  value: .eighth, isRest: true),   // breath
+                MelodyNote(pitch: 64, value: .eighth),                 // E4
+                MelodyNote(pitch: 60, value: .quarter),                // C4
+                MelodyNote(pitch: 62, value: .quarter)                 // D4
+            ]
+
+            var phasing = PhasingSettings()
+            phasing.mode = .discrete
+            phasing.stepsPerCycle = 1
+            phasing.voiceVelocityOffset = -10
+
+            var rhythm = RhythmSettings()
+            rhythm.accentBoost = 16
+
+            return PatternParameters(
+                tempo: 126.0,
+                mirror: false,
+                rhythmSettings: rhythm,
+                phasingSettings: phasing,
+                customMelody: melody
+            )
+        }(),
+        category: "Reich Showcase"
+    ),
+
     // Construction and phasing interacting: the pattern hollows out while the
     // second voice slips against it, an octave up
     SlonimskyPreset(

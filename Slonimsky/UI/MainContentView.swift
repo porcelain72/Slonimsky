@@ -323,6 +323,9 @@ struct MainContentView: View {
                 case .basic:
                     BasicParametersDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
+                case .melody:
+                    MelodyEditorView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
                 case .intervals:
                     IntervalParametersDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)

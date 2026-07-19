@@ -126,6 +126,8 @@ struct ParameterInfoPopupView: View {
         switch category {
         case .presets:
             return "square.grid.2x2"
+        case .melody:
+            return "pianokeys"
         case .basic:
             return "music.note"
         case .intervals:
