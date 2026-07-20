@@ -71,8 +71,21 @@ struct MelodyEditorView: View {
 
     private var enableSection: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Toggle("Use custom melody as pattern source", isOn: $parameterManager.customMelody.isEnabled)
-                .foregroundColor(Color.garageBandText)
+            Toggle("Use custom melody as pattern source", isOn: Binding(
+                get: { parameterManager.customMelody.isEnabled },
+                set: { enabled in
+                    parameterManager.customMelody.isEnabled = enabled
+                    // Mirror defaults to on (a scale-arpeggio default); left on,
+                    // it doubles the melody's pitch stream and the entered rhythm
+                    // then cycles against it — surprising on first Generate.
+                    // Turn it off when the melody is enabled; it stays available
+                    // in Directional for deliberate use.
+                    if enabled {
+                        parameterManager.mirror = false
+                    }
+                }
+            ))
+            .foregroundColor(Color.garageBandText)
 
             if melody.isEnabled && melody.pitches.isEmpty {
                 Text("Enter at least one note below — an empty melody cannot generate")
@@ -83,7 +96,31 @@ struct MelodyEditorView: View {
                     .font(.caption)
                     .foregroundColor(Color.garageBandText.opacity(0.7))
             }
+
+            if melody.isEnabled, !activeTransformNames.isEmpty {
+                Text("Active transforms will alter playback: \(activeTransformNames.joined(separator: ", ")). Turn them off to hear the melody exactly as entered.")
+                    .font(.caption)
+                    .foregroundColor(.orange)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
+    }
+
+    /// Transformations currently switched on that change the melody's verbatim
+    /// playback — surfaced so "repeated with variations" is never a mystery.
+    private var activeTransformNames: [String] {
+        var names: [String] = []
+        if parameterManager.mirror { names.append("Mirror") }
+        if parameterManager.interpolation.enabled { names.append("Interpolation") }
+        if parameterManager.infrapolation.enabled { names.append("Infrapolation") }
+        if parameterManager.ultrapolation.enabled { names.append("Ultrapolation") }
+        if parameterManager.iterations > 1 { names.append("Iterations ×\(parameterManager.iterations)") }
+        if parameterManager.randomiseOrder { names.append("Randomise Order") }
+        if parameterManager.registerShifts != .none { names.append("Register Shifts") }
+        if parameterManager.processSettings.mode != .none { names.append("Process: \(parameterManager.processSettings.mode.rawValue)") }
+        if parameterManager.phasingSettings.mode != .off { names.append("Phasing") }
+        if parameterManager.rhythmSettings.mode != .uniform { names.append("Rhythm: \(parameterManager.rhythmSettings.mode.rawValue)") }
+        return names
     }
 
     // MARK: - Meter
