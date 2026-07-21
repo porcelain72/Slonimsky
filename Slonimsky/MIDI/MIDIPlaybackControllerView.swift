@@ -12,6 +12,8 @@ struct MIDIPlaybackControllerView: View {
     
     // MARK: - Properties
     @ObservedObject var midiService: MIDIIntegrationService
+    @ObservedObject var compositionManager: CompositionManager
+    var onRepeatCountChanged: (() -> Void)?
     @State private var playbackStatus: PlaybackStatus = PlaybackStatus(isPlaying: false, currentTime: 0.0, totalDuration: 0.0)
     @State private var updateTimer: Timer?
     @State private var sendToExternalMIDI: Bool = false
@@ -114,6 +116,17 @@ struct MIDIPlaybackControllerView: View {
                     Text(midiService.currentPattern?.metadata.generatorName ?? "No Pattern")
                         .font(.system(size: 12, weight: .medium))
                         .foregroundColor(midiService.currentPattern == nil ? Color(red: 0.7, green: 0.7, blue: 0.7) : Color(red: 0.9, green: 0.9, blue: 0.9))
+                        .lineLimit(1)
+                }
+
+                HStack {
+                    Text("Chain")
+                        .font(.system(size: 12, weight: .medium))
+                        .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
+                    Spacer()
+                    Text("\(compositionManager.composition.slots.count) · \(compositionManager.playbackRepeatCount)×")
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
                 }
                 
                 HStack {
@@ -144,6 +157,29 @@ struct MIDIPlaybackControllerView: View {
                 RoundedRectangle(cornerRadius: 6)
                     .fill(Color(red: 0.15, green: 0.15, blue: 0.15))
             )
+
+            // Playback repeat (mirrors timeline control)
+            HStack {
+                Text("Repeat")
+                    .font(.system(size: 12, weight: .medium))
+                    .foregroundColor(Color(red: 0.7, green: 0.7, blue: 0.7))
+                Spacer()
+                Stepper(
+                    value: Binding(
+                        get: { compositionManager.playbackRepeatCount },
+                        set: { newValue in
+                            compositionManager.playbackRepeatCount = newValue
+                            onRepeatCountChanged?()
+                        }
+                    ),
+                    in: PatternComposition.minRepeatCount...PatternComposition.maxRepeatCount
+                ) {
+                    Text("\(compositionManager.playbackRepeatCount)×")
+                        .font(.system(size: 12, weight: .medium, design: .monospaced))
+                        .foregroundColor(Color(red: 0.9, green: 0.9, blue: 0.9))
+                }
+            }
+            .help("Finite playback/export repeats of the full pattern chain. Loop still repeats infinitely when enabled.")
             
             // Error Display
             if let errorMessage = midiService.errorMessage {
@@ -337,15 +373,21 @@ struct MIDIPlaybackControllerView: View {
     private func exportMIDI() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.midi]
-        panel.nameFieldStringValue = "slonimsky_pattern.mid"
+        panel.nameFieldStringValue = "slonimsky_composition.mid"
         
         panel.begin { response in
             if response == .OK, let url = panel.url {
-                let success = midiService.exportToMIDI(url: url)
-                if success {
-                    print("✅ MIDI file exported successfully")
-                } else {
-                    print("❌ Failed to export MIDI file")
+                // Rebuild so export includes current slots and repeat count
+                midiService.generateCompositionAndMIDI(compositionManager.composition) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success:
+                            let success = midiService.exportToMIDI(url: url)
+                            print(success ? "✅ MIDI file exported successfully" : "❌ Failed to export MIDI file")
+                        case .failure(let error):
+                            print("❌ Failed to build composition for export: \(error)")
+                        }
+                    }
                 }
             }
         }
@@ -388,7 +430,15 @@ struct MIDIPlaybackControllerView: View {
 
 struct MIDIPlaybackControllerView_Previews: PreviewProvider {
     static var previews: some View {
-        MIDIPlaybackControllerView(midiService: MIDIIntegrationService())
+        MIDIPlaybackControllerView(
+            midiService: MIDIIntegrationService(),
+            compositionManager: CompositionManager(
+                composition: PatternComposition.bootstrapped(
+                    parameters: PatternParameters(),
+                    generatorNames: ["Scale Pattern Generator"]
+                )
+            )
+        )
             .frame(width: 400)
             .padding()
     }

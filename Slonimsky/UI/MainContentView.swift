@@ -13,10 +13,11 @@ struct MainContentView: View {
     // MARK: - State Objects
     @StateObject private var midiService = MIDIIntegrationService()
     @StateObject private var parameterManager = ParameterManager()
+    @StateObject private var compositionManager = CompositionManager()
     
     init() {
         print("🎵 MainContentView: Initializing")
-        print("🎵 MainContentView: Creating ParameterManager and MIDIIntegrationService")
+        print("🎵 MainContentView: Creating ParameterManager, CompositionManager, and MIDIIntegrationService")
     }
     
     // MARK: - State Properties
@@ -31,15 +32,27 @@ struct MainContentView: View {
     // MARK: - Body
     var body: some View {
         VSplitView {
-            HStack(spacing: 0) {
-                // Left: Parameter List
-                parameterListPanel
-                
-                // Center: Selected Parameter Controls
-                parameterDetailPanel
-                
-                // Right: MIDI Controls Sidebar
-                midiControlsSidebar
+            VStack(spacing: 0) {
+                HStack(spacing: 0) {
+                    // Left: Parameter List
+                    parameterListPanel
+                    
+                    // Center: Selected Parameter Controls
+                    parameterDetailPanel
+                    
+                    // Right: MIDI Controls Sidebar
+                    midiControlsSidebar
+                }
+
+                CompositionTimelineView(
+                    compositionManager: compositionManager,
+                    parameterManager: parameterManager,
+                    onSelectionChanged: nil,
+                    onCompositionChanged: {
+                        regenerateCompositionIfNeeded(force: true)
+                    }
+                )
+                .frame(minHeight: 88, idealHeight: 100, maxHeight: 120)
             }
             
             // Bottom: Piano Roll (resizable)
@@ -71,7 +84,7 @@ struct MainContentView: View {
             Text("Choose which parameters to randomize")
         }
         .onAppear {
-            setupAutoGeneration()
+            setupCompositionAndAutoGeneration()
         }
     }
     
@@ -171,7 +184,7 @@ struct MainContentView: View {
                             Image(systemName: "play.circle.fill")
                                 .font(.title2)
                         }
-                        Text(isGenerating ? "Generating..." : "Generate Pattern")
+                        Text(isGenerating ? "Generating..." : "Generate Chain")
                             .font(.headline)
                     }
                     .frame(maxWidth: .infinity)
@@ -269,7 +282,13 @@ struct MainContentView: View {
             )
             
             // MIDI Controls - Top Aligned
-            MIDIPlaybackControllerView(midiService: midiService)
+            MIDIPlaybackControllerView(
+                midiService: midiService,
+                compositionManager: compositionManager,
+                onRepeatCountChanged: {
+                    regenerateCompositionIfNeeded(force: true)
+                }
+            )
                 .frame(maxWidth: .infinity, alignment: .topLeading)
             
             // Auto-generation Settings
@@ -358,113 +377,25 @@ struct MainContentView: View {
     // MARK: - Actions
     
     private func generatePattern() {
-        print("🎵 MainContentView: Generate Pattern button pressed")
-        print("🎵 MainContentView: Current parameters:")
-        print("   Root Note: \(parameterManager.rootNote)")
-        print("   Scale Type: \(parameterManager.scaleType.rawValue)")
-        print("   Number of Octaves: \(parameterManager.numberOfOctaves)")
+        print("🎵 MainContentView: Generate Chain button pressed")
+        print("   Slots: \(compositionManager.composition.slots.count)")
+        print("   Repeat: \(compositionManager.playbackRepeatCount)×")
         print("   Active Generators: \(parameterManager.activeGenerators)")
-        print("   Combination Mode: \(parameterManager.combinationMode.rawValue)")
-        
+
+        compositionManager.writeEditorStateToSelectedSlot(from: parameterManager)
         isGenerating = true
-        
-        // Use current parameters instead of random ones
-        let currentParameters = parameterManager.currentParameters
-        
-        // Check if cyclical parameters are enabled
-        let enabledCyclicalParameters = currentParameters.cyclicalSettings.enabledParameters
-        let hasCyclicalParameters = currentParameters.isCyclicalGeneration
-        
-        if hasCyclicalParameters {
-            print("🔄 Cyclical parameters detected: \(enabledCyclicalParameters.keys.map { $0.rawValue }.joined(separator: ", "))")
-            
-            // Use cyclical generation
-            if parameterManager.activeGenerators.count > 1 {
-                print("🔄 Using combined cyclical generation with \(parameterManager.activeGenerators.count) generators")
-                
-                midiService.generateCombinedCyclicalPatternAndMIDI(
-                    using: parameterManager.activeGenerators,
-                    parameters: currentParameters,
-                    combinationMode: parameterManager.combinationMode
-                ) { result in
-                    DispatchQueue.main.async {
-                        isGenerating = false
-                        
-                        switch result {
-                        case .success(let pattern):
-                            print("✅ MainContentView: Cyclical pattern generated successfully")
-                            print("   Generated \(pattern.notes.count) notes")
-                            print("   Generation time: \(pattern.performance.generationTime)s")
-                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
-                            updateSheetMusic(with: pattern)
-                        case .failure(let error):
-                            print("❌ MainContentView: Cyclical pattern generation failed: \(error)")
-                        }
-                    }
-                }
-            } else {
-                let generatorName = parameterManager.activeGenerators.first ?? "Scale Pattern Generator"
-                print("🔄 Using single generator with cyclical generation: \(generatorName)")
-                
-                midiService.generateCyclicalPatternAndMIDI(using: generatorName, parameters: currentParameters) { result in
-                    DispatchQueue.main.async {
-                        isGenerating = false
-                        
-                        switch result {
-                        case .success(let pattern):
-                            print("✅ MainContentView: Cyclical pattern generated successfully")
-                            print("   Generated \(pattern.notes.count) notes")
-                            print("   Generation time: \(pattern.performance.generationTime)s")
-                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
-                            updateSheetMusic(with: pattern)
-                        case .failure(let error):
-                            print("❌ MainContentView: Cyclical pattern generation failed: \(error)")
-                        }
-                    }
-                }
-            }
-        } else {
-            // No cyclical parameters, use regular generation
-            if parameterManager.activeGenerators.count > 1 {
-                midiService.generateCombinedPatternAndMIDI(
-                    using: parameterManager.activeGenerators,
-                    parameters: currentParameters,
-                    combinationMode: parameterManager.combinationMode
-                ) { result in
-                    DispatchQueue.main.async {
-                        isGenerating = false
-                        
-                        switch result {
-                        case .success(let pattern):
-                            print("✅ MainContentView: Pattern generated successfully")
-                            print("   Generated \(pattern.notes.count) notes")
-                            print("   Generation time: \(pattern.performance.generationTime)s")
-                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
-                            updateSheetMusic(with: pattern)
-                        case .failure(let error):
-                            print("❌ MainContentView: Pattern generation failed: \(error)")
-                        }
-                    }
-                }
-            } else {
-                // Use single generator
-                let generatorName = parameterManager.activeGenerators.first ?? "Scale Pattern Generator"
-                
-                midiService.generatePatternAndMIDI(using: generatorName, parameters: currentParameters) { result in
-                DispatchQueue.main.async {
-                    isGenerating = false
-                    
-                    switch result {
-                    case .success(let pattern):
-                            print("✅ MainContentView: Pattern generated successfully")
-                            print("   Generated \(pattern.notes.count) notes")
-                            print("   Generation time: \(pattern.performance.generationTime)s")
-                            print("   Memory usage: \(pattern.performance.memoryUsage) bytes")
-                        updateSheetMusic(with: pattern)
-                    case .failure(let error):
-                            print("❌ MainContentView: Pattern generation failed: \(error)")
-                        }
-                    }
+
+        midiService.generateCompositionAndMIDI(compositionManager.composition) { result in
+            DispatchQueue.main.async {
+                isGenerating = false
+                switch result {
+                case .success(let pattern):
+                    print("✅ MainContentView: Composition generated successfully")
+                    print("   Generated \(pattern.notes.count) notes")
+                    print("   Generation time: \(pattern.performance.generationTime)s")
+                    updateSheetMusic(with: pattern)
+                case .failure(let error):
+                    print("❌ MainContentView: Composition generation failed: \(error)")
                 }
             }
         }
@@ -481,15 +412,22 @@ struct MainContentView: View {
     private func exportCurrentPattern() {
         let panel = NSSavePanel()
         panel.allowedContentTypes = [.midi]
-        panel.nameFieldStringValue = "slonimsky_pattern.mid"
+        panel.nameFieldStringValue = "slonimsky_composition.mid"
         
         panel.begin { response in
             if response == .OK, let url = panel.url {
-                let success = midiService.exportToMIDI(url: url)
-                if success {
-                    print("✅ MIDI file exported successfully")
-                } else {
-                    print("❌ Failed to export MIDI file")
+                // Ensure export matches current composition (including repeats)
+                compositionManager.writeEditorStateToSelectedSlot(from: parameterManager)
+                midiService.generateCompositionAndMIDI(compositionManager.composition) { result in
+                    DispatchQueue.main.async {
+                        switch result {
+                        case .success:
+                            let success = midiService.exportToMIDI(url: url)
+                            print(success ? "✅ MIDI file exported successfully" : "❌ Failed to export MIDI file")
+                        case .failure(let error):
+                            print("❌ Failed to build composition for export: \(error)")
+                        }
+                    }
                 }
             }
         }
@@ -501,10 +439,35 @@ struct MainContentView: View {
         print("📝 Sheet music updated with \(pattern.notes.count) notes")
     }
     
-    private func setupAutoGeneration() {
-        // Set up auto-generation with the MIDI service
-        midiService.setupAutoGeneration(with: parameterManager)
-        print("🔄 Auto-generation setup complete")
+    private func setupCompositionAndAutoGeneration() {
+        compositionManager.ensureBootstrapped(
+            parameters: parameterManager.currentParameters,
+            generatorNames: parameterManager.activeGenerators,
+            combinationMode: parameterManager.combinationMode
+        )
+        compositionManager.applySelectedSlot(to: parameterManager)
+        midiService.setupAutoGeneration(
+            with: parameterManager,
+            compositionManager: compositionManager
+        )
+        print("🔄 Composition + auto-generation setup complete")
+    }
+
+    /// Regenerate when timeline structure or repeat count changes (respects auto-generate).
+    private func regenerateCompositionIfNeeded(force: Bool) {
+        compositionManager.writeEditorStateToSelectedSlot(from: parameterManager)
+        guard force || parameterManager.autoGenerateEnabled else { return }
+        guard !isGenerating else { return }
+
+        isGenerating = true
+        midiService.generateCompositionAndMIDI(compositionManager.composition) { result in
+            DispatchQueue.main.async {
+                isGenerating = false
+                if case .success(let pattern) = result {
+                    updateSheetMusic(with: pattern)
+                }
+            }
+        }
     }
 }
 

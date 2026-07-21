@@ -67,11 +67,19 @@ class MIDIEngine: ObservableObject {
     ///   - result: The pattern generation result
     ///   - parameters: The pattern generation parameters
     /// - Returns: Generated MusicSequence or nil if failed
-    func generateMusicSequence(from result: PatternGenerationResult, parameters: PatternParameters) -> MusicSequence? {
+    func generateMusicSequence(
+        from result: PatternGenerationResult,
+        parameters: PatternParameters,
+        tempoMarkers: [TempoChangeMarker] = []
+    ) -> MusicSequence? {
         guard let sequence = createNewSequence() else { return nil }
         
-        // Set tempo and time signature from parameters
-        setTempo(sequence: sequence, bpm: parameters.tempo)
+        // Set tempo (multi-marker for compositions) and time signature from parameters
+        if tempoMarkers.isEmpty {
+            setTempo(sequence: sequence, bpm: parameters.tempo)
+        } else {
+            setTempos(sequence: sequence, markers: tempoMarkers)
+        }
         setTimeSignatures(sequence: sequence, meterCycle: parameters.meterCycle, duration: result.notes.totalLength)
         
         // Create melody track (always needed)
@@ -165,9 +173,18 @@ class MIDIEngine: ObservableObject {
     /// - Parameters:
     ///   - result: The new pattern generation result
     ///   - parameters: The pattern generation parameters
+    ///   - tempoMarkers: Optional composition tempo changes; empty uses `parameters.tempo`
     /// - Returns: True if successful
-    func updateSequence(with result: PatternGenerationResult, parameters: PatternParameters) -> Bool {
-        guard let newSequence = generateMusicSequence(from: result, parameters: parameters) else {
+    func updateSequence(
+        with result: PatternGenerationResult,
+        parameters: PatternParameters,
+        tempoMarkers: [TempoChangeMarker] = []
+    ) -> Bool {
+        guard let newSequence = generateMusicSequence(
+            from: result,
+            parameters: parameters,
+            tempoMarkers: tempoMarkers
+        ) else {
             print("❌ Failed to generate new sequence")
             return false
         }
@@ -371,11 +388,18 @@ class MIDIEngine: ObservableObject {
     }
     
     private func setTempo(sequence: MusicSequence, bpm: Double) {
+        setTempos(sequence: sequence, markers: [TempoChangeMarker(beat: 0, bpm: bpm)])
+    }
+
+    /// Write tempo change events at the given beat positions (composition slot boundaries).
+    private func setTempos(sequence: MusicSequence, markers: [TempoChangeMarker]) {
         var tempoTrack: MusicTrack?
         MusicSequenceGetTempoTrack(sequence, &tempoTrack)
+        guard let tempoTrack = tempoTrack else { return }
 
-        if let tempoTrack = tempoTrack {
-            MusicTrackNewExtendedTempoEvent(tempoTrack, 0, bpm)
+        let sorted = markers.sorted { $0.beat < $1.beat }
+        for marker in sorted {
+            MusicTrackNewExtendedTempoEvent(tempoTrack, MusicTimeStamp(marker.beat), marker.bpm)
         }
     }
 

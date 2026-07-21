@@ -344,7 +344,7 @@ class PatternGeneratorRegistry: ObservableObject {
 // MARK: - Supporting Types
 
 /// Modes for combining multiple patterns
-enum PatternCombinationMode: String, CaseIterable {
+enum PatternCombinationMode: String, CaseIterable, Codable, Hashable {
     case sequential = "Sequential"
     case layered = "Layered"
 }

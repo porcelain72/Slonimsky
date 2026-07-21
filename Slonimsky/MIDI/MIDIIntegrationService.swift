@@ -29,8 +29,10 @@ class MIDIIntegrationService: ObservableObject {
     private let midiEngine = MIDIEngine()
     private let patternRegistry = PatternGeneratorRegistry.shared
     private let cyclicalSequenceGenerator = CyclicalSequenceGenerator()
+    private let compositionGenerator = CompositionGenerator()
     private var cancellables = Set<AnyCancellable>()
     private var parameterManager: ParameterManager?
+    private var compositionManager: CompositionManager?
     private var lastGeneratedPatternHash: Int = 0
     
     // MARK: - Initialization
@@ -43,7 +45,16 @@ class MIDIIntegrationService: ObservableObject {
     /// Set up auto-generation with parameter manager
     /// - Parameter parameterManager: The parameter manager to monitor for changes
     func setupAutoGeneration(with parameterManager: ParameterManager) {
+        setupAutoGeneration(with: parameterManager, compositionManager: nil)
+    }
+
+    /// Set up auto-generation with parameter and composition managers
+    func setupAutoGeneration(
+        with parameterManager: ParameterManager,
+        compositionManager: CompositionManager?
+    ) {
         self.parameterManager = parameterManager
+        self.compositionManager = compositionManager
         
         // Set parameter manager in MIDI engine for rhythmic accompaniment
         midiEngine.setParameterManager(parameterManager)
@@ -84,6 +95,51 @@ class MIDIIntegrationService: ObservableObject {
         guard let parameterManager = parameterManager else { 
             print("❌ Auto-generation failed: no parameter manager")
             return 
+        }
+
+        // Composition mode: write editor into selected slot, then build full chain
+        if let compositionManager = compositionManager {
+            guard !compositionManager.isApplyingSlotToEditor else {
+                print("🔄 Skipping auto-generation while applying slot to editor")
+                return
+            }
+            compositionManager.writeEditorStateToSelectedSlot(from: parameterManager)
+
+            let compositionHash = compositionManager.composition.contentHash
+            if compositionHash == lastGeneratedPatternHash && currentPattern != nil {
+                print("🔄 Composition already generated, skipping regeneration")
+                return
+            }
+
+            let errors = parameterManager.validateParameters()
+            if !errors.isEmpty {
+                print("❌ Auto-generation failed: parameter validation errors: \(errors)")
+                errorMessage = "Parameter validation failed: \(errors.joined(separator: ", "))"
+                return
+            }
+
+            print("🔄 Starting composition auto-generation...")
+            guard let built = compositionGenerator.build(compositionManager.composition) else {
+                print("❌ Auto-generation failed: composition build failed")
+                errorMessage = "Composition generation failed"
+                return
+            }
+
+            if midiEngine.updateSequence(
+                with: built.result,
+                parameters: built.primaryParameters,
+                tempoMarkers: built.tempoMarkers
+            ) {
+                self.currentPattern = built.result
+                self.lastGeneratedPatternHash = compositionHash
+                self.errorMessage = nil
+                print("✅ Auto-generated composition with \(compositionManager.composition.slots.count) slots")
+                self.autosaveCurrentPattern()
+            } else {
+                print("❌ Auto-generation failed: sequence update failed")
+                errorMessage = "MIDI sequence update failed"
+            }
+            return
         }
         
         let parameters = parameterManager.currentParameters
@@ -763,6 +819,56 @@ class MIDIIntegrationService: ObservableObject {
                 self.autosaveCurrentPattern()
                 
                 completion(.success(result))
+            }
+        }
+    }
+
+    /// Generate MIDI for a full pattern composition (all slots, concatenated, with repeats).
+    func generateCompositionAndMIDI(
+        _ composition: PatternComposition,
+        completion: @escaping (Result<PatternGenerationResult, Error>) -> Void
+    ) {
+        isGenerating = true
+        generationProgress = 0.0
+        errorMessage = nil
+
+        DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+            guard let self = self else { return }
+
+            let startTime = CFAbsoluteTimeGetCurrent()
+
+            guard let built = self.compositionGenerator.build(composition) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to generate composition"
+                    completion(.failure(MIDIIntegrationError.patternGenerationFailed))
+                }
+                return
+            }
+
+            guard let _ = self.midiEngine.generateMusicSequence(
+                from: built.result,
+                parameters: built.primaryParameters,
+                tempoMarkers: built.tempoMarkers
+            ) else {
+                DispatchQueue.main.async {
+                    self.isGenerating = false
+                    self.errorMessage = "Failed to create MIDI sequence"
+                    completion(.failure(MIDIIntegrationError.midiSequenceCreationFailed))
+                }
+                return
+            }
+
+            let generationTime = CFAbsoluteTimeGetCurrent() - startTime
+
+            DispatchQueue.main.async {
+                self.isGenerating = false
+                self.generationProgress = 1.0
+                self.lastGenerationTime = generationTime
+                self.currentPattern = built.result
+                self.lastGeneratedPatternHash = composition.contentHash
+                self.autosaveCurrentPattern()
+                completion(.success(built.result))
             }
         }
     }
