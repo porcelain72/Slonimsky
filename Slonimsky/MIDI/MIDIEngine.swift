@@ -579,7 +579,9 @@ class MIDIEngine: ObservableObject {
         // Group sounding notes that share the same onset into chords
         var currentChord: [MIDIInfo] = []
 
-        for note in notes.soundingNotes.sorted(by: { $0.onset < $1.onset }) {
+        // Chords are built from melodic material only — harmonising a kick
+        // drum would put pitched notes on the harmony channel.
+        for note in notes.soundingNotes.filter({ !$0.isPercussion }).sorted(by: { $0.onset < $1.onset }) {
             if let chordOnset = currentChord.first?.onset, abs(note.onset - chordOnset) < 1e-6 {
                 // Same onset, add to current chord
                 currentChord.append(note)
@@ -619,7 +621,9 @@ class MIDIEngine: ObservableObject {
         let baseVelocity = UInt8(clamping: Int(velocity * 127))
         
         // Create rhythmic pattern based on style
-        for (index, note) in notes.soundingNotes.enumerated() {
+        // The legacy accompaniment follows the melodic part; a rhythm-library
+        // groove is already percussion and must not seed more drums.
+        for (index, note) in notes.soundingNotes.filter({ !$0.isPercussion }).enumerated() {
             let densityMultiplier = Int(density * 4)
             
             switch style {

@@ -258,13 +258,17 @@ class CyclicalSequenceGenerator {
             copy.velocity = UInt8(clamping: max(1, Int(event.velocity) + phasing.voiceVelocityOffset))
             let slicedDuration = min(copy.duration, cycleLength - copy.onset)
             guard slicedDuration >= minimumSliceDuration else { continue }
-            let transposed = event.note + phasing.voiceTranspose
+            // Percussion notes are fixed GM instruments: transposing a kick
+            // turns it into a different drum, so the phase voice keeps its
+            // notes (and its channel) and only shifts in time.
+            let transposed = event.isPercussion ? event.note : event.note + phasing.voiceTranspose
             secondVoice.append(MIDIInfo(
                 note: min(127, max(0, transposed)),
                 velocity: copy.velocity,
                 onset: copy.onset,
                 duration: slicedDuration,
                 voice: 1,
+                isPercussion: event.isPercussion,
                 cycleIndex: copy.cycleIndex
             ))
         }
@@ -303,7 +307,8 @@ class CyclicalSequenceGenerator {
                 // Silence this position without moving anything
                 return MIDIInfo(note: 0, velocity: 0, onset: event.onset,
                                 duration: event.duration, isRest: true,
-                                voice: event.voice, cycleIndex: event.cycleIndex)
+                                voice: event.voice, isPercussion: event.isPercussion,
+                                cycleIndex: event.cycleIndex)
             }
         }
 

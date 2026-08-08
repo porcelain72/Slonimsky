@@ -99,12 +99,14 @@ final class RhythmLibraryTests: XCTestCase {
 
     // MARK: - Drum output
 
-    private func drumParameters(_ name: String) -> PatternParameters {
+    private func drumParameters(_ name: String, chords: Bool = false) -> PatternParameters {
         var settings = RhythmLibrarySettings()
         settings.isEnabled = true
         settings.patternName = name
         settings.output = .drumKit
-        var params = PatternParameters(mirror: false, rhythmLibrary: settings)
+        var params = PatternParameters(mirror: false,
+                                       chordGeneration: ChordSettings(enabled: chords),
+                                       rhythmLibrary: settings)
         params.velocitySettings = VelocitySettings(baseVelocity: 80, range: 0)
         return params
     }
@@ -252,20 +254,105 @@ final class RhythmLibraryTests: XCTestCase {
                        "The groove phases against itself")
     }
 
+    // MARK: - Transform regressions
+
+    /// A phased groove must stay on the drum kit: the phase voice is a second
+    /// pair of hands on the same instruments, not a melodic line.
+    func testPhasingKeepsPercussionFlagAndDrumNotes() {
+        var params = drumParameters("Basic Rock")
+        params.phasingSettings.mode = .discrete
+        params.phasingSettings.stepsPerCycle = 1
+        params.phasingSettings.voiceTranspose = 7   // must be ignored for percussion
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Rhythm Library Generator"
+        ) else {
+            return XCTFail("Phasing generation failed")
+        }
+
+        let sounding = result.notes.soundingNotes
+        XCTAssertEqual(Set(sounding.map { $0.voice }), [0, 1], "Both voices are present")
+        XCTAssertTrue(sounding.allSatisfy { $0.isPercussion },
+                      "The phase voice must remain percussion, not become a melody part")
+
+        let voiceZero = Set(sounding.filter { $0.voice == 0 }.map { $0.note })
+        let voiceOne = Set(sounding.filter { $0.voice == 1 }.map { $0.note })
+        XCTAssertEqual(voiceOne, voiceZero,
+                       "Transpose must not turn a kick into a different GM instrument")
+    }
+
+    /// Masking processes silence hits in place; the silenced slot is still a
+    /// percussion slot, so a later pass can't mistake it for melodic material.
+    func testMaskingProcessPreservesPercussionOnSilencedHits() {
+        var params = drumParameters("Basic Rock")
+        params.processSettings.mode = .construct
+        params.processSettings.startCount = 1
+        params.processSettings.notesPerCycle = 1
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Rhythm Library Generator"
+        ) else {
+            return XCTFail("Process generation failed")
+        }
+
+        let rests = result.notes.filter { $0.isRest }
+        XCTAssertFalse(rests.isEmpty, "Construct masks hits into rests in the early cycles")
+        XCTAssertTrue(result.notes.allSatisfy { $0.isPercussion },
+                      "Masked hits stay flagged as percussion")
+    }
+
+    /// Chord generation harmonises the melodic part only — a drum groove must
+    /// not sprout pitched chords on the harmony channel.
+    func testChordGenerationIgnoresPercussion() throws {
+        let params = drumParameters("Basic Rock", chords: true)
+
+        let notes = RhythmLibraryPatternGenerator().generatePattern(parameters: params, cycleIndex: 0)
+        let data = try exportedMIDI(for: notes, parameters: params)
+
+        XCTAssertTrue(data.contains(0x99), "The groove itself is on channel 10")
+        XCTAssertFalse(data.contains(0x91), "No harmony notes are built from drum hits")
+    }
+
     // MARK: - Export
 
     func testDrumExportUsesChannelTen() throws {
         let params = drumParameters("Basic Rock")
-        let generator = RhythmLibraryPatternGenerator()
-        let notes = generator.generatePattern(parameters: params, cycleIndex: 0)
+        let notes = RhythmLibraryPatternGenerator().generatePattern(parameters: params, cycleIndex: 0)
         XCTAssertFalse(notes.isEmpty)
 
+        let data = try exportedMIDI(for: notes, parameters: params)
+        XCTAssertTrue(data.contains(0x99), "Percussion must be written as channel-10 note-ons")
+    }
+
+    func testPhasedDrumExportStaysOnChannelTen() throws {
+        var params = drumParameters("Basic Rock")
+        params.phasingSettings.mode = .discrete
+        params.phasingSettings.stepsPerCycle = 1
+
+        guard let result = CyclicalSequenceGenerator().generateCyclicalSequence(
+            baseParameters: params,
+            generatorName: "Rhythm Library Generator"
+        ) else {
+            return XCTFail("Phasing generation failed")
+        }
+
+        let data = try exportedMIDI(for: result.notes, parameters: params)
+        XCTAssertTrue(data.contains(0x99), "Both phase voices export as channel-10 drums")
+        XCTAssertFalse(data.contains(0x92),
+                       "The phase voice must not land on the melodic voice-1 channel")
+    }
+
+    /// Renders `notes` through the engine and returns the exported MIDI file bytes.
+    private func exportedMIDI(for notes: [MIDIInfo], parameters: PatternParameters) throws -> Data {
+        let pitches = notes.soundingNotes.map { $0.note }
         let metadata = PatternMetadata(
             generatorName: "Rhythm Library Generator",
             parameterHash: "test",
             generationTime: 0.001,
             noteCount: notes.count,
-            pitchRange: 36...42,
+            pitchRange: (pitches.min() ?? 60)...(pitches.max() ?? 60),
             duration: notes.totalLength
         )
         let result = PatternGenerationResult(
@@ -275,15 +362,13 @@ final class RhythmLibraryTests: XCTestCase {
         )
 
         let engine = MIDIEngine()
-        XCTAssertNotNil(engine.generateMusicSequence(from: result, parameters: params))
+        XCTAssertNotNil(engine.generateMusicSequence(from: result, parameters: parameters))
 
         let url = FileManager.default.temporaryDirectory
             .appendingPathComponent("slonimsky-rhythm-test-\(UUID().uuidString).mid")
         defer { try? FileManager.default.removeItem(at: url) }
         XCTAssertTrue(engine.exportToMIDI(url: url))
-
-        let data = try Data(contentsOf: url)
-        XCTAssertTrue(data.contains(0x99), "Percussion must be written as channel-10 note-ons")
+        return try Data(contentsOf: url)
     }
 
     func testChannelMapping() {
