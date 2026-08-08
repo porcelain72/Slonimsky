@@ -69,6 +69,9 @@ struct PatternParameters: Codable, Equatable, Hashable {
 
     // MARK: - Custom Melody
     var customMelody: CustomMelody
+
+    // MARK: - Rhythm Library
+    var rhythmLibrary: RhythmLibrarySettings
     
     // MARK: - Initialization
     init(
@@ -105,7 +108,8 @@ struct PatternParameters: Codable, Equatable, Hashable {
         rhythmSettings: RhythmSettings = .default,
         processSettings: ProcessSettings = ProcessSettings(),
         phasingSettings: PhasingSettings = PhasingSettings(),
-        customMelody: CustomMelody = CustomMelody()
+        customMelody: CustomMelody = CustomMelody(),
+        rhythmLibrary: RhythmLibrarySettings = RhythmLibrarySettings()
     ) {
         self.rootNote = rootNote
         self.scaleType = scaleType
@@ -140,6 +144,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         self.processSettings = processSettings
         self.phasingSettings = phasingSettings
         self.customMelody = customMelody
+        self.rhythmLibrary = rhythmLibrary
     }
     
     // MARK: - Validation
@@ -158,6 +163,7 @@ struct PatternParameters: Codable, Equatable, Hashable {
         guard processSettings.validate() else { return false }
         guard phasingSettings.validate() else { return false }
         guard customMelody.validate() else { return false }
+        guard rhythmLibrary.validate() else { return false }
         
         return true
     }

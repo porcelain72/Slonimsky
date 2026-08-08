@@ -27,15 +27,18 @@ struct MIDIInfo: Equatable {
     var isRest: Bool
     /// Voice index: 0 = primary voice, 1 = phasing voice (own MIDI channel/track).
     var voice: Int
+    /// True for General MIDI percussion — emitted on channel 10 (index 9).
+    var isPercussion: Bool
     var cycleIndex: Int
 
-    init(note: Int, velocity: UInt8, onset: Double = 0, duration: Double, isRest: Bool = false, voice: Int = 0, cycleIndex: Int = 0) {
+    init(note: Int, velocity: UInt8, onset: Double = 0, duration: Double, isRest: Bool = false, voice: Int = 0, isPercussion: Bool = false, cycleIndex: Int = 0) {
         self.note = note
         self.velocity = velocity
         self.onset = onset
         self.duration = duration
         self.isRest = isRest
         self.voice = voice
+        self.isPercussion = isPercussion
         self.cycleIndex = cycleIndex
     }
 

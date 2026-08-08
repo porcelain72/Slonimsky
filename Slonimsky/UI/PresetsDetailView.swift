@@ -365,9 +365,95 @@ let reichPresets: [SlonimskyPreset] = [
     )
 ]
 
+// MARK: - Rhythm Library Showcase
+
+/// Presets built on the built-in rhythm catalog.
+let rhythmLibraryPresets: [SlonimskyPreset] = [
+
+    // A groove under a melodic pattern — the layered role
+    SlonimskyPreset(
+        name: "Clave & Motif",
+        description: "Son clave 3-2 on claves under a pentatonic pattern — the rhythm layered beneath the melody",
+        generatorName: "Scale Pattern Generator",
+        parameters: {
+            var rhythm = RhythmLibrarySettings()
+            rhythm.isEnabled = true
+            rhythm.patternName = "Son Clave 3-2"
+            rhythm.role = .layer
+            rhythm.output = .drumKit
+
+            return PatternParameters(
+                rootNote: 62,
+                scaleType: .minorPentatonic,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 5,
+                tempo: 104.0,
+                mirror: false,
+                baseNoteDuration: 0.5,
+                rhythmLibrary: rhythm
+            )
+        }(),
+        category: "Rhythm Library"
+    ),
+
+    // A groove as the pattern itself, then transformed
+    SlonimskyPreset(
+        name: "Karsilama Kit",
+        description: "Turkish 9/8 (2+2+2+3) kit groove built up one hit per cycle by the additive process",
+        generatorName: "Rhythm Library Generator",
+        parameters: {
+            var rhythm = RhythmLibrarySettings()
+            rhythm.isEnabled = true
+            rhythm.patternName = "Karsilama 9/8"
+            rhythm.role = .source
+            rhythm.output = .drumKit
+            rhythm.accentBoost = 22
+
+            var process = ProcessSettings()
+            process.mode = .additive
+            process.startCount = 2
+            process.notesPerCycle = 2
+
+            return PatternParameters(
+                tempo: 132.0,
+                meter: RhythmLibrary.karsilamaNine,
+                mirror: false,
+                processSettings: process,
+                rhythmLibrary: rhythm
+            )
+        }(),
+        category: "Rhythm Library"
+    ),
+
+    // The rhythm supplying onsets for pitched material
+    SlonimskyPreset(
+        name: "Bossa Pitched",
+        description: "The bossa nova grid driving a Dorian line instead of drums — Pitched output",
+        generatorName: "Rhythm Library Generator",
+        parameters: {
+            var rhythm = RhythmLibrarySettings()
+            rhythm.isEnabled = true
+            rhythm.patternName = "Bossa Nova"
+            rhythm.role = .source
+            rhythm.output = .pitched
+
+            return PatternParameters(
+                rootNote: 62,
+                scaleType: .dorian,
+                numberOfOctaves: 1,
+                divisionsOfOctave: 7,
+                tempo: 128.0,
+                mirror: false,
+                rhythmLibrary: rhythm
+            )
+        }(),
+        category: "Rhythm Library"
+    )
+]
+
 /// All presets known to the app, showcase groups first.
 var allPresets: [SlonimskyPreset] {
-    showcasePresets + reichPresets + defaultPresets
+    showcasePresets + reichPresets + rhythmLibraryPresets + defaultPresets
 }
 
 // MARK: - Presets Panel
@@ -467,6 +553,10 @@ struct PresetsDetailView: View {
         }
         if parameters.phasingSettings.mode != .off {
             chips.append("Phasing: \(parameters.phasingSettings.mode.rawValue)")
+        }
+        if parameters.rhythmLibrary.isEnabled {
+            chips.append("Rhythm: \(parameters.rhythmLibrary.patternName)")
+            chips.append(parameters.rhythmLibrary.role == .layer ? "Layered" : "Rhythm source")
         }
         return chips
     }

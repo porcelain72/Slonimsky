@@ -35,6 +35,13 @@
 		FAB1E503000000000000000C /* PhasingTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000C /* PhasingTests.swift */; };
 		FAB1E502000000000000000D /* CustomMelody.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000D /* CustomMelody.swift */; };
 		FAB1E503000000000000000D /* CustomMelody.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000D /* CustomMelody.swift */; };
+		FBB1E6020000000000000001 /* RhythmLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000001 /* RhythmLibrary.swift */; };
+		FBB1E6030000000000000001 /* RhythmLibrary.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000001 /* RhythmLibrary.swift */; };
+		FBB1E6020000000000000002 /* RhythmLibraryPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000002 /* RhythmLibraryPatternGenerator.swift */; };
+		FBB1E6030000000000000002 /* RhythmLibraryPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000002 /* RhythmLibraryPatternGenerator.swift */; };
+		FBB1E6020000000000000003 /* RhythmLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000003 /* RhythmLibraryView.swift */; };
+		FBB1E6030000000000000003 /* RhythmLibraryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000003 /* RhythmLibraryView.swift */; };
+		FBB1E6030000000000000004 /* RhythmLibraryTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FBB1E6010000000000000004 /* RhythmLibraryTests.swift */; };
 		FAB1E502000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */; };
 		FAB1E503000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */; };
 		FAB1E502000000000000000F /* MelodyEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E501000000000000000F /* MelodyEditorView.swift */; };
@@ -51,6 +58,12 @@
 		FAB1E5020000000000000014 /* CompositionTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000014 /* CompositionTimelineView.swift */; };
 		FAB1E5030000000000000014 /* CompositionTimelineView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000014 /* CompositionTimelineView.swift */; };
 		FAB1E5030000000000000015 /* PatternCompositionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000015 /* PatternCompositionTests.swift */; };
+		FAB1E5020000000000000016 /* MIDIMelodyImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000016 /* MIDIMelodyImporter.swift */; };
+		FAB1E5030000000000000016 /* MIDIMelodyImporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000016 /* MIDIMelodyImporter.swift */; };
+		FAB1E5030000000000000017 /* MIDIMelodyImporterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000017 /* MIDIMelodyImporterTests.swift */; };
+		FAB1E5020000000000000018 /* PatternSeam.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000018 /* PatternSeam.swift */; };
+		FAB1E5030000000000000018 /* PatternSeam.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000018 /* PatternSeam.swift */; };
+		FAB1E5030000000000000019 /* PatternSeamTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAB1E5010000000000000019 /* PatternSeamTests.swift */; };
 		987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3099C2E3B893D000D9EC7 /* CyclicalParameterSettings.swift */; };
 		987A91CF2F212051002A6706 /* PatternParameters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094E2E3932FE000D9EC7 /* PatternParameters.swift */; };
 		987A91D02F212056002A6706 /* VelocitySettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */; };
@@ -193,6 +206,10 @@
 		FAB1E501000000000000000A /* ProcessTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ProcessTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000C /* PhasingTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PhasingTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000D /* CustomMelody.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelody.swift; sourceTree = "<group>"; };
+		FBB1E6010000000000000001 /* RhythmLibrary.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmLibrary.swift; sourceTree = "<group>"; };
+		FBB1E6010000000000000002 /* RhythmLibraryPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmLibraryPatternGenerator.swift; sourceTree = "<group>"; };
+		FBB1E6010000000000000003 /* RhythmLibraryView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmLibraryView.swift; sourceTree = "<group>"; };
+		FBB1E6010000000000000004 /* RhythmLibraryTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RhythmLibraryTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelodyPatternGenerator.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000F /* MelodyEditorView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MelodyEditorView.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000010 /* CustomMelodyTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomMelodyTests.swift; sourceTree = "<group>"; };
@@ -201,6 +218,10 @@
 		FAB1E5010000000000000013 /* CompositionManager.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompositionManager.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000014 /* CompositionTimelineView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompositionTimelineView.swift; sourceTree = "<group>"; };
 		FAB1E5010000000000000015 /* PatternCompositionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternCompositionTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000016 /* MIDIMelodyImporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIMelodyImporter.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000017 /* MIDIMelodyImporterTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MIDIMelodyImporterTests.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000018 /* PatternSeam.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternSeam.swift; sourceTree = "<group>"; };
+		FAB1E5010000000000000019 /* PatternSeamTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PatternSeamTests.swift; sourceTree = "<group>"; };
 		FAB1E501000000000000000B /* PresetsDetailView.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PresetsDetailView.swift; sourceTree = "<group>"; };
 		98C3097E2E393378000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/NoteSequenceGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
 		98C3097F2E393378000D9EC7 /* SlonimskyTests/PatternGeneratorTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SlonimskyTests/PatternGeneratorTests.swift; sourceTree = SOURCE_ROOT; };
@@ -306,7 +327,10 @@
 				FAB1E501000000000000000A /* ProcessTests.swift */,
 				FAB1E501000000000000000C /* PhasingTests.swift */,
 				FAB1E5010000000000000010 /* CustomMelodyTests.swift */,
+				FBB1E6010000000000000004 /* RhythmLibraryTests.swift */,
 				FAB1E5010000000000000015 /* PatternCompositionTests.swift */,
+				FAB1E5010000000000000017 /* MIDIMelodyImporterTests.swift */,
+				FAB1E5010000000000000019 /* PatternSeamTests.swift */,
 				987A91C92F211EE8002A6706 /* MirrorArpeggioTests.swift */,
 				01093025AE7F46AD99194AEF /* ScaleGeneratorParameterTests.swift */,
 				98AF6E182EAD05C000DD60AC /* SimpleCyclicalTest.swift */,
@@ -337,6 +361,7 @@
 				FAB1E5010000000000000001 /* Meter.swift */,
 				FAB1E5010000000000000002 /* RhythmSettings.swift */,
 				FAB1E501000000000000000D /* CustomMelody.swift */,
+				FBB1E6010000000000000001 /* RhythmLibrary.swift */,
 				FAB1E5010000000000000011 /* PatternComposition.swift */,
 				98C3094F2E3932FE000D9EC7 /* VelocitySettings.swift */,
 				98C309502E3932FE000D9EC7 /* ModulationSettings.swift */,
@@ -350,12 +375,14 @@
 				987A91C62F2113A2002A6706 /* MIDIPatternConverter.swift */,
 				FAB1E5010000000000000003 /* EuclideanRhythm.swift */,
 				FAB1E501000000000000000E /* CustomMelodyPatternGenerator.swift */,
+				FBB1E6010000000000000002 /* RhythmLibraryPatternGenerator.swift */,
 				98C3099E2E3B8E63000D9EC7 /* CyclicalParameterManager.swift */,
 				98C309552E393311000D9EC7 /* HarmonicPatternGenerator.swift */,
 				98C309572E393311000D9EC7 /* ScalePatternGenerator.swift */,
 				98C309582E393311000D9EC7 /* SymmetricalPatternGenerator.swift */,
 				98C309592E393311000D9EC7 /* ContourPatternGenerator.swift */,
 				98C3095A2E393311000D9EC7 /* PatternGeneratorRegistry.swift */,
+				FAB1E5010000000000000018 /* PatternSeam.swift */,
 				98C3095B2E393311000D9EC7 /* ModulationPatternGenerator.swift */,
 				98C3095C2E393311000D9EC7 /* PatternGenerator.swift */,
 				98C3095D2E393311000D9EC7 /* IntervalPatternGenerator.swift */,
@@ -369,6 +396,7 @@
 			children = (
 				98C309A42E3B982B000D9EC7 /* CyclicalSequenceGenerator.swift */,
 				FAB1E5010000000000000012 /* CompositionGenerator.swift */,
+				FAB1E5010000000000000016 /* MIDIMelodyImporter.swift */,
 				98C309682E39332A000D9EC7 /* MIDIPlaybackControllerView.swift */,
 				98C309692E39332A000D9EC7 /* MIDIEngine.swift */,
 				98C3096A2E39332A000D9EC7 /* MIDIIntegrationService.swift */,
@@ -387,6 +415,7 @@
 				98C309702E39333C000D9EC7 /* PresetPickerView.swift */,
 				FAB1E501000000000000000B /* PresetsDetailView.swift */,
 				FAB1E501000000000000000F /* MelodyEditorView.swift */,
+				FBB1E6010000000000000003 /* RhythmLibraryView.swift */,
 				98C309712E39333C000D9EC7 /* PianoRollPanelView.swift */,
 				98C309722E39333C000D9EC7 /* ParameterPanelView.swift */,
 				98C309732E39333C000D9EC7 /* SheetMusicPanelView.swift */,
@@ -515,7 +544,7 @@
 			);
 			mainGroup = 98692B202E2FBE0200223430;
 			packageReferences = (
-				98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */,
+				98C3098C2E393BDF000D9EC7 /* XCLocalSwiftPackageReference "../Salieri" */,
 			);
 			productRefGroup = 98692B2A2E2FBE0200223430 /* Products */;
 			projectDirPath = "";
@@ -585,12 +614,17 @@
 				98C3097C2E39334F000D9EC7 /* MidiInfo.swift in Sources */,
 				FAB1E5020000000000000001 /* Meter.swift in Sources */,
 				FAB1E502000000000000000D /* CustomMelody.swift in Sources */,
+				FBB1E6020000000000000001 /* RhythmLibrary.swift in Sources */,
+				FBB1E6020000000000000002 /* RhythmLibraryPatternGenerator.swift in Sources */,
+				FBB1E6020000000000000003 /* RhythmLibraryView.swift in Sources */,
 				FAB1E502000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */,
 				FAB1E502000000000000000F /* MelodyEditorView.swift in Sources */,
 				FAB1E5020000000000000011 /* PatternComposition.swift in Sources */,
 				FAB1E5020000000000000012 /* CompositionGenerator.swift in Sources */,
 				FAB1E5020000000000000013 /* CompositionManager.swift in Sources */,
 				FAB1E5020000000000000014 /* CompositionTimelineView.swift in Sources */,
+				FAB1E5020000000000000016 /* MIDIMelodyImporter.swift in Sources */,
+				FAB1E5020000000000000018 /* PatternSeam.swift in Sources */,
 				FAB1E5020000000000000002 /* RhythmSettings.swift in Sources */,
 				FAB1E5020000000000000003 /* EuclideanRhythm.swift in Sources */,
 				98C3096C2E39332A000D9EC7 /* MIDIEngine.swift in Sources */,
@@ -627,6 +661,10 @@
 				FAB1E503000000000000000A /* ProcessTests.swift in Sources */,
 				FAB1E503000000000000000C /* PhasingTests.swift in Sources */,
 				FAB1E503000000000000000D /* CustomMelody.swift in Sources */,
+				FBB1E6030000000000000001 /* RhythmLibrary.swift in Sources */,
+				FBB1E6030000000000000002 /* RhythmLibraryPatternGenerator.swift in Sources */,
+				FBB1E6030000000000000003 /* RhythmLibraryView.swift in Sources */,
+				FBB1E6030000000000000004 /* RhythmLibraryTests.swift in Sources */,
 				FAB1E503000000000000000E /* CustomMelodyPatternGenerator.swift in Sources */,
 				FAB1E503000000000000000F /* MelodyEditorView.swift in Sources */,
 				FAB1E5030000000000000010 /* CustomMelodyTests.swift in Sources */,
@@ -635,6 +673,10 @@
 				FAB1E5030000000000000013 /* CompositionManager.swift in Sources */,
 				FAB1E5030000000000000014 /* CompositionTimelineView.swift in Sources */,
 				FAB1E5030000000000000015 /* PatternCompositionTests.swift in Sources */,
+				FAB1E5030000000000000016 /* MIDIMelodyImporter.swift in Sources */,
+				FAB1E5030000000000000017 /* MIDIMelodyImporterTests.swift in Sources */,
+				FAB1E5030000000000000018 /* PatternSeam.swift in Sources */,
+				FAB1E5030000000000000019 /* PatternSeamTests.swift in Sources */,
 				987A91CB2F21200E002A6706 /* PatternGeneratorRegistry.swift in Sources */,
 				98C3098B2E3933F0000D9EC7 /* SlonimskyTests/NoteSequenceGeneratorTests.swift in Sources */,
 				987A91CE2F21204A002A6706 /* CyclicalParameterSettings.swift in Sources */,
@@ -990,21 +1032,17 @@
 		};
 /* End XCConfigurationList section */
 
-/* Begin XCRemoteSwiftPackageReference section */
-		98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/porcelain72/Salieri";
-			requirement = {
-				branch = main25;
-				kind = branch;
-			};
+/* Begin XCLocalSwiftPackageReference section */
+		98C3098C2E393BDF000D9EC7 /* XCLocalSwiftPackageReference "../Salieri" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = ../Salieri;
 		};
-/* End XCRemoteSwiftPackageReference section */
+/* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
 		98C3098D2E393BDF000D9EC7 /* Salieri */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 98C3098C2E393BDF000D9EC7 /* XCRemoteSwiftPackageReference "Salieri" */;
+			package = 98C3098C2E393BDF000D9EC7 /* XCLocalSwiftPackageReference "../Salieri" */;
 			productName = Salieri;
 		};
 /* End XCSwiftPackageProductDependency section */

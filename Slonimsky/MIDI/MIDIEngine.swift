@@ -36,6 +36,13 @@ class MIDIEngine: ObservableObject {
     private var stopRequested = false
     private var externalMIDIThread: Thread?
     
+    // MARK: - Sequence Access
+    
+    /// Current MusicSequence used for playback / export (nil if empty).
+    var currentMusicSequence: MusicSequence? {
+        musicSequence
+    }
+    
     // MARK: - Initialization
     init() {
         setupMIDI()
@@ -264,10 +271,12 @@ class MIDIEngine: ObservableObject {
 
         var events: [MIDIEvent] = []
         let dedupedNotes = notes.soundingNotes.dedupedExactUnisons()
-        let voices = Set(dedupedNotes.map { $0.voice })
-        for voice in voices {
-            let channel = MIDIEngine.channel(forVoice: voice)
-            let voiceNotes = dedupedNotes.filter { $0.voice == voice }.gatedSamePitch()
+        let buckets = Set(dedupedNotes.map { NoteBucket(voice: $0.voice, isPercussion: $0.isPercussion) })
+        for bucket in buckets {
+            let channel = MIDIEngine.channel(forVoice: bucket.voice, isPercussion: bucket.isPercussion)
+            let voiceNotes = dedupedNotes
+                .filter { $0.voice == bucket.voice && $0.isPercussion == bucket.isPercussion }
+                .gatedSamePitch()
             for note in voiceNotes {
                 events.append(MIDIEvent(timeBeats: note.onset, isNoteOn: true, note: UInt8(clamping: note.note), velocity: note.velocity, channel: channel))
                 events.append(MIDIEvent(timeBeats: note.end, isNoteOn: false, note: UInt8(clamping: note.note), velocity: 0, channel: channel))
@@ -455,26 +464,36 @@ class MIDIEngine: ObservableObject {
     
     /// MIDI channel for a melody voice. Channel 1 is reserved for the harmony
     /// track and channel 9 for drums, so the phasing voice lands on channel 2.
-    static func channel(forVoice voice: Int) -> UInt8 {
-        voice == 0 ? 0 : UInt8(clamping: voice + 1)
+    static func channel(forVoice voice: Int, isPercussion: Bool = false) -> UInt8 {
+        // GM percussion always lives on channel 10 (index 9)
+        if isPercussion { return 9 }
+        return voice == 0 ? 0 : UInt8(clamping: voice + 1)
     }
 
     private func createMelodyTrack(sequence: MusicSequence, notes: [MIDIInfo]) -> MusicTrack? {
         // Cross-voice unison de-dup first: phasing lock points would otherwise
         // double every note sample-identically on two channels
         let soundingNotes = notes.soundingNotes.dedupedExactUnisons()
-        let voices = Set(soundingNotes.map { $0.voice }).sorted()
+        // Percussion is its own bucket so it lands on the GM drum channel
+        let buckets: [(voice: Int, isPercussion: Bool)] = Array(
+            Set(soundingNotes.map { NoteBucket(voice: $0.voice, isPercussion: $0.isPercussion) })
+        )
+        .sorted { ($0.isPercussion ? 1 : 0, $0.voice) < ($1.isPercussion ? 1 : 0, $1.voice) }
+        .map { ($0.voice, $0.isPercussion) }
+        let voices = buckets
         print("🎵 Creating melody track(s) for \(voices.count) voice(s), \(soundingNotes.count) sounding notes (\(notes.count - soundingNotes.count) rests skipped)")
 
         var firstTrack: MusicTrack?
-        for voice in voices {
+        for bucket in voices {
             var track: MusicTrack?
             MusicSequenceNewTrack(sequence, &track)
             guard let track = track else { continue }
             if firstTrack == nil { firstTrack = track }
 
-            let channel = MIDIEngine.channel(forVoice: voice)
-            let voiceNotes = soundingNotes.filter { $0.voice == voice }.gatedSamePitch()
+            let channel = MIDIEngine.channel(forVoice: bucket.voice, isPercussion: bucket.isPercussion)
+            let voiceNotes = soundingNotes
+                .filter { $0.voice == bucket.voice && $0.isPercussion == bucket.isPercussion }
+                .gatedSamePitch()
             for note in voiceNotes {
                 var midiMessage = MIDINoteMessage(
                     channel: channel,
@@ -752,6 +771,12 @@ class MIDIEngine: ObservableObject {
 }
 
 // MARK: - Supporting Types
+
+/// Emission bucket: one MIDI channel's worth of notes.
+struct NoteBucket: Hashable {
+    let voice: Int
+    let isPercussion: Bool
+}
 
 /// Represents a MIDI destination
 struct MIDIDestination: Identifiable, Hashable {

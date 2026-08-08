@@ -128,6 +128,8 @@ struct ParameterInfoPopupView: View {
             return "square.grid.2x2"
         case .melody:
             return "pianokeys"
+        case .rhythms:
+            return "music.quarternote.3"
         case .basic:
             return "music.note"
         case .intervals:

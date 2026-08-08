@@ -345,6 +345,9 @@ struct MainContentView: View {
                 case .melody:
                     MelodyEditorView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
+                case .rhythms:
+                    RhythmLibraryView(parameterManager: parameterManager)
+                        .navigationTitle(category.title)
                 case .intervals:
                     IntervalParametersDetailView(parameterManager: parameterManager)
                         .navigationTitle(category.title)
@@ -434,9 +437,8 @@ struct MainContentView: View {
     }
     
     private func updateSheetMusic(with pattern: PatternGenerationResult) {
-        // Update sheet music view model with new pattern
-        // This will be implemented when we integrate with Salieri
-        print("📝 Sheet music updated with \(pattern.notes.count) notes")
+        // SheetMusicPopupView observes `currentPattern` and re-renders via Salieri; no separate cache.
+        _ = pattern
     }
     
     private func setupCompositionAndAutoGeneration() {

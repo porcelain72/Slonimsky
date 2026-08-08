@@ -8,12 +8,17 @@
 //
 
 import SwiftUI
+import AppKit
+import UniformTypeIdentifiers
 
 struct MelodyEditorView: View {
     @ObservedObject var parameterManager: ParameterManager
 
     @State private var selectedDuration: DurationValue = .quarter
     @State private var baseOctave: Int = 4   // keyboard spans two octaves from C(baseOctave)
+    @State private var importErrorMessage: String?
+    @State private var showReplaceConfirm = false
+    @State private var pendingImportURL: URL?
 
     private let pointsPerBeat: CGFloat = 32
     private let previewHeight: CGFloat = 140
@@ -64,6 +69,29 @@ struct MelodyEditorView: View {
             Divider()
             previewSection
             contractCaption
+        }
+        .alert("Import MIDI", isPresented: Binding(
+            get: { importErrorMessage != nil },
+            set: { if !$0 { importErrorMessage = nil } }
+        )) {
+            Button("OK", role: .cancel) { importErrorMessage = nil }
+        } message: {
+            Text(importErrorMessage ?? "")
+        }
+        .confirmationDialog(
+            "Replace the current melody with the imported MIDI?",
+            isPresented: $showReplaceConfirm,
+            titleVisibility: .visible
+        ) {
+            Button("Replace", role: .destructive) {
+                if let url = pendingImportURL {
+                    performImport(from: url)
+                }
+                pendingImportURL = nil
+            }
+            Button("Cancel", role: .cancel) {
+                pendingImportURL = nil
+            }
         }
     }
 
@@ -281,6 +309,7 @@ struct MelodyEditorView: View {
                     .font(.subheadline).fontWeight(.semibold)
                     .foregroundColor(Color.garageBandText)
                 Spacer()
+                Button("Import MIDI…") { requestImport() }
                 Button("Undo") { removeLast() }
                     .disabled(melody.notes.isEmpty)
                 Button("Clear") { clear() }
@@ -404,6 +433,42 @@ struct MelodyEditorView: View {
 
     private func clear() {
         parameterManager.customMelody.notes.removeAll()
+    }
+
+    private func requestImport() {
+        let panel = NSOpenPanel()
+        panel.allowsMultipleSelection = false
+        panel.canChooseDirectories = false
+        panel.canChooseFiles = true
+        panel.allowedContentTypes = [.midi]
+        panel.title = "Import MIDI Melody"
+        panel.message = "Choose a MIDI file. Polyphonic parts are reduced to a single upper voice; durations are quantized to the note-value palette."
+
+        panel.begin { response in
+            guard response == .OK, let url = panel.url else { return }
+            DispatchQueue.main.async {
+                if !parameterManager.customMelody.notes.isEmpty {
+                    pendingImportURL = url
+                    showReplaceConfirm = true
+                } else {
+                    performImport(from: url)
+                }
+            }
+        }
+    }
+
+    private func performImport(from url: URL) {
+        do {
+            let imported = try MIDIMelodyImporter.importMelody(
+                from: url,
+                maxBeats: maxBeats
+            )
+            parameterManager.customMelody = imported
+            // Same as enabling the toggle: avoid surprise mirror-doubling
+            parameterManager.mirror = false
+        } catch {
+            importErrorMessage = error.localizedDescription
+        }
     }
 
     private func noteName(for midiNote: Int) -> String {

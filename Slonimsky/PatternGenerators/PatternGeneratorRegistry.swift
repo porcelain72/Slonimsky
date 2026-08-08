@@ -140,8 +140,11 @@ class PatternGeneratorRegistry: ObservableObject {
             
             switch combinationMode {
             case .sequential:
-                let offset = allNotes.totalLength
-                allNotes.append(contentsOf: result.notes.map { $0.offset(by: offset) })
+                allNotes = PatternSeam.appending(
+                    result.notes,
+                    to: allNotes,
+                    dropMatchingSeam: true
+                )
             case .layered:
                 allNotes = layerNotes(allNotes, with: result.notes)
             }
@@ -204,8 +207,11 @@ class PatternGeneratorRegistry: ObservableObject {
             
             switch combinationMode {
             case .sequential:
-                let offset = allNotes.totalLength
-                allNotes.append(contentsOf: result.notes.map { $0.offset(by: offset) })
+                allNotes = PatternSeam.appending(
+                    result.notes,
+                    to: allNotes,
+                    dropMatchingSeam: true
+                )
             case .layered:
                 allNotes = layerNotes(allNotes, with: result.notes)
             }
@@ -262,6 +268,7 @@ class PatternGeneratorRegistry: ObservableObject {
     private func registerDefaultGenerators() {
         register(ScalePatternGenerator())
         register(CustomMelodyPatternGenerator())
+        register(RhythmLibraryPatternGenerator())
         register(IntervalPatternGenerator())
         register(ModulationPatternGenerator())
         register(HarmonicPatternGenerator())

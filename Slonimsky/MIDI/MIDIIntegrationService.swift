@@ -7,6 +7,9 @@
 
 import Foundation
 import Combine
+import AudioToolbox
+import PDFKit
+import Salieri
 
 /// Service that integrates pattern generators with MIDI output
 class MIDIIntegrationService: ObservableObject {
@@ -462,6 +465,34 @@ class MIDIIntegrationService: ObservableObject {
         return success
     }
     
+    /// Live MusicSequence backing the current pattern (for sheet music rendering).
+    var currentMusicSequence: MusicSequence? {
+        midiEngine.currentMusicSequence
+    }
+    
+    /// Render the current sequence to a sheet-music PDF via Salieri.
+    func renderSheetMusicPDF() -> PDFDocument? {
+        guard let sequence = currentMusicSequence else {
+            errorMessage = "No music sequence available for sheet music"
+            return nil
+        }
+        guard let pdf = Salieri().renderPDF(from: sequence) else {
+            errorMessage = "Failed to render sheet music PDF"
+            return nil
+        }
+        return pdf
+    }
+    
+    /// Write the current sheet-music PDF to disk.
+    func exportSheetMusicPDF(url: URL) -> Bool {
+        guard let pdf = renderSheetMusicPDF() else { return false }
+        let success = pdf.write(to: url)
+        if !success {
+            errorMessage = "Failed to write sheet music PDF"
+        }
+        return success
+    }
+    
     /// Current tempo from the parameter manager, or 120 BPM as fallback
     var currentTempo: Double {
         return parameterManager?.tempo ?? 120.0
@@ -605,6 +636,18 @@ class MIDIIntegrationService: ObservableObject {
     ) {
         let parameters = preset.parameters
         let generatorName = preset.generatorName
+        
+        // A layered rhythm needs both parts: the preset's own generator plus
+        // the rhythm library generator, merged by onset.
+        if parameters.rhythmLibrary.isEnabled && parameters.rhythmLibrary.role == .layer {
+            generateCombinedPatternAndMIDI(
+                using: [generatorName, "Rhythm Library Generator"],
+                parameters: parameters,
+                combinationMode: .layered,
+                completion: completion
+            )
+            return
+        }
         
         // Presets that use cyclical curves or a pattern process must run the
         // multi-cycle pipeline, not the single-pattern path.

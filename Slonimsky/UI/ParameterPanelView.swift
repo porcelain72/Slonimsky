@@ -78,6 +78,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
     case presets = "Presets"
     case basic = "Basic"
     case melody = "Melody"
+    case rhythms = "Rhythms"
     case intervals = "Intervals"
     case modulations = "Modulations"
     case directional = "Directional"
@@ -93,6 +94,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .presets: return "Presets"
         case .basic: return "Basic Parameters"
         case .melody: return "Custom Melody"
+        case .rhythms: return "Rhythm Library"
         case .intervals: return "Interval Parameters"
         case .modulations: return "Slonimsky Modulations"
         case .directional: return "Directional Parameters"
@@ -108,6 +110,7 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
         case .presets: return "square.grid.2x2"
         case .basic: return "music.note"
         case .melody: return "pianokeys"
+        case .rhythms: return "music.quarternote.3"
         case .intervals: return "arrow.up.and.down"
         case .modulations: return "waveform.path.ecg"
         case .directional: return "arrow.triangle.turn.up.right.circle"
@@ -126,6 +129,8 @@ enum ParameterCategory: String, CaseIterable, Identifiable {
             return "Root note, scale type, octaves, tempo"
         case .melody:
             return "Enter your own melody as the pattern source"
+        case .rhythms:
+            return "Built-in grooves mapped to GM drums"
         case .intervals:
             return "Primary/secondary intervals, patterns, inversions"
         case .modulations:
@@ -177,6 +182,8 @@ struct ParameterCategoryDetailView: View {
                         BasicParametersDetailView(parameterManager: parameterManager)
                     case .melody:
                         MelodyEditorView(parameterManager: parameterManager)
+                    case .rhythms:
+                        RhythmLibraryView(parameterManager: parameterManager)
                     case .intervals:
                         IntervalParametersDetailView(parameterManager: parameterManager)
                     case .modulations:

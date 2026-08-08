@@ -72,18 +72,16 @@ class CyclicalSequenceGenerator {
                 parameters: baseParameters
             )
 
-            let notesToAppend = appendableNotes(
-                from: phasedNotes,
-                cycleIndex: cycleIndex,
-                isLastCycle: cycleIndex == totalCycles - 1,
-                runningLength: allNotes.totalLength,
-                dropSeamNote: baseParameters.processSettings.mode == .none
-                    && baseParameters.phasingSettings.mode == .off
-            )
-
-            allNotes.append(contentsOf: notesToAppend)
+            let dropSeam = baseParameters.processSettings.mode == .none
+                && baseParameters.phasingSettings.mode == .off
+            let tagged = phasedNotes.map { note -> MIDIInfo in
+                var copy = note
+                copy.cycleIndex = cycleIndex
+                return copy
+            }
+            allNotes = PatternSeam.appending(tagged, to: allNotes, dropMatchingSeam: dropSeam)
             totalGenerationTime += cycleResult.metadata.generationTime
-            totalNoteCount += notesToAppend.count
+            totalNoteCount = allNotes.count
             actualCycles += 1
         }
 
@@ -164,18 +162,16 @@ class CyclicalSequenceGenerator {
                 parameters: baseParameters
             )
 
-            let notesToAppend = appendableNotes(
-                from: phasedNotes,
-                cycleIndex: cycleIndex,
-                isLastCycle: cycleIndex == totalCycles - 1,
-                runningLength: allNotes.totalLength,
-                dropSeamNote: baseParameters.processSettings.mode == .none
-                    && baseParameters.phasingSettings.mode == .off
-            )
-
-            allNotes.append(contentsOf: notesToAppend)
+            let dropSeam = baseParameters.processSettings.mode == .none
+                && baseParameters.phasingSettings.mode == .off
+            let tagged = phasedNotes.map { note -> MIDIInfo in
+                var copy = note
+                copy.cycleIndex = cycleIndex
+                return copy
+            }
+            allNotes = PatternSeam.appending(tagged, to: allNotes, dropMatchingSeam: dropSeam)
             totalGenerationTime += cycleResult.metadata.generationTime
-            totalNoteCount += notesToAppend.count
+            totalNoteCount = allNotes.count
             actualCycles += 1
         }
 
@@ -334,33 +330,6 @@ class CyclicalSequenceGenerator {
         }
         if parameters.phasingSettings.mode != .off {
             print("   Phasing: \(parameters.phasingSettings.mode.rawValue)")
-        }
-    }
-
-    /// Shift a cycle's notes onto the end of the running sequence and apply the
-    /// drop-last-note rule (only the final cycle keeps its last sounding note,
-    /// to avoid repeated notes at cycle seams; rests are never dropped).
-    /// The rule is disabled while a pattern process is active — truncated cycles
-    /// end exactly on the note the process added, which must be heard.
-    private func appendableNotes(
-        from notes: [MIDIInfo],
-        cycleIndex: Int,
-        isLastCycle: Bool,
-        runningLength: Double,
-        dropSeamNote: Bool
-    ) -> [MIDIInfo] {
-        let cycleNotes = notes.map { note -> MIDIInfo in
-            var modifiedNote = note.offset(by: runningLength)
-            modifiedNote.cycleIndex = cycleIndex
-            return modifiedNote
-        }
-
-        if isLastCycle || !dropSeamNote {
-            return cycleNotes
-        } else if cycleNotes.count > 1, let last = cycleNotes.last, !last.isRest {
-            return Array(cycleNotes.dropLast())
-        } else {
-            return cycleNotes
         }
     }
 

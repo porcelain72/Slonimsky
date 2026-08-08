@@ -268,13 +268,61 @@ The transformation contract:
 
 ---
 
-## 9. Putting it all together — recipes
+## 9. Rhythm library
+
+*Where: Rhythms panel (sidebar, below Custom Melody)*
+
+Around forty built-in grooves, each written on a step grid **in its native time
+signature** and mapped to the General MIDI percussion notes.
+
+| Family | Examples |
+|---|---|
+| Rock & Pop | Basic Rock, Four on the Floor, Half-Time, Rock Shuffle, Motown, Boom Bap |
+| Funk | Funk Sixteenths, Purdie-style Shuffle, Disco |
+| Jazz | Swing Ride, Jazz Waltz (3/4), Brush Ballad |
+| Afro-Cuban | Son Clave 3-2 / 2-3, Rumba Clave, Cascara, Tumbao, Mambo Bell, Cha-Cha, Songo |
+| Brazilian | Bossa Nova, Samba, Partido Alto, Baião |
+| African Bell | Short Bell 6/8, Bembé 12/8, Highlife, Afro 12/8 Kit |
+| Middle East & Balkan | Maqsum, Baladi, Ayub (2/4), Karsilama (9/8), Balkan 7/8, Kopanitsa (11/16) |
+| Electronic | House, Techno, Breakbeat, Drum and Bass, Trap Hats, Two-Step Garage |
+| Odd Meter | Take Five (5/4), Prog 7/8, Five-Eight Drive, Tresillo, Cinquillo |
+
+**Browsing.** Filter by time signature and family; every row shows a dot-grid preview
+of the pattern (lanes down, steps across, brighter dots for accents, faint columns on
+the meter's grouping starts). **Selecting a rhythm also sets the app's time signature**
+to the pattern's own, so a 9/8 groove is always heard in 9/8.
+
+**Role**
+- *Pattern Source* — the rhythm becomes the pattern, exactly like a custom melody, and
+  every other panel transforms it.
+- *Layer Under Pattern* — the rhythm plays simultaneously beneath your scale or melody
+  pattern.
+
+**Output**
+- *Drum Kit (GM)* — each lane sounds its General MIDI note (Kick 36, Snare 38, Closed
+  Hat 42, Ride 51, Claves 75 …) on **MIDI channel 10**, so exports open as a drum part
+  in any DAW.
+- *Pitched* — the rhythm supplies onsets and durations while the pitches come from the
+  scale (or your custom melody): enter a tune, then play it on a bossa grid.
+
+**Per-pattern controls**: mute individual lanes, rotate the whole groove by any number
+of steps (the same idea as Euclidean rotation), and set the accent boost. The caption
+lists the exact GM note numbers currently sounding.
+
+Transformations apply as they do everywhere else — the *Karsilama Kit* preset builds a
+9/8 groove up two hits per cycle with the additive process, and phasing works on a
+groove just as it does on a melody.
+
+---
+
+## 10. Putting it all together — recipes
 
 > **Tip:** the **Presets** panel (top of the sidebar) ships one-tap versions of
 > these ideas: a "Rhythm Engine Showcase" section (*Balkan Machine*, *Tresillo
 > Bass*, *Machaut in Five*, *Glass Pendulum*, *Phase Music*, *Odd-Time Traveler*)
-> and a "Reich Showcase" section (*Clapping Pattern*, *Piano Phase*, *Drumming
-> Build*, *Phase & Fade*). Applying one loads every parameter panel, so you can
+> a "Reich Showcase" section (*Clapping Pattern*, *Piano Phase*, *Drumming
+> Build*, *Phase & Fade*) and a "Rhythm Library" section (*Clave & Motif*,
+> *Karsilama Kit*, *Bossa Pitched*). Applying one loads every parameter panel, so you can
 > inspect exactly how it's built and tweak from there.
 
 ### "Balkan machine"
@@ -312,7 +360,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 10. Seeing and exporting the results
+## 11. Seeing and exporting the results
 
 - **Piano roll** (bottom pane, resizable): onset-accurate notes, thick barlines that
   follow the meter cycle, alternating grouping shading, brighter/outlined accented
@@ -325,7 +373,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 
 ---
 
-## 11. Quick reference
+## 12. Quick reference
 
 | Feature | Panel | Key controls |
 |---|---|---|
@@ -339,6 +387,7 @@ produce. Everything realigns at the lcm of the process length and the curve peri
 | Pattern process | Rhythm & Meter | mode (incl. Construct/Reduce), starting notes, notes per cycle |
 | Phasing voices | Rhythm & Meter | mode (Discrete/Continuous), steps or drift per cycle, voice-2 transpose |
 | Custom melody | Custom Melody | step entry, duration palette, rests, keyboard, 8-bar limit |
+| Rhythm library | Rhythms | ~40 grooves, meter/family filters, GM drums or pitched, role, lane mutes, rotation |
 
 *Sequence length rules:* curves realign at the **lcm of their periods**; a pattern
 process contributes its own cycle count; both merge via lcm, capped at **64 cycles**.

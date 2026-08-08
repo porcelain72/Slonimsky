@@ -16,6 +16,8 @@ struct ParameterDescriptionHelper {
         switch category {
         case .presets:
             return "Ready-made configurations that demonstrate meters, meter cycles, isorhythm, Euclidean rhythms, phase curves, and the pattern process. Applying a preset loads every panel so you can inspect and tweak it."
+        case .rhythms:
+            return "Pick from ~40 built-in grooves — rock, funk, jazz, Afro-Cuban, Brazilian, African bell, Middle Eastern, Balkan, electronic and odd-meter — each in its native time signature. Play them as General MIDI drums on channel 10 or as pitched material on the rhythm's grid, either as the pattern source or layered under it."
         case .melody:
             return "Enter a custom melody by step entry — pick a note value or rest, then click keys. The melody becomes the base material that every other panel transforms: mirror, modulations, rhythm modes, meter cycles, curves, processes, and phasing."
         case .basic:
@@ -43,6 +45,8 @@ struct ParameterDescriptionHelper {
             return "Presets"
         case .melody:
             return "Custom Melody"
+        case .rhythms:
+            return "Rhythm Library"
         case .basic:
             return "basic_parameters_title".localized
         case .intervals:
@@ -70,6 +74,13 @@ struct ParameterDescriptionHelper {
             return [
                 "Rhythm Engine Showcase — meters, isorhythm, Euclidean, curves, process",
                 "Classic — original generator presets"
+            ]
+        case .rhythms:
+            return [
+                "Filter by time signature and family",
+                "Drum Kit (GM) or Pitched output",
+                "Pattern source or layered under the melody",
+                "Lane mutes, rotation, accent boost"
             ]
         case .melody:
             return [

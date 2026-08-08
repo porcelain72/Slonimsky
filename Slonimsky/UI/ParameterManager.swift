@@ -61,6 +61,9 @@ class ParameterManager: ObservableObject {
     @Published var customMelody: CustomMelody = CustomMelody() {
         didSet { validateAndNotify() }
     }
+    @Published var rhythmLibrary: RhythmLibrarySettings = RhythmLibrarySettings() {
+        didSet { validateAndNotify() }
+    }
     
     /// Single-meter accessor: reads the first bar; writing replaces the whole
     /// cycle with one bar (the full cycle editor lives in Rhythm & Meter).
@@ -261,7 +264,8 @@ class ParameterManager: ObservableObject {
             rhythmSettings: rhythmSettings,
             processSettings: processSettings,
             phasingSettings: phasingSettings,
-            customMelody: customMelody
+            customMelody: customMelody,
+            rhythmLibrary: rhythmLibrary
         )
     }
     
@@ -276,6 +280,7 @@ class ParameterManager: ObservableObject {
         processSettings = parameters.processSettings
         phasingSettings = parameters.phasingSettings
         customMelody = parameters.customMelody
+        rhythmLibrary = parameters.rhythmLibrary
         rhythmSettings = parameters.rhythmSettings
         iterations = parameters.iterations
         randomiseOrder = parameters.randomiseOrder
@@ -336,7 +341,7 @@ class ParameterManager: ObservableObject {
                 randomizeExpressionParameters()
             case .accompaniment:
                 randomizeRhythmicAccompanimentParameters()
-            case .presets, .melody:
+            case .presets, .melody, .rhythms:
                 break // Nothing to randomize in these panels
             }
         }
@@ -509,13 +514,23 @@ class ParameterManager: ObservableObject {
         
         var generators: Set<String> = []
         
-        // The custom melody replaces the scale generator as the base source
-        if customMelody.isEnabled && !customMelody.notes.isEmpty {
+        // A rhythm set as Pattern Source replaces the base generator entirely;
+        // as a Layer it is added alongside whatever base is chosen below.
+        let rhythmIsSource = rhythmLibrary.isEnabled && rhythmLibrary.role == .source
+        if rhythmIsSource {
+            generators.insert("Rhythm Library Generator")
+            print("   Using Rhythm Library Generator as base (rhythm is pattern source)")
+        } else if customMelody.isEnabled && !customMelody.notes.isEmpty {
             generators.insert("Custom Melody Generator")
             print("   Using Custom Melody Generator as base (melody enabled)")
         } else {
             // Always include Scale Pattern Generator for basic parameters
             generators.insert("Scale Pattern Generator")
+        }
+        
+        if rhythmLibrary.isEnabled && rhythmLibrary.role == .layer {
+            generators.insert("Rhythm Library Generator")
+            print("   Added Rhythm Library Generator (layered under the pattern)")
         }
         print("   Added Scale Pattern Generator (always active)")
         
@@ -592,6 +607,12 @@ class ParameterManager: ObservableObject {
         guard activeGenerators.count > 1 else { 
             print("   Using sequential mode (single generator)")
             return .sequential 
+        }
+        
+        // A layered rhythm must sound simultaneously with the melodic pattern
+        if activeGenerators.contains("Rhythm Library Generator") && activeGenerators.count > 1 {
+            print("   Using layered mode (rhythm layered under the pattern)")
+            return .layered
         }
         
         // Use layered mode if harmonic generator is active with others

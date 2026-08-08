@@ -19,7 +19,7 @@ final class ShowcasePresetTests: XCTestCase {
     }
 
     func testShowcasePresetsGenerate() {
-        for preset in showcasePresets + reichPresets {
+        for preset in showcasePresets + reichPresets + rhythmLibraryPresets {
             let result: PatternGenerationResult?
             if preset.parameters.isCyclicalGeneration {
                 result = CyclicalSequenceGenerator().generateCyclicalSequence(

@@ -35,18 +35,32 @@ final class CompositionGenerator {
             totalNoteCount += slotResult.notes.count
         }
 
-        let concatenated = CompositionNoteBuilder.concatenateSlotNotes(slotNoteLists)
-        let singlePassDuration = concatenated.notes.totalLength
-        let repeatedNotes = CompositionNoteBuilder.applyRepeats(
-            notes: concatenated.notes,
-            count: composition.playbackRepeatCount
-        )
+        let repeatCount = PatternComposition.clampedRepeatCount(composition.playbackRepeatCount)
+
+        // Flatten to slot segments × repeats so seam drops adjust timing and tempo markers.
+        var segments: [[MIDIInfo]] = []
+        var segmentTempos: [Double] = []
+        for _ in 0..<repeatCount {
+            for (notes, tempo) in zip(slotNoteLists, slotTempos) {
+                segments.append(notes)
+                segmentTempos.append(tempo)
+            }
+        }
+
+        let concatenated = PatternSeam.concatenate(segments, dropMatchingSeam: true)
+        let singlePassDuration: Double = {
+            guard repeatCount > 1, !slotNoteLists.isEmpty else {
+                return concatenated.notes.totalLength
+            }
+            let firstPass = PatternSeam.concatenate(slotNoteLists, dropMatchingSeam: true)
+            return firstPass.notes.totalLength
+        }()
+
         let markers = CompositionNoteBuilder.tempoMarkers(
-            slotTempos: slotTempos,
-            slotStartBeats: concatenated.slotStartBeats,
-            singlePassDuration: singlePassDuration,
-            repeatCount: composition.playbackRepeatCount
+            tempos: segmentTempos,
+            startBeats: concatenated.segmentStartBeats
         )
+        let repeatedNotes = concatenated.notes
 
         let generationTime = CFAbsoluteTimeGetCurrent() - startTime
         let pitches = repeatedNotes.soundingNotes.map(\.note)

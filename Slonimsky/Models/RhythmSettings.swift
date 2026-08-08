@@ -62,6 +62,33 @@ enum DurationValue: String, CaseIterable, Codable, Hashable {
     }
 
     var displayName: String { rawValue }
+
+    /// Closest palette duration to an arbitrary beat length.
+    static func nearest(to beats: Double) -> DurationValue {
+        let clamped = max(beats, 0)
+        return DurationValue.allCases.min {
+            abs($0.beats - clamped) < abs($1.beats - clamped)
+        } ?? .quarter
+    }
+
+    /// Greedy cover of `beats` using palette values (largest first that fits).
+    /// Used when expanding rests/gaps so imported timing stays on the palette.
+    static func covering(beats: Double, tolerance: Double = 1e-6) -> [DurationValue] {
+        var remaining = max(0, beats)
+        var values: [DurationValue] = []
+        let descending = DurationValue.allCases.sorted { $0.beats > $1.beats }
+
+        while remaining > tolerance {
+            guard let next = descending.first(where: { $0.beats <= remaining + tolerance }) else {
+                // Leftover shorter than sixteenth — round up to a sixteenth
+                values.append(.sixteenth)
+                break
+            }
+            values.append(next)
+            remaining -= next.beats
+        }
+        return values
+    }
 }
 
 /// One entry of a talea (duration cycle): a duration that either sounds or rests.

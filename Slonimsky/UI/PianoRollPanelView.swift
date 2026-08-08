@@ -16,40 +16,61 @@ struct PianoRollPanelView: View {
     
     // MARK: - State
     @State private var zoomLevel: Double = 1.0
-    @State private var scrollOffset: CGPoint = .zero
     @State private var selectedNotes: Set<Int> = []
     @State private var showNoteDetails = false
     @State private var hoveredNote: Int? = nil
     @State private var autoScaleEnabled: Bool = true
-    @State private var verticalCenterOffset: CGFloat = 0
     @State private var dynamicNoteHeight: CGFloat = 20
     @State private var tonalRange: ClosedRange<Int> = 21...108
+    /// Content X that should sit at the leading edge of the viewport (GarageBand follow).
+    @State private var scrollLeadX: CGFloat = 0
+    @State private var viewportWidth: CGFloat = 0
     
     // MARK: - Constants
-    private let noteHeight: CGFloat = 20
     private let timeDivision: CGFloat = 50
     private let pianoKeysWidth: CGFloat = 60
-    private let minTimeDivision: CGFloat = 20
-    private let maxTimeDivision: CGFloat = 100
-    private let minNoteHeight: CGFloat = 8
-    private let maxNoteHeight: CGFloat = 40
-    private let maxPianoRollHeight: CGFloat = 600
+    private let minTimeDivision: CGFloat = 12
+    private let maxTimeDivision: CGFloat = 200
+    private let minNoteHeight: CGFloat = 2
+    private let scrollAnchorID = "pianoRollScrollLead"
     
     // MARK: - Body
     var body: some View {
         VStack(spacing: 0) {
-            // Header
             pianoRollHeader
             
-            // Piano Roll Content
-            HStack(spacing: 0) {
-                // Piano Keys
-                pianoKeysView
-                // Note Grid
-                noteGridView
+            GeometryReader { geometry in
+                let availableHeight = max(geometry.size.height, 1)
+                let rowHeight = pitchRowHeight(for: availableHeight)
+                let gridWidth = max(geometry.size.width - pianoKeysWidth, 1)
+                
+                HStack(spacing: 0) {
+                    pianoKeysView(rowHeight: rowHeight, height: availableHeight)
+                    noteGridView(
+                        rowHeight: rowHeight,
+                        height: availableHeight,
+                        viewportWidth: gridWidth
+                    )
+                }
+                .onAppear {
+                    dynamicNoteHeight = rowHeight
+                    viewportWidth = gridWidth
+                    if let pattern = midiService.currentPattern {
+                        updateViewForNewPattern(pattern)
+                        dynamicNoteHeight = pitchRowHeight(for: availableHeight)
+                    }
+                }
+                .onChange(of: geometry.size.height) { newHeight in
+                    dynamicNoteHeight = pitchRowHeight(for: max(newHeight, 1))
+                }
+                .onChange(of: geometry.size.width) { newWidth in
+                    viewportWidth = max(newWidth - pianoKeysWidth, 1)
+                }
+                .onChange(of: tonalRange) { _ in
+                    dynamicNoteHeight = pitchRowHeight(for: availableHeight)
+                }
             }
             
-            // Footer Controls
             pianoRollFooter
         }
         .background(Color.garageBandBackground)
@@ -62,6 +83,7 @@ struct PianoRollPanelView: View {
         .onReceive(midiService.$currentPattern) { pattern in
             if let pattern = pattern {
                 updateViewForNewPattern(pattern)
+                scrollLeadX = 0
             }
         }
     }
@@ -116,45 +138,39 @@ struct PianoRollPanelView: View {
     
     // MARK: - Piano Keys
     
-    private var pianoKeysView: some View {
+    private func pianoKeysView(rowHeight: CGFloat, height: CGFloat) -> some View {
         VStack(spacing: 0) {
-            ScrollView(.vertical, showsIndicators: false) {
-                LazyVStack(spacing: 0) {
-                    ForEach(Array(tonalRange).reversed(), id: \.self) { noteNumber in
-                        PianoKeyView(
-                            noteNumber: noteNumber,
-                            isSelected: selectedNotes.contains(noteNumber),
-                            isHovered: hoveredNote == noteNumber
-                        )
-                        .frame(height: dynamicNoteHeight * zoomLevel)
-                        .onTapGesture {
-                            toggleNoteSelection(noteNumber)
-                        }
-                        .onHover { isHovered in
-                            hoveredNote = isHovered ? noteNumber : nil
-                        }
-                    }
+            ForEach(Array(tonalRange).reversed(), id: \.self) { noteNumber in
+                PianoKeyView(
+                    noteNumber: noteNumber,
+                    isSelected: selectedNotes.contains(noteNumber),
+                    isHovered: hoveredNote == noteNumber
+                )
+                .frame(height: rowHeight)
+                .onTapGesture {
+                    toggleNoteSelection(noteNumber)
+                }
+                .onHover { isHovered in
+                    hoveredNote = isHovered ? noteNumber : nil
                 }
             }
-            .background(Color.garageBandPanel)
         }
-        .frame(width: pianoKeysWidth, height: sharedHeight)
+        .frame(width: pianoKeysWidth, height: height, alignment: .top)
         .background(Color.garageBandPanel)
-        .onChange(of: tonalRange) { _ in
-            print("🎹 Piano keys updated for new tonal range: \(tonalRange.lowerBound)-\(tonalRange.upperBound)")
-        }
     }
     
     // MARK: - Note Grid
     
-    private var noteGridView: some View {
-        GeometryReader { geometry in
-            ScrollView([.horizontal, .vertical], showsIndicators: true) {
+    private func noteGridView(rowHeight: CGFloat, height: CGFloat, viewportWidth: CGFloat) -> some View {
+        let contentWidth = patternContentWidth(viewportWidth: viewportWidth)
+        let playback = midiService.getPlaybackStatus()
+        let playheadX = CGFloat(playback.currentTime) * currentTimeDivision
+        
+        return ScrollViewReader { proxy in
+            ScrollView(.horizontal, showsIndicators: true) {
                 ZStack(alignment: .topLeading) {
-                    // Grid Background
-                    gridBackground
+                    gridBackground(height: height)
                     
-                    // Notes and rests
                     if let pattern = midiService.currentPattern {
                         ForEach(Array(pattern.notes.enumerated()), id: \.offset) { index, note in
                             if note.isRest {
@@ -168,10 +184,9 @@ struct PianoRollPanelView: View {
                                     startTime: note.onset,
                                     isSelected: selectedNotes.contains(note.note),
                                     isAccented: parameterManager.meterCycle.isGroupingStart(note.onset),
-                                    zoomLevel: zoomLevel,
                                     timeDivision: currentTimeDivision,
                                     tonalRange: tonalRange,
-                                    noteHeight: dynamicNoteHeight
+                                    noteHeight: rowHeight
                                 )
                                 .onTapGesture {
                                     toggleNoteSelection(note.note)
@@ -183,53 +198,115 @@ struct PianoRollPanelView: View {
                         }
                     }
                     
-                    // Playback Position Indicator
-                    if midiService.getPlaybackStatus().isPlaying {
-                        playbackPositionIndicator
+                    // Leading-edge scroll target for GarageBand-style follow
+                    HStack(spacing: 0) {
+                        Color.clear.frame(width: max(0, scrollLeadX), height: 1)
+                        Color.clear
+                            .frame(width: 1, height: 1)
+                            .id(scrollAnchorID)
+                        Spacer(minLength: 0)
+                    }
+                    .frame(width: contentWidth, height: 1, alignment: .leading)
+                    .allowsHitTesting(false)
+                    
+                    if playback.isPlaying || playback.currentTime > 0 {
+                        playbackPlayhead(playheadX: playheadX, height: height)
                     }
                 }
-                .frame(
-                    width: max(CGFloat(midiService.currentPattern?.metadata.duration ?? 0) * currentTimeDivision, geometry.size.width - pianoKeysWidth),
-                    height: calculateConstrainedHeight(availableHeight: geometry.size.height)
-                )
+                .frame(width: contentWidth, height: height, alignment: .topLeading)
             }
             .background(Color.garageBandBackground)
+            .onChange(of: playback.currentTime) { newTime in
+                followPlayhead(
+                    proxy: proxy,
+                    playheadX: CGFloat(newTime) * currentTimeDivision,
+                    viewportWidth: viewportWidth,
+                    contentWidth: contentWidth,
+                    isPlaying: playback.isPlaying
+                )
+            }
+            .onChange(of: playback.isPlaying) { isPlaying in
+                if isPlaying {
+                    followPlayhead(
+                        proxy: proxy,
+                        playheadX: playheadX,
+                        viewportWidth: viewportWidth,
+                        contentWidth: contentWidth,
+                        isPlaying: true
+                    )
+                }
+            }
+            .onChange(of: scrollLeadX) { _ in
+                // Keep ScrollView in sync when lead X is updated from follow logic
+                proxy.scrollTo(scrollAnchorID, anchor: .leading)
+            }
             .onAppear {
-                if let pattern = midiService.currentPattern {
-                    updateViewForNewPattern(pattern)
-                }
-                updateNoteHeight(for: geometry.size.height)
-            }
-            .onChange(of: geometry.size.height) { newHeight in
-                updateNoteHeight(for: newHeight)
-            }
-            .onChange(of: verticalCenterOffset) { newOffset in
-                // Scroll to center on the median tone when a new pattern is loaded
-                DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
-                    // This would require a ScrollViewReader to implement proper scrolling
-                    // For now, we'll just log the offset
-                    print("🎹 Should scroll to vertical offset: \(newOffset)")
-                }
+                scrollLeadX = 0
+                proxy.scrollTo(scrollAnchorID, anchor: .leading)
             }
         }
     }
     
+    private func playbackPlayhead(playheadX: CGFloat, height: CGFloat) -> some View {
+        Rectangle()
+            .fill(Color.red)
+            .frame(width: 2, height: height)
+            .position(x: playheadX, y: height / 2)
+            .allowsHitTesting(false)
+    }
+    
+    /// GarageBand-style follow: playhead travels to viewport center, then content scrolls
+    /// with the playhead locked at center until the end of the roll.
+    private func followPlayhead(
+        proxy: ScrollViewProxy,
+        playheadX: CGFloat,
+        viewportWidth: CGFloat,
+        contentWidth: CGFloat,
+        isPlaying: Bool
+    ) {
+        guard isPlaying, viewportWidth > 0 else { return }
+        
+        let halfView = viewportWidth / 2
+        let maxScroll = max(0, contentWidth - viewportWidth)
+        let targetLead: CGFloat
+        if playheadX <= halfView {
+            targetLead = 0
+        } else if playheadX >= contentWidth - halfView {
+            targetLead = maxScroll
+        } else {
+            targetLead = playheadX - halfView
+        }
+        
+        if abs(targetLead - scrollLeadX) > 0.5 {
+            scrollLeadX = targetLead
+            // scrollTo also runs via onChange(of: scrollLeadX); call here for immediacy
+            DispatchQueue.main.async {
+                proxy.scrollTo(scrollAnchorID, anchor: .leading)
+            }
+        }
+    }
+    
+    private func patternContentWidth(viewportWidth: CGFloat) -> CGFloat {
+        let duration = midiService.currentPattern?.notes.totalLength
+            ?? midiService.currentPattern?.metadata.duration
+            ?? 0
+        return max(CGFloat(duration) * currentTimeDivision, viewportWidth)
+    }
+    
     // MARK: - Grid Background
     
-    private var gridBackground: some View {
+    private func gridBackground(height: CGFloat) -> some View {
         Canvas { context, size in
             let meterCycle = parameterManager.meterCycle
-            let beatWidth = currentTimeDivision  // 1.0 beat (quarter note) in points
-            let visibleBeats = Double(size.width) / beatWidth
+            let beatWidth = currentTimeDivision
+            let visibleBeats = Double(size.width) / Double(beatWidth)
             let beatColor = Color.garageBandPanel
+            let rowHeight = dynamicNoteHeight
             
-            // Per-bar rendering: bars may have different meters
             for (barStart, meter) in meterCycle.barStarts(upTo: visibleBeats) {
                 let barBeats = max(meter.beatsPerBar, 0.25)
                 let groupingOnsets = meter.groupingOnsets
                 
-                // Grouping-span shading: alternate groups get a faint accent tint so
-                // 2+2+3 reads differently from 3+2+2
                 let groupSpans: [(start: Double, end: Double)] = groupingOnsets.enumerated().map { index, onset in
                     let end = index + 1 < groupingOnsets.count ? groupingOnsets[index + 1] : barBeats
                     return (onset, end)
@@ -241,65 +318,43 @@ struct PianoRollPanelView: View {
                     context.fill(Path(rect), with: .color(Color.garageBandAccent.opacity(0.06)))
                 }
                 
-                // Grouping-start lines (medium) within the bar
                 for onset in groupingOnsets.dropFirst() {
                     let x = (barStart + onset) * beatWidth
-                    let path = Path { path in
-                        path.move(to: CGPoint(x: x, y: 0))
-                        path.addLine(to: CGPoint(x: x, y: size.height))
-                    }
+                    var path = Path()
+                    path.move(to: CGPoint(x: x, y: 0))
+                    path.addLine(to: CGPoint(x: x, y: size.height))
                     context.stroke(path, with: .color(Color.garageBandAccent.opacity(0.35)), lineWidth: 1.0)
                 }
                 
-                // Barline (thick, bright) at the bar start
                 let x = barStart * beatWidth
-                let barlinePath = Path { path in
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x, y: size.height))
-                }
+                var barlinePath = Path()
+                barlinePath.move(to: CGPoint(x: x, y: 0))
+                barlinePath.addLine(to: CGPoint(x: x, y: size.height))
                 context.stroke(barlinePath, with: .color(Color.garageBandText.opacity(0.4)), lineWidth: 2.0)
             }
             
-            // Beat lines (thin) every 1.0 beat
             for beat in stride(from: 0.0, through: visibleBeats, by: 1.0) {
                 let x = beat * beatWidth
-                let path = Path { path in
-                    path.move(to: CGPoint(x: x, y: 0))
-                    path.addLine(to: CGPoint(x: x, y: size.height))
-                }
+                var path = Path()
+                path.move(to: CGPoint(x: x, y: 0))
+                path.addLine(to: CGPoint(x: x, y: size.height))
                 context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
             }
             
-            // Horizontal lines (note divisions)
-            for y in stride(from: 0, through: size.height, by: dynamicNoteHeight * zoomLevel) {
-                let path = Path { path in
-                    path.move(to: CGPoint(x: 0, y: y))
-                    path.addLine(to: CGPoint(x: size.width, y: y))
-                }
+            for y in stride(from: 0.0, through: Double(size.height), by: Double(max(rowHeight, 1))) {
+                var path = Path()
+                path.move(to: CGPoint(x: 0, y: y))
+                path.addLine(to: CGPoint(x: size.width, y: y))
                 context.stroke(path, with: .color(beatColor), lineWidth: 1.0)
             }
         }
-    }
-    
-    // MARK: - Playback Position Indicator
-    
-    private var playbackPositionIndicator: some View {
-        GeometryReader { geometry in
-            let position = CGFloat(midiService.getPlaybackStatus().currentTime) * currentTimeDivision
-            
-            Rectangle()
-                .fill(Color.red)
-                .frame(width: 2)
-                .position(x: position, y: geometry.size.height / 2)
-                .animation(.linear(duration: 0.1), value: midiService.getPlaybackStatus().currentTime)
-        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
     // MARK: - Footer (Simplified for smaller space)
     
     private var pianoRollFooter: some View {
         HStack {
-            // Selection Controls (Compact)
             if !selectedNotes.isEmpty {
                 HStack(spacing: 4) {
                     Text("\(selectedNotes.count)")
@@ -316,17 +371,19 @@ struct PianoRollPanelView: View {
             
             Spacer()
             
-            // Quick controls (Compact)
             HStack(spacing: 4) {
                 Button("Fit") {
                     autoScaleEnabled = true
+                    zoomLevel = 1.0
+                    scrollLeadX = 0
                 }
                 .buttonStyle(.bordered)
                 .font(.caption2)
                 
                 Button("Reset") {
                     zoomLevel = 1.0
-                    scrollOffset = .zero
+                    autoScaleEnabled = false
+                    scrollLeadX = 0
                 }
                 .buttonStyle(.bordered)
                 .font(.caption2)
@@ -341,12 +398,14 @@ struct PianoRollPanelView: View {
     private func zoomIn() {
         withAnimation(.easeInOut(duration: 0.2)) {
             zoomLevel = min(zoomLevel * 1.2, 3.0)
+            autoScaleEnabled = false
         }
     }
     
     private func zoomOut() {
         withAnimation(.easeInOut(duration: 0.2)) {
             zoomLevel = max(zoomLevel / 1.2, 0.5)
+            autoScaleEnabled = false
         }
     }
     
@@ -358,116 +417,33 @@ struct PianoRollPanelView: View {
         }
     }
     
-    private func deleteSelectedNotes() {
-        // This would be implemented when we add note editing capabilities
-        selectedNotes.removeAll()
-    }
+    // MARK: - Scaling
     
-    private func formatTime(_ time: TimeInterval) -> String {
-        let minutes = Int(time) / 60
-        let seconds = Int(time) % 60
-        return String(format: "%d:%02d", minutes, seconds)
-    }
-    
-    // MARK: - Auto-scaling and Centering Methods
-    
-    /// Calculate the median tone from the current pattern
-    private func calculateMedianTone(from pattern: PatternGenerationResult) -> Int {
-        let sortedNotes = pattern.notes.soundingNotes.map(\.note).sorted()
-        let count = sortedNotes.count
-        
-        if count == 0 {
-            return 60 // Default to middle C
-        } else if count % 2 == 0 {
-            // Even number of notes - average of two middle values
-            let mid1 = sortedNotes[count / 2 - 1]
-            let mid2 = sortedNotes[count / 2]
-            return (mid1 + mid2) / 2
-        } else {
-            // Odd number of notes - middle value
-            return sortedNotes[count / 2]
-        }
-    }
-    
-    /// Calculate the optimal time division to fit the pattern width
-    private func calculateOptimalTimeDivision(for pattern: PatternGenerationResult, viewWidth: CGFloat) -> CGFloat {
-        let availableWidth = viewWidth - pianoKeysWidth
-        let patternDuration = pattern.metadata.duration
-        let optimalDivision = availableWidth / patternDuration
-        
-        // Clamp to reasonable bounds
-        return max(minTimeDivision, min(maxTimeDivision, optimalDivision))
+    /// Row height that fits the full tonal range into the available viewport height.
+    private func pitchRowHeight(for availableHeight: CGFloat) -> CGFloat {
+        let rangeSize = max(tonalRange.count, 1)
+        return max(minNoteHeight, availableHeight / CGFloat(rangeSize))
     }
     
     /// Calculate the tonal range of the pattern
     private func calculateTonalRange(from pattern: PatternGenerationResult) -> ClosedRange<Int> {
         let notes = pattern.notes.soundingNotes.map(\.note)
         guard let minNote = notes.min(), let maxNote = notes.max() else {
-            return 21...108 // Default full piano range
+            return 48...72
         }
         
-        // Add some padding around the tonal range
-        let padding = 2
-        let lowerBound = max(21, minNote - padding)
-        let upperBound = min(108, maxNote + padding)
-        
+        let padding = 1
+        let lowerBound = max(0, minNote - padding)
+        let upperBound = min(127, maxNote + padding)
         return lowerBound...upperBound
-    }
-    
-    /// Calculate the optimal note height based on tonal range and available height
-    private func calculateOptimalNoteHeight(tonalRange: ClosedRange<Int>, availableHeight: CGFloat) -> CGFloat {
-        let rangeSize = tonalRange.upperBound - tonalRange.lowerBound + 1
-        let optimalHeight = availableHeight / CGFloat(rangeSize)
-        
-        // Clamp to reasonable bounds
-        return max(minNoteHeight, min(maxNoteHeight, optimalHeight))
-    }
-    
-    /// Calculate the constrained height for the piano roll
-    private func calculateConstrainedHeight(availableHeight: CGFloat) -> CGFloat {
-        // Use the maximum piano roll height constant
-        let maxHeight = min(availableHeight * 0.8, maxPianoRollHeight)
-        let calculatedHeight = CGFloat(tonalRange.count) * dynamicNoteHeight * zoomLevel
-        
-        return min(calculatedHeight, maxHeight)
-    }
-    
-    /// Update the note height based on available space
-    private func updateNoteHeight(for availableHeight: CGFloat) {
-        // Consider the maximum height constraint when calculating note height
-        let constrainedHeight = min(availableHeight, maxPianoRollHeight)
-        let optimalHeight = calculateOptimalNoteHeight(tonalRange: tonalRange, availableHeight: constrainedHeight)
-        dynamicNoteHeight = optimalHeight
-        print("🎹 Updated note height to: \(optimalHeight) for tonal range \(tonalRange.lowerBound)-\(tonalRange.upperBound)")
-        print("🎹 Constrained height: \(constrainedHeight), Max height: \(maxPianoRollHeight)")
     }
     
     /// Update the view when a new pattern is generated
     private func updateViewForNewPattern(_ pattern: PatternGenerationResult) {
-        // Calculate tonal range
-        let newTonalRange = calculateTonalRange(from: pattern)
-        tonalRange = newTonalRange
-        
-        // Calculate median tone
-        let medianTone = calculateMedianTone(from: pattern)
-        
-        // Update note height based on tonal range (will be refined when view appears)
-        let estimatedHeight = CGFloat(tonalRange.count) * 20 // Estimate for initial calculation
-        dynamicNoteHeight = calculateOptimalNoteHeight(tonalRange: tonalRange, availableHeight: estimatedHeight)
-        
-        // Auto-scale if enabled
-        if autoScaleEnabled {
-            // The auto-scaling is handled by the currentTimeDivision computed property
-            print("🎹 Auto-scaling enabled for pattern duration: \(pattern.metadata.duration)s")
-        }
-        
+        tonalRange = calculateTonalRange(from: pattern)
         print("🎹 Piano roll tonal range: \(tonalRange.lowerBound)-\(tonalRange.upperBound) (\(noteName(for: tonalRange.lowerBound)) to \(noteName(for: tonalRange.upperBound)))")
-        print("🎹 Piano roll centered on median tone: \(medianTone) (\(noteName(for: medianTone)))")
-        print("🎹 Initial note height: \(dynamicNoteHeight)")
-        print("🎹 Piano keys and note grid height: \(CGFloat(tonalRange.count) * dynamicNoteHeight * zoomLevel)")
     }
     
-    /// Get the note name for a MIDI note number
     private func noteName(for midiNote: Int) -> String {
         let noteNames = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B"]
         let noteInOctave = midiNote % 12
@@ -475,28 +451,18 @@ struct PianoRollPanelView: View {
         return "\(noteNames[noteInOctave])\(octave)"
     }
     
-    /// Get the current time division (scaled for auto-fit)
+    /// Horizontal pixels per beat. Zoom affects time scale only; pitch always fills height.
     private var currentTimeDivision: CGFloat {
         guard let pattern = midiService.currentPattern else { return timeDivision * zoomLevel }
         
         if autoScaleEnabled {
-            // Calculate optimal time division based on pattern duration and available width
-            // For now, we'll use a simple scaling approach
-            let baseDivision = timeDivision
-            let patternDuration = pattern.metadata.duration
-            let scaleFactor = max(0.5, min(2.0, 10.0 / patternDuration)) // Scale based on duration
-            return baseDivision * scaleFactor * zoomLevel
+            let duration = max(pattern.notes.totalLength, pattern.metadata.duration, 0.25)
+            let available = max(viewportWidth, 200)
+            let fitted = available / CGFloat(duration)
+            return max(minTimeDivision, min(maxTimeDivision, fitted)) * zoomLevel
         } else {
             return timeDivision * zoomLevel
         }
-    }
-    
-    /// Get the shared height for both piano keys and note grid
-    private var sharedHeight: CGFloat {
-        // Use the maximum piano roll height constant
-        let calculatedHeight = CGFloat(tonalRange.count) * dynamicNoteHeight * zoomLevel
-        
-        return min(calculatedHeight, maxPianoRollHeight)
     }
 }
 
@@ -567,7 +533,6 @@ struct NoteView: View {
     let startTime: TimeInterval
     let isSelected: Bool
     var isAccented: Bool = false
-    let zoomLevel: Double
     let timeDivision: CGFloat
     let tonalRange: ClosedRange<Int>
     let noteHeight: CGFloat
@@ -575,6 +540,11 @@ struct NoteView: View {
     private var noteColor: Color {
         if isSelected {
             return Color.garageBandAccent
+        }
+        // Percussion reads as a neutral grey lane so a layered kit never looks
+        // like melodic material.
+        if note.isPercussion {
+            return Color(hue: 0.08, saturation: 0.18, brightness: isAccented ? 0.85 : 0.62)
         }
         // Voice 0: hue follows pitch class. Phasing voice: fixed cool tint so the
         // two patterns stay separable as they slide apart.
@@ -589,16 +559,16 @@ struct NoteView: View {
     var body: some View {
         let x = CGFloat(startTime) * timeDivision
         let notePosition = tonalRange.upperBound - note.note
-        let y = CGFloat(Double(notePosition) * noteHeight * zoomLevel)
-        let width = CGFloat(note.duration) * timeDivision
-        let height = max(4, noteHeight * 0.9) * zoomLevel
+        let rowTop = CGFloat(notePosition) * noteHeight
+        let width = max(1, CGFloat(note.duration) * timeDivision)
+        let height = max(2, noteHeight * 0.85)
         
-        RoundedRectangle(cornerRadius: 4)
+        RoundedRectangle(cornerRadius: 3)
             .fill(noteColor)
             .frame(width: width, height: height)
-            .position(x: x + width / 2, y: y + 10 * zoomLevel)
+            .position(x: x + width / 2, y: rowTop + noteHeight / 2)
             .overlay(
-                RoundedRectangle(cornerRadius: 4)
+                RoundedRectangle(cornerRadius: 3)
                     .stroke(isSelected ? Color.garageBandAccent
                             : (isAccented ? Color.white.opacity(0.7) : Color.clear),
                             lineWidth: isSelected ? 2 : 1)

@@ -77,15 +77,12 @@ final class PatternCompositionTests: XCTestCase {
 
     // MARK: - Tempo markers
 
-    func testTempoMarkersAtSlotBoundariesAndRepeats() {
+    func testTempoMarkersAtSlotBoundaries() {
         let markers = CompositionNoteBuilder.tempoMarkers(
-            slotTempos: [120, 90],
-            slotStartBeats: [0, 4],
-            singlePassDuration: 8,
-            repeatCount: 2
+            tempos: [120, 90, 120, 90],
+            startBeats: [0, 4, 8, 12]
         )
 
-        // Pass 0: 120@0, 90@4; Pass 1: 120@8, 90@12 — consecutive identical collapsed only when bpm matches
         XCTAssertEqual(markers.count, 4)
         XCTAssertEqual(markers[0].beat, 0, accuracy: 1e-9)
         XCTAssertEqual(markers[0].bpm, 120, accuracy: 1e-9)
@@ -99,21 +96,58 @@ final class PatternCompositionTests: XCTestCase {
 
     func testTempoMarkersCollapseIdenticalConsecutiveBPM() {
         let markers = CompositionNoteBuilder.tempoMarkers(
-            slotTempos: [100, 100],
-            slotStartBeats: [0, 2],
-            singlePassDuration: 4,
-            repeatCount: 1
+            tempos: [100, 100],
+            startBeats: [0, 2]
         )
         XCTAssertEqual(markers.count, 1)
         XCTAssertEqual(markers[0].bpm, 100, accuracy: 1e-9)
     }
 
+    // MARK: - Seam drops
+
+    func testApplyRepeatsDropsMatchingSeamPitch() {
+        // Closed figure ending on tonic — second pass starts on tonic
+        let pass = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0, duration: 1),
+            MIDIInfo(note: 64, velocity: 80, onset: 1, duration: 1),
+            MIDIInfo(note: 67, velocity: 80, onset: 2, duration: 1),
+            MIDIInfo(note: 60, velocity: 80, onset: 3, duration: 1)
+        ]
+        let repeated = CompositionNoteBuilder.applyRepeats(notes: pass, count: 2)
+        let pitches = repeated.soundingNotes.map(\.note)
+        XCTAssertEqual(pitches, [60, 64, 67, 60, 64, 67, 60],
+                       "Shared tonic at the join should be played once")
+        XCTAssertEqual(repeated.count, 7)
+    }
+
+    func testApplyRepeatsKeepsDifferingSeamPitches() {
+        let pass = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0, duration: 1),
+            MIDIInfo(note: 62, velocity: 80, onset: 1, duration: 1)
+        ]
+        let repeated = CompositionNoteBuilder.applyRepeats(notes: pass, count: 3)
+        XCTAssertEqual(repeated.count, 6, "No seam drop when 62 ≠ 60")
+    }
+
+    func testConcatenateSlotsDropsMatchingSeam() {
+        let slotA = [
+            MIDIInfo(note: 60, velocity: 80, onset: 0, duration: 1),
+            MIDIInfo(note: 64, velocity: 80, onset: 1, duration: 1)
+        ]
+        let slotB = [
+            MIDIInfo(note: 64, velocity: 80, onset: 0, duration: 1),
+            MIDIInfo(note: 67, velocity: 80, onset: 1, duration: 1)
+        ]
+        let (notes, _) = CompositionNoteBuilder.concatenateSlotNotes([slotA, slotB])
+        XCTAssertEqual(notes.soundingNotes.map(\.note), [60, 64, 67])
+    }
+
     // MARK: - Composition generator
 
     func testCompositionGeneratorBuildsMultiSlotResult() {
-        var paramsA = PatternParameters(rootNote: 60, tempo: 120, iterations: 1)
+        var paramsA = PatternParameters(rootNote: 60, tempo: 120, iterations: 1, mirror: false)
         paramsA.rhythmSettings.accentBoost = 0
-        var paramsB = PatternParameters(rootNote: 62, tempo: 90, iterations: 1)
+        var paramsB = PatternParameters(rootNote: 62, tempo: 90, iterations: 1, mirror: false)
         paramsB.rhythmSettings.accentBoost = 0
 
         let composition = PatternComposition(
@@ -133,8 +167,13 @@ final class PatternCompositionTests: XCTestCase {
         XCTAssertGreaterThan(built.result.notes.count, 0)
         XCTAssertEqual(built.primaryParameters.tempo, 120, accuracy: 1e-9)
         XCTAssertEqual(built.result.metadata.totalCycles, 2)
-        // Two passes: duration should be ~2× single pass
-        XCTAssertEqual(built.result.notes.totalLength, built.singlePassDuration * 2, accuracy: 1e-6)
+        // With mirror off and different slot roots, repeats may still seam-drop if a
+        // pass happens to close on its opening pitch; length is at most 2× one pass.
+        XCTAssertLessThanOrEqual(
+            built.result.notes.totalLength,
+            built.singlePassDuration * 2 + 1e-6
+        )
+        XCTAssertGreaterThan(built.result.notes.totalLength, built.singlePassDuration - 1e-6)
         XCTAssertFalse(built.tempoMarkers.isEmpty)
     }
 

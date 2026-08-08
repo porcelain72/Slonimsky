@@ -125,59 +125,29 @@ struct CompositionBuildResult {
 /// Pure helpers for concatenating and repeating note lists (testable without MIDI I/O).
 enum CompositionNoteBuilder {
 
-    /// Offset each note's onset by `runningLength` and append to the accumulator.
-    static func appendNotes(
-        _ notes: [MIDIInfo],
-        to accumulator: inout [MIDIInfo],
-        runningLength: Double
-    ) {
-        let shifted = notes.map { $0.offset(by: runningLength) }
-        accumulator.append(contentsOf: shifted)
-    }
-
-    /// Concatenate slot note lists end-to-end; returns notes and per-slot start beats.
+    /// Concatenate slot note lists end-to-end with same-pitch seam drops between slots.
     static func concatenateSlotNotes(_ slotNoteLists: [[MIDIInfo]]) -> (notes: [MIDIInfo], slotStartBeats: [Double]) {
-        var allNotes: [MIDIInfo] = []
-        var starts: [Double] = []
-        for notes in slotNoteLists {
-            let start = allNotes.totalLength
-            starts.append(start)
-            appendNotes(notes, to: &allNotes, runningLength: start)
-        }
-        return (allNotes, starts)
+        let result = PatternSeam.concatenate(slotNoteLists, dropMatchingSeam: true)
+        return (result.notes, result.segmentStartBeats)
     }
 
-    /// Repeat a single-pass note list `count` times by onset-offsetting each pass.
+    /// Repeat a single-pass note list `count` times, dropping a matching seam
+    /// note between passes (keeps the final pass intact).
     static func applyRepeats(notes: [MIDIInfo], count: Int) -> [MIDIInfo] {
         let repeats = PatternComposition.clampedRepeatCount(count)
         guard repeats > 1, !notes.isEmpty else { return notes }
 
-        let passLength = notes.totalLength
-        var result = notes
-        for pass in 1..<repeats {
-            let offset = passLength * Double(pass)
-            result.append(contentsOf: notes.map { $0.offset(by: offset) })
-        }
-        return result
+        let segments = Array(repeating: notes, count: repeats)
+        return PatternSeam.concatenate(segments, dropMatchingSeam: true).notes
     }
 
-    /// Build tempo markers for each slot start, then again for each repeat pass.
+    /// Tempo markers from already-resolved segment start beats.
     static func tempoMarkers(
-        slotTempos: [Double],
-        slotStartBeats: [Double],
-        singlePassDuration: Double,
-        repeatCount: Int
+        tempos: [Double],
+        startBeats: [Double]
     ) -> [TempoChangeMarker] {
-        guard !slotTempos.isEmpty, slotTempos.count == slotStartBeats.count else { return [] }
-        let repeats = PatternComposition.clampedRepeatCount(repeatCount)
-        var markers: [TempoChangeMarker] = []
-        for pass in 0..<repeats {
-            let passOffset = singlePassDuration * Double(pass)
-            for (tempo, start) in zip(slotTempos, slotStartBeats) {
-                markers.append(TempoChangeMarker(beat: passOffset + start, bpm: tempo))
-            }
-        }
-        // Collapse consecutive identical tempos at the same beat (or adjacent with same bpm)
+        guard tempos.count == startBeats.count else { return [] }
+        let markers = zip(startBeats, tempos).map { TempoChangeMarker(beat: $0, bpm: $1) }
         return collapseRedundantTempos(markers)
     }
 
